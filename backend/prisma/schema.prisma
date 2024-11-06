@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model doctor {
+  doctor_id    BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id      BigInt @db.UnsignedBigInt
+  speciality   String @db.VarChar(255)
+  phone_number String @db.VarChar(15)
+  user         user   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "doctor_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model health_records {
+  health_records_id BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id           BigInt   @db.UnsignedBigInt
+  record_date       DateTime @db.Date
+  blood_pressure    String?  @db.VarChar(50)
+  heart_rate        Int?
+  weight            Decimal? @db.Decimal(8, 2)
+  temperature       Decimal? @db.Decimal(8, 2)
+  notes             String?  @db.Text
+  user              user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "health_records_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model medication {
+  medication_id    BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id          BigInt             @db.UnsignedBigInt
+  name             String             @db.VarChar(255)
+  type             medication_type
+  dosage           String             @db.VarChar(50)
+  start_date       DateTime           @db.Date
+  end_date         DateTime           @db.Date
+  instructions     String?            @db.Text
+  user             user               @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "medication_ibfk_1")
+  medication_times medication_times[]
+
+  @@unique([user_id, name], map: "medication_name_unique")
+}
+
+model medication_times {
+  medication_time_id BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  medication_id      BigInt     @db.UnsignedBigInt
+  intake_time        DateTime   @db.Time(0)
+  medication         medication @relation(fields: [medication_id], references: [medication_id], onDelete: NoAction, onUpdate: NoAction, map: "medication_times_ibfk_1")
+
+  @@index([medication_id], map: "medication_id")
+}
+
+model notification {
+  notification_id  BigInt                        @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id          BigInt                        @db.UnsignedBigInt
+  message          String                        @db.VarChar(255)
+  remind_at        DateTime                      @db.DateTime(0)
+  repeat_frequency notification_repeat_frequency @default(none)
+  acknowledged     Boolean                       @default(false)
+  user             user                          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "notification_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model notification_logs {
+  notification_log_id BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id             BigInt   @db.UnsignedBigInt
+  message             String   @db.VarChar(255)
+  sent_at             DateTime @db.Timestamp(0)
+  acknowledged        Boolean  @default(false)
+  user                user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "notification_logs_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model patientprofile {
+  profile_id    BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id       BigInt                    @db.UnsignedBigInt
+  age           Int
+  weight        Decimal                   @db.Decimal(8, 2)
+  date_of_birth DateTime                  @db.Date
+  blood_type    patientprofile_blood_type
+  address       String                    @db.VarChar(255)
+  user          user                      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "patientprofile_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model user {
+  id                BigInt              @id @default(autoincrement()) @db.UnsignedBigInt
+  email             String              @unique(map: "user_email_unique") @db.VarChar(100)
+  password          String              @db.VarChar(255)
+  name              String              @db.VarChar(50)
+  phone_number      String              @db.VarChar(15)
+  role              user_role           @default(patient)
+  doctor            doctor[]
+  health_records    health_records[]
+  medication        medication[]
+  notification      notification[]
+  notification_logs notification_logs[]
+  patientprofile    patientprofile[]
+}
+
+enum medication_type {
+  pills
+  syrup
+  injection
+}
+
+enum notification_repeat_frequency {
+  none
+  daily
+  weekly
+  monthly
+}
+
+enum patientprofile_blood_type {
+  A_POS @map("A+")
+  A_NEG @map("A-")
+  B_POS @map("B+")
+  B_NEG @map("B-")
+  AB_POS @map("AB+")
+  AB_NEG @map("AB-")
+  O_POS @map("O+")
+  O_NEG @map("O-")
+}
+enum user_role {
+  patient
+  caregiver
+  doctor
+}
