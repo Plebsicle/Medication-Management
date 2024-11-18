@@ -24,29 +24,50 @@ export default function Signin(){
   const [name , Setname] = useState<string>("");
   const [email,Setemail] = useState<string>("");
   const [password , Setpassword] = useState<string>("");
+  const [role , Setrole] = useState<string>("patient");
+  
+
   const navigate = useNavigate();
+
   const GoogleLoginHandler = async (response : any) => {
       if(response && response.credential){
         try{
           const userInfo:dataCredential = jwtDecode(response.credential);
           console.log(userInfo);
           const {name , email } = userInfo;
-          console.log(name); console.log(email);
-          localStorage.setItem('token' , response.credential);
-          navigate('/dashboard')
+          const res = await axios.post('http://localhost:8000/signup',{
+            name , email
+          },{
+            headers : {
+              Authorization : `${response.credential}`
+            }
+          })
+          if(res){
+            localStorage.setItem('token',res.data.token);
+            navigate('/completeregistration')
+          }
+          else{
+            navigate('/signup');
+          }
+         
         }
         catch(error){
           console.log("GoogleLoginHandler Error" ,  error);
         }
       }
   }
+
     const LoginHandlerManual = async () => {
       try{
-        const response = await axios.post('http://localhost:8000/signup',{
-          name , email , password 
-        });
-        localStorage.setItem('token' , response.data);
-        navigate('/dashboard')
+        const response = await axios.post('http://localhost:8000/signup',{name , email , password , role});
+        if(response){
+          localStorage.setItem('token' , response.data.token);
+          const res = axios.post('localhost:8000/send-verification-email/',{email});
+          
+        }
+        else{
+          navigate('/signup');
+        }
       }
       catch(error){
         console.error("LoginHandlerManual Error:", error);
@@ -79,8 +100,14 @@ export default function Signin(){
                 onChange={(e) => Setpassword(e.target.value)}
                 className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <select value={role}
+            onChange={(e) => Setrole(e.target.value)} className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="patient" >Patient</option>
+                <option value="caregiver" >Caregiver</option>
+                <option value="doctor" >Doctor</option>
+              </select>
               <div className="flex items-center justify-between">
-                <a href="#" className="text-sm text-blue-500 hover:underline">Forgot password?</a>
+                <a href="/forgotpassword" className="text-sm text-blue-500 hover:underline">Forgot password?</a>
               </div>
               <button
                 type="button"

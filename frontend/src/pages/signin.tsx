@@ -8,36 +8,53 @@ import { jwtDecode } from "jwt-decode";
 export default function Signin(){
     const [email,Setemail] = useState<string>("");
     const [password , Setpassword] = useState<string>("");
+
     const navigate = useNavigate();
+
     const LoginHandlerManual = async ()=>{
         try{
             const res = await axios.post('http://localhost:8000/signin', {
                 email, password
             });
-            localStorage.setItem('token', res.data.token);
-            navigate('/dashboard')
+            if(res){
+              localStorage.setItem('token', res.data.token);
+              navigate('/dashboard');
+            }
+            else{
+              navigate('/signin');
+            }
         }
         catch(error){
             console.log("Error in LoginHandlerManual" , error);
         }
     }
+
     const GoogleLoginHandler =  async(response : any)=>{
         try{
             if(response && response.credential){
               const userInfo:dataCredential = jwtDecode(response.credential);
               const {name , email } = userInfo;
-              console.log(name);console.log(email);
-                // const res = await axios.post('http://localhost:8000/signup',{
-                //     name ,  email 
-                // });
-                //   localStorage.setItem('token' , response.credential);
-                  navigate('/dashboard')
+              const res = await axios.post('http://localhost:8000/signup',{
+                name , email
+              },{
+                headers : {
+                  Authorization : `${response.credential}`
+                }
+              })
+              if(res){
+                localStorage.setItem('token', res.data.token);
+                navigate('/dashboard')
+              }
+              else{
+                navigate('/signin')
+              }
             }
         }   
         catch(error){
             console.log("Error is in GoogleLoginHandler" ,error );
         }
     }
+
     return(
         <div>
             <div>
@@ -47,6 +64,7 @@ export default function Signin(){
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => Setemail(e.target.value)}
+                required
                 className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <input
@@ -54,6 +72,7 @@ export default function Signin(){
                 placeholder="Password"
                 value={password}
                 onChange={(e) => Setpassword(e.target.value)}
+                required
                 className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <div className="flex items-center justify-between">
