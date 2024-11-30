@@ -24,9 +24,11 @@ const VerifyEmail: React.FC = () => {
       console.log("Verification Token:", token);
 
       try {
-        const response = await axios.get(
+        const response = await axios.post(
           `http://localhost:8000/verifyEmail?token=${token}`
-        );
+        ,{
+          Name : "Pravaz"
+        });
         const { token: jwtToken } = response.data;
 
         // Save JWT and redirect
