@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const router = express.Router();
 const prisma = new PrismaClient();
 
-router.post('/signin',(req , res)=>{
+router.post('/',(req , res)=>{
     
 })
 

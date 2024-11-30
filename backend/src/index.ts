@@ -12,7 +12,11 @@ import emailVerification from './routes/emailVerification'
  app.use(express.json());
 
 
- app.use('/', Signup);
- app.use('/',Signin);
- app.use('/' , emailVerification);
+ app.use('/signup', Signup);
+ app.use('/signin',Signin);
+ app.use('/verifyEmail' , emailVerification);
  
+ const PORT = 8000;
+ app.listen(PORT, () => {
+   console.log(`Server is running on port ${PORT}`);
+ });

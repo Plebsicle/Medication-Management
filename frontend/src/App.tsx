@@ -4,7 +4,6 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Signup from './pages/signup';
 import Signin from './pages/signin';
 import Dashboard from './pages/dashboard';
-import CompleteRegistration from './pages/completeregistration'
 import ForgetPassword from './pages/forgetpassword';
 import VerifyEmail from './pages/verify-email'
 
@@ -17,7 +16,6 @@ function Routing(){
         <Route path="/signup" element={<Signup/>}/>
         <Route path="/signin" element={<Signin/>}></Route>
         <Route path="/dashboard" element={<Dashboard/>}/>
-        <Route path ='/completeregistration' element={<CompleteRegistration/>}></Route>
         <Route path='/forgetpassword' element={<ForgetPassword/>}></Route>
         <Route path="/verify-email" element={<VerifyEmail/>}/>
       </Routes>

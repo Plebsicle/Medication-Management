@@ -1,10 +1,29 @@
 -- CreateTable
+CREATE TABLE `user` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `email` VARCHAR(100) NOT NULL,
+    `password` VARCHAR(255) NULL,
+    `name` VARCHAR(50) NOT NULL,
+    `phone_number` VARCHAR(15) NULL,
+    `role` ENUM('patient', 'caregiver', 'doctor') NOT NULL DEFAULT 'patient',
+    `verified` BOOLEAN NOT NULL DEFAULT false,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+    `google_id` VARCHAR(255) NULL,
+
+    UNIQUE INDEX `user_email_unique`(`email`),
+    UNIQUE INDEX `user_google_id_key`(`google_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `doctor` (
     `doctor_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id` BIGINT UNSIGNED NOT NULL,
     `speciality` VARCHAR(255) NOT NULL,
     `phone_number` VARCHAR(15) NOT NULL,
 
+    UNIQUE INDEX `doctor_user_id_key`(`user_id`),
     INDEX `user_id`(`user_id`),
     PRIMARY KEY (`doctor_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -19,6 +38,8 @@ CREATE TABLE `health_records` (
     `weight` DECIMAL(8, 2) NULL,
     `temperature` DECIMAL(8, 2) NULL,
     `notes` TEXT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
 
     INDEX `user_id`(`user_id`),
     PRIMARY KEY (`health_records_id`)
@@ -84,40 +105,43 @@ CREATE TABLE `patientprofile` (
     `blood_type` ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-') NOT NULL,
     `address` VARCHAR(255) NOT NULL,
 
+    UNIQUE INDEX `patientprofile_user_id_key`(`user_id`),
     INDEX `user_id`(`user_id`),
     PRIMARY KEY (`profile_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `user` (
-    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `email` VARCHAR(100) NOT NULL,
-    `password` VARCHAR(255) NOT NULL,
-    `name` VARCHAR(50) NOT NULL,
-    `phone_number` VARCHAR(15) NOT NULL,
-    `role` ENUM('patient', 'caregiver', 'doctor') NOT NULL DEFAULT 'patient',
+CREATE TABLE `EmailVerificationToken` (
+    `token_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `token` VARCHAR(255) NOT NULL,
+    `expiration` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `user_email_unique`(`email`),
-    PRIMARY KEY (`id`)
+    UNIQUE INDEX `EmailVerificationToken_user_id_key`(`user_id`),
+    INDEX `user_id`(`user_id`),
+    PRIMARY KEY (`token_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `doctor` ADD CONSTRAINT `doctor_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `doctor` ADD CONSTRAINT `doctor_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `health_records` ADD CONSTRAINT `health_records_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `health_records` ADD CONSTRAINT `health_records_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `medication` ADD CONSTRAINT `medication_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `medication` ADD CONSTRAINT `medication_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `medication_times` ADD CONSTRAINT `medication_times_ibfk_1` FOREIGN KEY (`medication_id`) REFERENCES `medication`(`medication_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `medication_times` ADD CONSTRAINT `medication_times_medication_id_fkey` FOREIGN KEY (`medication_id`) REFERENCES `medication`(`medication_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `notification` ADD CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `notification` ADD CONSTRAINT `notification_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `notification_logs` ADD CONSTRAINT `notification_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `notification_logs` ADD CONSTRAINT `notification_logs_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `patientprofile` ADD CONSTRAINT `patientprofile_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `patientprofile` ADD CONSTRAINT `patientprofile_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `EmailVerificationToken` ADD CONSTRAINT `EmailVerificationToken_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
