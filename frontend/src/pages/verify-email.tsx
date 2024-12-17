@@ -33,9 +33,9 @@ const VerifyEmail: React.FC = () => {
 
         // Save JWT and redirect
         localStorage.setItem("token", jwtToken);
-        setStatusMessage("Email verified successfully! Redirecting...");
+        setStatusMessage("Email verified successfully! This tab will close automatically in a few seconds...");
         setTimeout(() => {
-          navigate("/dashboard");
+          window.close();
         }, 3000);
       } catch (error: any) {
         console.error("Verification Error:", error);

@@ -39,9 +39,22 @@ export default function Signup() {
       const response = await axios.post('http://localhost:8000/signup', {
         name, email, password, role
       });
-      if (response.status === 200) {
-        
-      }
+      navigate('/redirect-verify')
+      const interval = setInterval(async () => {
+        try {
+          const verifiedResponse = await axios.post('http://localhost:8000/isverified', {
+            name, email
+          });
+  
+          // Assuming `verifiedResponse` has a field like { verified: true }
+          if (verifiedResponse.data.verified) {
+            clearInterval(interval); // Stop the polling
+            navigate('/dashboard'); // Navigate to the dashboard
+          }
+        } catch (error) {
+          console.error("Error checking verification status", error);
+        }
+      }, 3000);
     } catch (error) {
       console.log("Error from manual Signup", error);
     }

@@ -4,6 +4,7 @@
 import { Sign } from 'crypto';
 import Signin from './routes/signin'
 import emailVerification from './routes/emailVerification'
+import isverified from './routes/isverified'
 
  const app = express();
  const router = express.Router();
@@ -15,6 +16,7 @@ import emailVerification from './routes/emailVerification'
  app.use('/signup', Signup);
  app.use('/signin',Signin);
  app.use('/verifyEmail' , emailVerification);
+ app.use('/isverified',isverified)
  
  const PORT = 8000;
  app.listen(PORT, () => {
