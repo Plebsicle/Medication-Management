@@ -16,8 +16,9 @@ router.post('/', async (req, res) => {
         const { googleId } = req.body;
     if(!googleId){
         const {name , email , role  , password} = req.body; 
-        if(await verifyUserDetails(name , email , role,password)){
-            const userPossible = await prisma.user.findUnique({
+        let zodCheck = await verifyUserDetails(name , email , role,password);
+        if(zodCheck){
+            const userPossible = await prisma.user.findFirst({
                 where : {
                     email
                 }
@@ -45,15 +46,15 @@ router.post('/', async (req, res) => {
                     },
                 });
                 sendVerificationEmail(email , emailToken);
-                res.status(200).json('Email Verification Pending');
+                res.status(202).json({message : 'Email Verification Pending',isEmailVerified : false});
             }
             else{
-                res.status(409).json({ message: "Email is already in use" });
+                res.status(202).json({ message: "Email is already in use" , EmailinUse : true});
                 return;
             }
         }
         else{
-            res.status(400).json("Entered Details are Not Valid");
+            res.status(202).json({message : "Entered Details are Not Valid",zodPass : false});
             return;
         }
     }
@@ -63,7 +64,7 @@ router.post('/', async (req, res) => {
                 const { email, name, sub: googleId } = googleUser;
                 const {role} = req.body;
                 if(role && email && name && await verifyGoogleDetails(name, email, role)){
-                    const userPossible = await prisma.user.findUnique({where : {email}})
+                    const userPossible = await prisma.user.findFirst({where : {email}})
                     if(!userPossible){
                         const userCreationResponse = await prisma.user.create({
                             data : {name , email , role , verified : true}
@@ -72,25 +73,25 @@ router.post('/', async (req, res) => {
                         res.status(201).json(token);
                     }
                     else{
-                        res.status(409).json({ message: "Email is already in use" });
+                        res.status(409).json({ message: "Email is already in use" ,EmailinUse : true});
                         return;
                     }
                 }
                 else
                 {
-                    res.status(400).json("Google Credentials are Invalid");
+                    res.status(400).json({message : "Google Credentials are Invalid",vaildDetails : false});
                     return;
                 }
             }
             else{
-                res.status(400).json({ message: "Invalid Google token" });
+                res.status(400).json({ message: "Invalid Google token" ,vaildDetails : false});
                 return;
             } 
         }
     }
     catch(e){
         console.log("Error while signing up" , e);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: "Internal server error" ,serverError : true});
     }
     
 });

@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt'
-import { hash } from 'crypto';
 
 const saltRounds = 10;
 

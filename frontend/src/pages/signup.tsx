@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { TextField, Button, MenuItem, Select, InputLabel, FormControl, Box, Typography } from '@mui/material';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
@@ -7,26 +7,28 @@ import { useNavigate } from 'react-router-dom';
 type Role = 'patient' | 'caregiver' | 'doctor';
 
 export default function Signup() {
-  const [name, setName] = useState<String>("");
-  const [email, setEmail] = useState<String>("");
-  const [password, setPassword] = useState<String>("");
-  const [role, setRole] = useState<Role>("patient");
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [role, setRole] = useState<Role>('patient');
   const navigate = useNavigate();
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     try {
-      const googleToken = credentialResponse.response;
-      const jwtToken = await axios.post('http://localhost:8000/signup',{
+      const googleToken = credentialResponse.credential;
+      console.log(googleToken);
+      const jwtToken = await axios.post('http://localhost:8000/signup', {
         googleId: googleToken,
+        role,
       });
       if (!jwtToken) {
-        console.log("Invalid Credentials");
+        console.log('Invalid Credentials');
       } else {
         localStorage.setItem('jwtToken', JSON.stringify(jwtToken));
         navigate('/dashboard');
       }
     } catch (error) {
-      console.log("Error in Google signup", error);
+      console.log('Error in Google signup', error);
     }
   };
 
@@ -37,46 +39,71 @@ export default function Signup() {
   async function manualSignuphandler() {
     try {
       const response = await axios.post('http://localhost:8000/signup', {
-        name, email, password, role
+        name,
+        email,
+        password,
+        role,
       });
-      navigate('/redirect-verify')
+      if (response.data.EmailinUse) {
+        alert('Email is already in use');
+        return;
+      } else if (response.data.zodPass === false) {
+        alert('Entered Details Do not Match the Criteria');
+        return;
+      } else if (response.data.serverError) {
+        alert('Server Error');
+        return;
+      }
+      navigate('/redirect-verify');
       const interval = setInterval(async () => {
         try {
           const verifiedResponse = await axios.post('http://localhost:8000/isverified', {
-            name, email
+            email,
           });
-  
-          // Assuming `verifiedResponse` has a field like { verified: true }
           if (verifiedResponse.data.verified) {
-            clearInterval(interval); // Stop the polling
-            navigate('/dashboard'); // Navigate to the dashboard
+            clearInterval(interval);
+            navigate('/dashboard');
           }
         } catch (error) {
-          console.error("Error checking verification status", error);
+          console.error('Error checking verification status', error);
         }
       }, 3000);
     } catch (error) {
-      console.log("Error from manual Signup", error);
+      console.log('Error from manual Signup', error);
     }
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <Box 
+    <div
+      className="flex items-center justify-center min-h-screen min-w-full  bg-gray-900"
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '80vh',
+        width: '90vw',
+      }}
+    >
+      <Box
         sx={{
           width: '100%',
           maxWidth: 400,
           bgcolor: 'white',
           p: 4,
           borderRadius: 2,
-          boxShadow: 3
+          boxShadow: 3,
         }}
       >
         <Typography variant="h4" component="h1" gutterBottom align="center">
           Sign Up
         </Typography>
 
-        <form onSubmit={(e) => { e.preventDefault(); manualSignuphandler(); }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            manualSignuphandler();
+          }}
+        >
           <TextField
             label="Name"
             variant="outlined"
@@ -140,6 +167,16 @@ export default function Signup() {
           theme="filled_blue"
           text="continue_with"
         />
+        <Button
+          type="button"
+          variant="contained"
+          color="primary"
+          fullWidth
+          sx={{ mt: 2 }}
+          onClick={() => navigate('/signin')}
+        >
+          Sign In
+        </Button>
       </Box>
     </div>
   );

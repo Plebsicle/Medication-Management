@@ -10,7 +10,6 @@ router.post("/", async (req, res) => {
   try {
     console.log("Email Verification Endpoint Hit");
 
-    // Extract and validate the token
     const token = Array.isArray(req.query.token) ? req.query.token[0] : req.query.token;
     console.log("Received Token:", token);
     if (!token) {

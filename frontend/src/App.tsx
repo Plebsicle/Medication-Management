@@ -7,7 +7,7 @@ import Dashboard from './pages/dashboard';
 import ForgetPassword from './pages/forgetpassword';
 import VerifyEmail from './pages/verify-email'
 import RedirectVerify from './pages/redirect-verify'
-
+import VerifyEmailManual from './pages/verify-email-manual';
 const GoogleclientId =import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 function Routing(){
@@ -19,7 +19,8 @@ function Routing(){
         <Route path="/dashboard" element={<Dashboard/>}/>
         <Route path='/forgetpassword' element={<ForgetPassword/>}></Route>
         <Route path="/verify-email" element={<VerifyEmail/>}/>
-        <Route path='redirect-verify' element={<RedirectVerify/>}></Route>
+        <Route path='/redirect-verify' element={<RedirectVerify/>}></Route>
+        <Route path='/manualEmailVerification' element={<VerifyEmailManual/>}></Route>
       </Routes>
       
     </div>
