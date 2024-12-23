@@ -61,7 +61,7 @@ router.post("/", async (req, res) => {
     // Respond with success and the JWT
     res.status(200).json({
       message: "Email verified successfully.",
-      token: jwtToken,
+      jwt: jwtToken,
     });
 
     // Delete the token record

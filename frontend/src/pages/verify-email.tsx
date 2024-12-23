@@ -32,7 +32,7 @@ const VerifyEmail: React.FC = () => {
         const { token: jwtToken } = response.data;
 
         // Save JWT and redirect
-        localStorage.setItem("token", jwtToken);
+        localStorage.setItem("jwt", jwtToken);
         setStatusMessage("Email verified successfully! This tab will close automatically in a few seconds...");
         setTimeout(() => {
           window.close();

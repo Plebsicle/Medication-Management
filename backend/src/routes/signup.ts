@@ -70,7 +70,7 @@ router.post('/', async (req, res) => {
                             data : {name , email , role , verified : true}
                         })
                         const token = jwt.sign({name , email , role}, jwtSecret);
-                        res.status(201).json(token);
+                        res.status(201).json({jwt : token});
                     }
                     else{
                         res.status(409).json({ message: "Email is already in use" ,EmailinUse : true});

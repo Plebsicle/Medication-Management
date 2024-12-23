@@ -11,14 +11,15 @@ export default function Signin() {
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
-      const googleToken = credentialResponse.response;
-      const jwtToken = await axios.post('http://localhost:8000/signin', {
+      const googleToken = credentialResponse.credential;
+      const response = await axios.post('http://localhost:8000/signin', {
         googleId: googleToken,
       });
-      if (!jwtToken) {
+      if (!response) {
         console.log("Invalid Credentials");
       } else {
-        localStorage.setItem('jwtToken', JSON.stringify(jwtToken));
+        console.log(response.data);
+        localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
         navigate('/dashboard');
       }
     } catch (error) {
@@ -35,7 +36,7 @@ export default function Signin() {
       const response = await axios.post('http://localhost:8000/signin', {email,password,});
       console.log(response.data);
       if (response.data.jwt) {
-        localStorage.setItem('jwtToken', JSON.stringify(response.data.jwt));
+        localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
         navigate('/dashboard');
       } 
       else if(response.data.zodpass === false){alert("Entered Details do not match the criteria")}
@@ -51,13 +52,13 @@ export default function Signin() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900"
+    <div className="flex items-center justify-center min-h-screen pr-36 pt-16"
       style={{
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '80vh',
-        width: '90vw',
+        width: '88vw',
       }}
     >
       <Box 

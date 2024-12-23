@@ -17,14 +17,14 @@ export default function Signup() {
     try {
       const googleToken = credentialResponse.credential;
       console.log(googleToken);
-      const jwtToken = await axios.post('http://localhost:8000/signup', {
+      const response = await axios.post('http://localhost:8000/signup', {
         googleId: googleToken,
         role,
       });
-      if (!jwtToken) {
+      if (!response) {
         console.log('Invalid Credentials');
       } else {
-        localStorage.setItem('jwtToken', JSON.stringify(jwtToken));
+        localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
         navigate('/dashboard');
       }
     } catch (error) {
@@ -75,13 +75,13 @@ export default function Signup() {
 
   return (
     <div
-      className="flex items-center justify-center min-h-screen min-w-full  bg-gray-900"
+      className="flex items-center justify-center min-h-screen min-w-full pr-36 pt-12"
       style={{
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '80vh',
-        width: '90vw',
+        width: '88vw',
       }}
     >
       <Box
