@@ -4,7 +4,6 @@ import verifyGoogleToken from "../_utilities/googleAuthService";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import {verifySigninManualDetails} from '../middlewares/zodverification';
-import isverified from "./isverified";
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -20,12 +19,12 @@ router.post("/", async (req, res) => {
         return;
       }
       const email = payload.email;
+      const name =payload.name;
       let user = await prisma.user.findFirst({ where: { email } });
-
       if (user) {
-        const jwtToken = jwt.sign({ id: user.id, email: user.email }, jwtSecret);
-         res.status(200).json({ jwt: jwtToken });
-         return;
+        const jwtToken = jwt.sign({ name : user.name , email: user.email ,role : user.role}, jwtSecret);
+        res.status(200).json({ jwt: jwtToken });
+        return;
       } else {
          res.status(202).json({ message: "User not found. Please sign up first." ,userFound : false});
          return;
@@ -60,7 +59,7 @@ router.post("/", async (req, res) => {
             res.status(202).json({ message: "Incorrect password. Please try again." ,isPasswordCorrect : false});
             return;
         }
-        const jwtToken = jwt.sign({ id: user.id, email: user.email }, jwtSecret);
+        const jwtToken = jwt.sign({ name : user.name , email: user.email ,role : user.role }, jwtSecret);
         res.status(200).json({ jwt: jwtToken });
         return;
     }
