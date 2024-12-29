@@ -9,6 +9,11 @@ import addMedication from './routes/addMedication'
 import verifyToken from './routes/verifyToken'
 import toggleNotification from './routes/toggleNotification'
 import deleteMedication from './routes/deleteMedication'
+import medicationHistory from './routes/medicationHistory'
+import serveProfile from './routes/serveProfile'
+import profilePhoto from './routes/profilePhoto'
+import path from 'path';
+import { profile } from 'console';
 
 const app = express();
 const router = express.Router();
@@ -25,6 +30,10 @@ app.use('/addMedication',addMedication);
 app.use('/verifyToken',verifyToken);
 app.use('/toggleNotification',toggleNotification);
 app.use('/deleteMedication',deleteMedication);
+app.use('/medicationHistory',medicationHistory);
+app.use('/serveProfile',serveProfile);
+app.use('/profilePhoto',profilePhoto);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = 8000;
 app.listen(PORT, () => {
