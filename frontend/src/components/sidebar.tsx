@@ -27,7 +27,7 @@ export default function SidebarComponent() {
           </MenuItem>
           <MenuItem icon={<GridViewRoundedIcon />} component={<Link to={'/dashboard'}/>}> Dashboard </MenuItem>
           <MenuItem icon={<SpeedDialIcon/> } component={<Link to={'/medicationHistory'}/>}>Medication History</MenuItem>
-          <MenuItem icon={<ReceiptRoundedIcon />}> Health Records </MenuItem>
+          <MenuItem icon={<ReceiptRoundedIcon /> } component={<Link to={'/health-records'}/>}> Health Records </MenuItem>
           <MenuItem icon={<LogoutRoundedIcon />} component={<Link to={'/signin'} />} onClick={() => {localStorage.clear();}}>
             Logout
           </MenuItem>

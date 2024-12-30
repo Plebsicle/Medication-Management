@@ -12,6 +12,8 @@ import AddMedication from './pages/addMedication';
 import MedicationHistory from './pages/medicationHistory';
 import Profile from './pages/profile'
 import HospitalLocation from './pages/hopitalLocation';
+import HealthRecords from './pages/HealthRecords';
+import  HealthRecordsForm  from './pages/healthRecordsForm';
 
 const GoogleclientId =import.meta.env.VITE_GOOGLE_CLIENT_ID
 
@@ -30,6 +32,8 @@ function Routing(){
         <Route path='/medicationHistory' element={<MedicationHistory/>}></Route>
         <Route path='/profile' element={<Profile/>}></Route>
         <Route path='/hospital-location' element={<HospitalLocation/>}></Route>
+        <Route path='/health-records' element={<HealthRecords/>}></Route>
+        <Route path='/healthRecordsForm' element={<HealthRecordsForm/>}></Route>
       </Routes>
     </div>
   );

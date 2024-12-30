@@ -14,6 +14,7 @@ import serveProfile from './routes/serveProfile'
 import profilePhoto from './routes/profilePhoto'
 import path from 'path';
 import hospitalLocation from './routes/hospitalLocation'
+import healthRecords from './routes/healthRecords'
 
 const app = express();
 const router = express.Router();
@@ -34,6 +35,7 @@ app.use('/medicationHistory',medicationHistory);
 app.use('/serveProfile',serveProfile);
 app.use('/profilePhoto',profilePhoto);
 app.use('/hospitalLocation',hospitalLocation);
+app.use('/healthRecords',healthRecords);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
