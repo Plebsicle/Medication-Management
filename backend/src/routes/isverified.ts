@@ -22,4 +22,4 @@ export default router.post('/',async (req,res)=>{
         else 
             res.status(401).json({verified : false});
     }
-})
+});

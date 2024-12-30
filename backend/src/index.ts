@@ -13,7 +13,7 @@ import medicationHistory from './routes/medicationHistory'
 import serveProfile from './routes/serveProfile'
 import profilePhoto from './routes/profilePhoto'
 import path from 'path';
-import { profile } from 'console';
+import hospitalLocation from './routes/hospitalLocation'
 
 const app = express();
 const router = express.Router();
@@ -33,6 +33,8 @@ app.use('/deleteMedication',deleteMedication);
 app.use('/medicationHistory',medicationHistory);
 app.use('/serveProfile',serveProfile);
 app.use('/profilePhoto',profilePhoto);
+app.use('/hospitalLocation',hospitalLocation);
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = 8000;

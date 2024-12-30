@@ -70,7 +70,7 @@ export default function Profile() {
         const response = await axios.post(`${BASE_URL}/profilePhoto`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "multipart/form-data",  
           },
         });
 

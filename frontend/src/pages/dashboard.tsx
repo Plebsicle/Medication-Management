@@ -161,6 +161,7 @@ export default function Dashboard() {
                     ) : (
                         <p className="text-red-500 font-semibold">There are no active medications.</p>
                     )}
+                    
                 </div>
             </div>
         </div>

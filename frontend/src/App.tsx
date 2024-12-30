@@ -11,7 +11,7 @@ import VerifyEmailManual from './pages/verify-email-manual';
 import AddMedication from './pages/addMedication';
 import MedicationHistory from './pages/medicationHistory';
 import Profile from './pages/profile'
-import EmailUpdate from './pages/emailUpdate'
+import HospitalLocation from './pages/hopitalLocation';
 
 const GoogleclientId =import.meta.env.VITE_GOOGLE_CLIENT_ID
 
@@ -29,7 +29,7 @@ function Routing(){
         <Route path='/addMedication' element={<AddMedication></AddMedication>}></Route>
         <Route path='/medicationHistory' element={<MedicationHistory/>}></Route>
         <Route path='/profile' element={<Profile/>}></Route>
-        {/* <Route path='/emailUpdate' element={<EmailUpdate/>}></Route> */}
+        <Route path='/hospital-location' element={<HospitalLocation/>}></Route>
       </Routes>
     </div>
   );

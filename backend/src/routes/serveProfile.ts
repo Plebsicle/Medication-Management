@@ -91,13 +91,12 @@ router.post('/', async (req, res) => {
 
     try {
         const validFields = ["name", "role", "profile_photo_path"];
-        const updateData: Record<string, any> = {}; 
-
+        const updateData: Record<string, any> = {};  
         for (const key in updates) {
             if (validFields.includes(key)) {
                 updateData[key] = updates[key];
             } else {
-                res.status(400).json({ error: `Invalid field: ${key}` });
+                res.status(400).json({ error: `Invalid field: ${key}`});
                 return;
             }
         }
@@ -105,7 +104,6 @@ router.post('/', async (req, res) => {
             where: { email },
             data: updateData,
         });
-
         res.status(200).json({ message: "Profile updated successfully", user: updatedUser });
     } catch (error) {
         console.error("Error updating profile", error);
