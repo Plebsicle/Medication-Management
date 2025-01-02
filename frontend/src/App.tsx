@@ -14,6 +14,7 @@ import Profile from './pages/profile'
 import HospitalLocation from './pages/hopitalLocation';
 import HealthRecords from './pages/HealthRecords';
 import  HealthRecordsForm  from './pages/healthRecordsForm';
+import NotificationSystem from './pages/notification';
 
 const GoogleclientId =import.meta.env.VITE_GOOGLE_CLIENT_ID
 
@@ -34,6 +35,7 @@ function Routing(){
         <Route path='/hospital-location' element={<HospitalLocation/>}></Route>
         <Route path='/health-records' element={<HealthRecords/>}></Route>
         <Route path='/healthRecordsForm' element={<HealthRecordsForm/>}></Route>
+        <Route path='/notifications' element={<NotificationSystem/>}></Route>
       </Routes>
     </div>
   );
