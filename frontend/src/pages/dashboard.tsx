@@ -99,7 +99,7 @@ export default function Dashboard() {
 
         const medication = medications[index];
         try {
-            await axios.post(`http://localhost:8000/deleteMedication`,{medicationFull : medication}, {
+            await axios.post(`http://localhost:8000/deleteMedication`, { medicationFull: medication }, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                 },
@@ -125,7 +125,7 @@ export default function Dashboard() {
                     {isMedication ? (
                         <div className="grid grid-cols-3 gap-4">
                             {medications.map((medication, index) => (
-                                <div key={index} className="p-4 border rounded shadow">
+                                <div key={index} className="p-4 border rounded shadow hover:bg-gray-100 transition">
                                     <h3 className="text-lg font-semibold">{medication.name}</h3>
                                     <p><strong>Type:</strong> {medication.type}</p>
                                     <p><strong>Dosage:</strong> {medication.dosage}</p>
@@ -136,8 +136,9 @@ export default function Dashboard() {
                                     <p><strong>Notifications:</strong> {medication.notification_on ? "On" : "Off"}</p>
                                     <p><strong>Intake Times:</strong> {medication.intake_times.join(", ")}</p>
 
-                                    {/* Notification Slider */}
+                                    {/* Buttons Section */}
                                     <div className="flex items-center justify-between mt-4">
+                                        {/* Notification Toggle */}
                                         <label className="flex items-center">
                                             <span className="mr-2">Notifications</span>
                                             <input
@@ -147,13 +148,24 @@ export default function Dashboard() {
                                                 className="toggle-checkbox"
                                             />
                                         </label>
-                                        {/* Delete Button */}
-                                        <button
-                                            onClick={() => deleteMedication(index)}
-                                            className="px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded shadow"
-                                        >
-                                            Delete
-                                        </button>
+
+                                        <div className="flex gap-2">
+                                            {/* Edit Button */}
+                                            <Link
+                                                to={`/medications/${encodeURIComponent(medication.name)}`}
+                                                className="px-4 py-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded shadow"
+                                            >
+                                                Edit
+                                            </Link>
+
+                                            {/* Delete Button */}
+                                            <button
+                                                onClick={() => deleteMedication(index)}
+                                                className="px-4 py-2 text-white bg-red-500 hover:bg-red-600 rounded shadow"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -161,7 +173,6 @@ export default function Dashboard() {
                     ) : (
                         <p className="text-red-500 font-semibold">There are no active medications.</p>
                     )}
-                    
                 </div>
             </div>
         </div>
