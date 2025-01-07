@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import {toast , Bounce} from 'react-toastify'
 
 type healthrecord = {
     record_date : Date ,
@@ -20,6 +21,17 @@ export default function HealthRecords() {
     useEffect(() => {
         const jwt = localStorage.getItem("jwt");
         if (!jwt) {
+            toast.error('Sign In Please', {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                transition: Bounce,
+                });
             navigate("/signin");
         }
         async function fetchHealthRecords() {
@@ -38,6 +50,17 @@ export default function HealthRecords() {
                 setRecords(parsedRecords || []);
             } catch (error) {
                 console.error("Error fetching health records:", error);
+                toast.error('Error Fetching health Records!', {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    transition: Bounce,
+                    });
             }
         }
     

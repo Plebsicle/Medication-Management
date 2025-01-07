@@ -2,6 +2,7 @@ import DashboardTopBar from "../components/dashboardNavbar";
 import Sidebar from "../components/sidebar";
 import { useState } from "react";
 import axios from "axios";
+import {toast,Bounce} from 'react-toastify'
 
 type Hospital = {
     id: number;
@@ -20,23 +21,43 @@ export default function HospitalLocation() {
         try {
             setIsLoading(true);
             setError(null);
-
-            // Get user's current location
             const { coords } = await new Promise<GeolocationPosition>((resolve, reject) =>
                 navigator.geolocation.getCurrentPosition(resolve, reject)
             );
 
-            // Fetch hospitals from backend
             const response = await axios.post("http://localhost:8000/hospitalLocation", {
                 latitude: coords.latitude,
                 longitude: coords.longitude,
-                radius: 5000, // Radius in meters
+                radius: 5000, 
             });
-
+            if(response.data){
+                toast.success('NearBy Hospitals Found!', {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    transition: Bounce,
+                    });
+            }
             setHospitals(response.data.hospitals);
         } catch (err: any) {
             console.error("Error fetching hospitals:", err.message);
             setError(err.response?.data?.message || "An error occurred while fetching hospitals.");
+            toast.error('error occurred while fetching hospitals!', {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                transition: Bounce,
+                });
         } finally {
             setIsLoading(false);
         }

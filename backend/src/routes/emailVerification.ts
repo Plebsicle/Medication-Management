@@ -27,7 +27,7 @@ router.post("/", async (req, res) => {
       res.status(400).json({ message: "Invalid or expired token." });
       return;
     }
-    if (tokenRecord.expiration < new Date()) {
+    if (tokenRecord.expiration < new Date()){
       res.status(400).json({ message: "Expired token." });
     }
 

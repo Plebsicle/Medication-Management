@@ -3,6 +3,7 @@ import Sidebar from "../components/sidebar";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import {toast,Bounce} from 'react-toastify'
 
 export default function HealthRecordsForm() {
     const navigate = useNavigate();
@@ -21,6 +22,17 @@ export default function HealthRecordsForm() {
         const token = localStorage.getItem("jwt");
         setJwt(token);
         if (!token) {
+            toast.error('Error toggling notification!', {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Bounce,
+            });
             navigate("/signin");
         }
     }, [navigate]);
@@ -40,13 +52,36 @@ export default function HealthRecordsForm() {
             return;
         }
         try {
-            await axios.post("http://localhost:8000/healthRecords", formData, {
+            const response = await axios.post("http://localhost:8000/healthRecords", formData, {
                 headers: {
                     Authorization: `Bearer ${jwt}`,
                 },
             });
+            if(response.data)
+            toast.success('Health Record Added Successfully!', {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                transition: Bounce,
+            });
             navigate("/health-records");
         } catch (error) {
+            toast.error('Error submitting health record!', {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                transition: Bounce,
+                });
             console.error("Error submitting health record:", error);
         }
     };

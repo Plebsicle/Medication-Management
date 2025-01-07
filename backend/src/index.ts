@@ -16,6 +16,7 @@ import path from 'path';
 import hospitalLocation from './routes/hospitalLocation'
 import healthRecords from './routes/healthRecords'
 import medicationDetails from './routes/medicationDetails'
+import medicationChanges from './routes/medicationChanges'
 
 const app = express();
 const router = express.Router();
@@ -38,6 +39,7 @@ app.use('/profilePhoto',profilePhoto);
 app.use('/hospitalLocation',hospitalLocation);
 app.use('/healthRecords',healthRecords);
 app.use('/medications',medicationDetails);
+app.use('/editMedications',medicationChanges);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

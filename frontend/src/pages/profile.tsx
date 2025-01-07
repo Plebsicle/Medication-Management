@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import DashboardTopBar from "../components/dashboardNavbar";
 import axios from "axios";
 import Sidebar from "../components/sidebar";
+import {toast,Bounce} from 'react-toastify'
 
 export default function Profile() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -23,6 +24,17 @@ export default function Profile() {
         const token = localStorage.getItem("jwt");
         if (!token) {
           console.error("JWT token is missing");
+          toast.error('Sign In Please!', {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Bounce,
+            });
           return;
         }
 
@@ -63,6 +75,17 @@ export default function Profile() {
         const token = localStorage.getItem("jwt");
         if (!token) {
           console.error("JWT token is missing");
+          toast.error('Sign In Please!', {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Bounce,
+          });
           return;
         }
         const formData = new FormData();
@@ -104,10 +127,21 @@ export default function Profile() {
       const token = localStorage.getItem("jwt");
       if (!token) {
         console.error("JWT token is missing");
+        toast.error('Sign In Please!', {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+        });
         return;
       }
 
-      await axios.post(
+      const response1 = await axios.post(
         `${BASE_URL}/serveProfile`,
         { [field]: updatedValue },
         {
@@ -116,13 +150,36 @@ export default function Profile() {
           },
         }
       );
-
+      if(response1.data){
+        toast.success('Updated Profile Successfully!', {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+          transition: Bounce,
+          });
+      }
       setProfileData((prev) =>
         prev ? { ...prev, [field]: updatedValue } : null
       );
       setEditingField(null);
     } catch (error) {
       console.error("Error updating profile data:", error);
+      toast.error('Error updating profile data!', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+        });
     }
   };
 

@@ -16,6 +16,7 @@ import HealthRecords from './pages/HealthRecords';
 import  HealthRecordsForm  from './pages/healthRecordsForm';
 import NotificationSystem from './pages/notification';
 import MedicationDetails from './pages/medicationDetails';
+import { ToastContainer } from 'react-toastify';
 
 const GoogleclientId =import.meta.env.VITE_GOOGLE_CLIENT_ID
 
@@ -49,6 +50,7 @@ function App() {
       <BrowserRouter>
         <Routing />
       </BrowserRouter>
+      <ToastContainer/>
     </GoogleOAuthProvider>
   );
 }

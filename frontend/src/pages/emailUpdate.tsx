@@ -2,7 +2,7 @@ import { TextField, Button, Box, Typography } from '@mui/material';
 import  { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import {toast,Bounce} from 'react-toastify'
 
 export default function VerifyEmailManual(){
     const [newEmail, setnewEmail] = useState<string>("");
@@ -20,6 +20,17 @@ export default function VerifyEmailManual(){
                   });
                   if (verifiedResponse.data.verified) {
                     clearInterval(interval);
+                    toast.success('Email Verified Succesfully!', {
+                      position: "top-center",
+                      autoClose: 5000,
+                      hideProgressBar: false,
+                      closeOnClick: false,
+                      pauseOnHover: true,
+                      draggable: true,
+                      progress: undefined,
+                      theme: "dark",
+                      transition: Bounce,
+                      });
                     navigate('/dashboard'); 
                   }
                 } catch (error) {
@@ -29,6 +40,17 @@ export default function VerifyEmailManual(){
         }
         catch(e){
             console.log("Error in Manual Email Verification Frontend",e);
+             toast.error('Error in Manual Email Verification Frontend!', {
+              position: "top-center",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: false,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "dark",
+              transition: Bounce,
+              });
         }
     }
     return (

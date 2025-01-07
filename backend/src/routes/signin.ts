@@ -19,6 +19,7 @@ router.post("/", async (req, res) => {
         return;
       }
       const email = payload.email;
+      console.log(email);
       const name =payload.name;
       let user = await prisma.user.findFirst({ where: { email } });
       if (user) {

@@ -3,6 +3,8 @@ import { TextField, Button, MenuItem, Select, InputLabel, FormControl, Box, Typo
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 type Role = 'patient' | 'caregiver' | 'doctor';
 
@@ -16,24 +18,44 @@ export default function Signup() {
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     try {
       const googleToken = credentialResponse.credential;
-      console.log(googleToken);
       const response = await axios.post('http://localhost:8000/signup', {
         googleId: googleToken,
         role,
       });
-      if (!response) {
-        console.log('Invalid Credentials');
-      } else {
+
+      if (response.data.jwt) {
         localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
+        toast.success('Sign Up Successful!', {
+          position: "top-center",
+          autoClose: 5000,
+          theme: "dark",
+          transition: Bounce,
+        });
         navigate('/dashboard');
+      } else if (response.data.EmailinUse) {
+        toast.error('Email is already in use!', {
+          position: "top-center",
+          autoClose: 5000,
+        });
+      } else if (!response.data.validDetails) {
+        toast.error('Invalid Google Credentials!', {
+          position: "top-center",
+          autoClose: 5000,
+        });
       }
     } catch (error) {
-      console.log('Error in Google signup', error);
+      toast.error('Error during Google signup!', {
+        position: "top-center",
+        autoClose: 5000,
+      });
     }
   };
 
   const handleGoogleFailure = () => {
-    alert('Google login failed!');
+    toast.error('Google login failed!', {
+      position: "top-center",
+      autoClose: 5000,
+    });
   };
 
   async function manualSignuphandler() {
@@ -44,32 +66,51 @@ export default function Signup() {
         password,
         role,
       });
+
       if (response.data.EmailinUse) {
-        alert('Email is already in use');
-        return;
-      } else if (response.data.zodPass === false) {
-        alert('Entered Details Do not Match the Criteria');
-        return;
+        toast.error('Email is already in use!', {
+          position: "top-center",
+          autoClose: 5000,
+        });
+      } else if (!response.data.zodPass) {
+        toast.error('Entered Details Do Not Match the Criteria!', {
+          position: "top-center",
+          autoClose: 5000,
+        });
       } else if (response.data.serverError) {
-        alert('Server Error');
-        return;
-      }
-      navigate('/redirect-verify');
-      const interval = setInterval(async () => {
-        try {
-          const verifiedResponse = await axios.post('http://localhost:8000/isverified', {
-            email,
-          });
-          if (verifiedResponse.data.verified) {
-            clearInterval(interval);
-            navigate('/dashboard');
+        toast.error('Server Error! Please try again later.', {
+          position: "top-center",
+          autoClose: 5000,
+        });
+      } else if (!response.data.isEmailVerified) {
+        toast.info('Verification email sent. Please check your inbox.', {
+          position: "top-center",
+          autoClose: 5000,
+        });
+        navigate('/redirect-verify');
+        const interval = setInterval(async () => {
+          try {
+            const verifiedResponse = await axios.post('http://localhost:8000/isverified', {
+              email,
+            });
+            if (verifiedResponse.data.verified) {
+              clearInterval(interval);
+              toast.success('Email Verified! Redirecting to Dashboard...', {
+                position: "top-center",
+                autoClose: 5000,
+              });
+              navigate('/dashboard');
+            }
+          } catch (error) {
+            console.error('Error checking verification status', error);
           }
-        } catch (error) {
-          console.error('Error checking verification status', error);
-        }
-      }, 3000);
+        }, 3000);
+      }
     } catch (error) {
-      console.log('Error from manual Signup', error);
+      toast.error('Error during manual signup!', {
+        position: "top-center",
+        autoClose: 5000,
+      });
     }
   }
 

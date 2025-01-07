@@ -3,6 +3,7 @@ import { TextField, Button, Box, Typography } from '@mui/material';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import {toast,Bounce} from 'react-toastify'
 
 export default function Signin() {
   const [email, setEmail] = useState<string>("");
@@ -15,20 +16,51 @@ export default function Signin() {
       const response = await axios.post('http://localhost:8000/signin', {
         googleId: googleToken,
       });
-      if (!response) {
-        console.log("Invalid Credentials");
-      } else {
-        console.log(response.data);
+  
+      if (response.data.userFound === false) {
+        toast.error('Account does not exist. Please sign up.', {
+          position: "top-center",
+          autoClose: 5000,
+          theme: "dark",
+          transition: Bounce,
+        });
+        return;
+      }
+  
+      if (response.data.jwt) {
         localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
+        toast.success('Sign In Successful!', {
+          position: "top-center",
+          autoClose: 5000,
+          theme: "dark",
+          transition: Bounce,
+        });
         navigate('/dashboard');
       }
     } catch (error) {
-      console.log("Error in Google signin", error);
+      console.error('Error in Google Signin:', error);
+      toast.error('An error occurred during Google Signin.', {
+        position: "top-center",
+        autoClose: 5000,
+        theme: "dark",
+        transition: Bounce,
+      });
     }
   };
+  
 
   const handleGoogleFailure = () => {
-    alert('Google login failed!');
+    toast.error('Google Login Failed!', {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+      });
   };
 
   async function manualSigninHandler() {
@@ -37,17 +69,28 @@ export default function Signin() {
       console.log(response.data);
       if (response.data.jwt) {
         localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
+        toast.success('Sign In Successful!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+        });
         navigate('/dashboard');
       } 
-      else if(response.data.zodpass === false){alert("Entered Details do not match the criteria")}
-      else if(response.data.userFound === false){alert("Signup Before you Sign in")}
-      else if(response.data.isPasswordSet === false){alert("Your Password has not been set up yet , signin with Google")}
-      else if(response.data.isEmailVerified === false){alert("Verify Your Email Before You signin")}
-      else if(response.data.isPasswordCorrect === false){alert("Enter The Correct Password")}
-      else if(response.data.fullDetails === false){alert("Please Enter Complete Details")}
-      else if(response.data.serverError){alert("Server Error")}
+      else if(response.data.zodpass === false){toast.error('Entered Details do not match the criteria!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+      });}
+      else if(response.data.userFound === false){toast.error('Signup Before you Sign in!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+      });}
+      else if(response.data.isPasswordSet === false){toast.error('Your Password has not been set up yet , signin with Google!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+      });}
+      else if(response.data.isEmailVerified === false){toast.error('Verify Your Email Before You signin!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+      });}
+      else if(response.data.isPasswordCorrect === false){toast.error('Enter The Correct Password!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+      });}
+      else if(response.data.fullDetails === false){toast.error('Please Enter Complete Details!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+      });}
+      else if(response.data.serverError){toast.error('Server Error!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+      });}
     } catch (error) {
       console.log("Error from manual Signin", error);
+      toast.error('Error from manual Signin!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+      });
     }
   }
 
