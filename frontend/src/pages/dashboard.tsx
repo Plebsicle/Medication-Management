@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import {toast , Bounce} from 'react-toastify'
  
 type FormDataType = {
+    medication_id : number,
     name: string;
     type: string;
     dosage: string;
@@ -206,7 +207,7 @@ export default function Dashboard() {
 
                                 <div className="flex gap-2">
                                     <Link
-                                        to={`/medications/${encodeURIComponent(medication.name)}`}
+                                        to={`/medications/${medication.medication_id}`}
                                         className="px-4 py-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded shadow dark:bg-yellow-700 dark:hover:bg-yellow-800"
                                     >
                                         Edit

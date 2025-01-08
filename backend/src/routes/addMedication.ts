@@ -11,6 +11,7 @@ enum medication_type {
 }
 
 type FormDataType = {
+    medication_id : number;
     name: string;
     type: medication_type;
     dosage: string;
@@ -50,7 +51,7 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const { formData} : {formData : FormDataType} = req.body;
+        const { formData} = req.body;
         console.log(req.body);
         console.log(formData);
         if (!formData) {
@@ -163,6 +164,7 @@ router.get('/',async (req,res)=>{
         return;
     }
     const formattedMedications: FormDataType[] = medications.map((medication) => ({
+        medication_id : medication.medication_id,
         name: medication.name,
         type: medication.type as medication_type,
         dosage: medication.dosage,

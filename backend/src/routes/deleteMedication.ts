@@ -40,20 +40,16 @@ router.post('/', async (req, res) => {
             return;
         }
 
-        const { name, type, dosage, start_date, end_date } = medicationFull;
+        const { medication_id , name, type, dosage, start_date, end_date } = medicationFull;
 
-        if (!name || !type || !dosage || !start_date || !end_date) {
+        if (!name || !type || !dosage || !start_date || !end_date || !medication_id) {
             res.status(400).json({ error: "Incomplete medication details" });
             return;
         }
 
         const medication = await prisma.medication.findFirst({
             where: {
-                name,
-                type,
-                dosage,
-                start_date: new Date(start_date),
-                end_date: new Date(end_date),
+                medication_id
             },
         });
 

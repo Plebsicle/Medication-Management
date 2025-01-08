@@ -32,7 +32,7 @@ router.post('/',async (req,res)=>{
         res.status(202).json({message : "User has not signed Up yet ", isSignedUp : false})
         return;
     }
-    await prisma.emailVerificationToken.upsert({
+    await prisma.emailverificationtoken.upsert({
         where: {
             user_id: placeholderUser.id,
         },

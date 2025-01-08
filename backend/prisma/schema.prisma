@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,38 +7,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-  model user {
-    id                    Int                   @id @default(autoincrement()) @db.UnsignedInt
-    email                 String                @unique(map: "user_email_unique") @db.VarChar(100)
-    password              String?               @db.VarChar(255)
-    name                  String                @db.VarChar(50)
-    phone_number          String?               @db.VarChar(15)
-    role                  user_role             @default(patient)
-    verified              Boolean               @default(false)
-    created_at            DateTime              @default(now())
-    updated_at            DateTime              @updatedAt
-    google_id             String?               @unique @db.VarChar(255)
-    profile_photo_path    String?               @db.VarChar(255)
-    doctor                doctor[]
-    health_records        health_records[]
-    medication            medication[]
-    patientprofile        patientprofile[]
-    emailVerificationToken EmailVerificationToken?
-  }
+model user {
+  id                     Int                     @id @default(autoincrement()) @db.UnsignedInt
+  email                  String                  @unique(map: "user_email_unique") @db.VarChar(100)
+  password               String?                 @db.VarChar(255)
+  name                   String                  @db.VarChar(50)
+  phone_number           String?                 @db.VarChar(15)
+  role                   user_role               @default(patient)
+  verified               Boolean                 @default(false)
+  created_at             DateTime                @default(now())
+  updated_at             DateTime                @updatedAt
+  google_id              String?                 @unique @db.VarChar(255)
+  profile_photo_path     String?                 @db.VarChar(255)
+  doctor                 doctor?
+  emailverificationtoken emailverificationtoken?
+  health_records         health_records[]
+  patientprofile         patientprofile?
+}
 
 model doctor {
-  doctor_id    Int   @id @default(autoincrement()) @db.UnsignedInt
-  user_id      Int   @unique @db.UnsignedInt
-  speciality   String   @db.VarChar(255)
-  phone_number String   @db.VarChar(15)
-  user         user     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  doctor_id    Int    @id @default(autoincrement()) @db.UnsignedInt
+  user_id      Int    @unique @db.UnsignedInt
+  speciality   String @db.VarChar(255)
+  phone_number String @db.VarChar(15)
+  user         user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id], map: "user_id")
 }
 
 model health_records {
-  health_records_id Int   @id @default(autoincrement()) @db.UnsignedInt
-  user_id           Int   @db.UnsignedInt
+  health_records_id Int      @id @default(autoincrement()) @db.UnsignedInt
+  user_id           Int      @db.UnsignedInt
   record_date       DateTime @db.Date
   blood_pressure    String?  @db.VarChar(50)
   heart_rate        Int?
@@ -53,72 +46,75 @@ model health_records {
   notes             String?  @db.Text
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
-  user              user     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user              user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
   @@index([user_id], map: "user_id")
 }
 
 model medication {
-  medication_id         Int                @id @default(autoincrement()) @db.UnsignedInt
-  user_id               Int                   @db.UnsignedInt
-  name                  String                @db.VarChar(255)
-  type                  medication_type
-  dosage                String                @db.VarChar(50)
-  start_date            DateTime              @db.Date
-  end_date              DateTime              @db.Date
-  instructions          String?               @db.Text
-  user                  user                  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  medication_times      medication_times[]
-  notification          notification[]        
-  @@unique([user_id, name], map: "medication_name_unique")
+  medication_id    Int                @id @default(autoincrement()) @db.UnsignedInt
+  user_id          Int                @db.UnsignedInt
+  name             String             @db.VarChar(255)
+  type             medication_type
+  dosage           String             @db.VarChar(50)
+  start_date       DateTime           @db.Date
+  end_date         DateTime           @db.Date
+  instructions     String?            @db.Text
+  medication_times medication_times[]
+  notification     notification[]
 }
 
 model medication_times {
-  medication_time_id Int     @id @default(autoincrement()) @db.UnsignedInt
-  medication_id      Int     @db.UnsignedInt
+  medication_time_id Int        @id @default(autoincrement()) @db.UnsignedInt
+  medication_id      Int        @db.UnsignedInt
   intake_time        DateTime   @db.Time(0)
-  medication         medication @relation(fields: [medication_id], references: [medication_id], onDelete: Cascade, onUpdate: Cascade)
+  medication         medication @relation(fields: [medication_id], references: [medication_id], onDelete: Cascade)
 
   @@index([medication_id], map: "medication_id")
 }
 
 model notification {
-  notification_id       Int                   @id @default(autoincrement()) @db.UnsignedInt
-  medication_id         Int                @db.UnsignedInt
-  notification_on       Boolean               @default(true) // Indicates if notifications are enabled
-  message               String                @db.Text
-  created_at            DateTime              @default(now())
-  updated_at            DateTime              @updatedAt
-  medication            medication            @relation(fields: [medication_id], references: [medication_id], onDelete: Cascade, onUpdate: Cascade)
-  notification_logs     notification_logs[]   // Linked to notification logs
+  notification_id   Int                 @id @default(autoincrement()) @db.UnsignedInt
+  message           String              @db.Text
+  created_at        DateTime            @default(now())
+  medication_id     Int                 @db.UnsignedInt
+  notification_on   Boolean             @default(true)
+  updated_at        DateTime            @updatedAt
+  medication        medication          @relation(fields: [medication_id], references: [medication_id], onDelete: Cascade)
+  notification_logs notification_logs[]
+
+  @@index([medication_id], map: "notification_medication_id_fkey")
 }
 
 model notification_logs {
-  log_id                Int                   @id @default(autoincrement()) @db.UnsignedInt
-  notification_id       Int                   @db.UnsignedInt
-  sent_at               DateTime              @default(now())
-  status                String                @db.VarChar(50) // Example: sent, failed, etc.
-  notification          notification          @relation(fields: [notification_id], references: [notification_id], onDelete: Cascade, onUpdate: Cascade)
+  sent_at         DateTime     @default(now())
+  log_id          Int          @id @default(autoincrement()) @db.UnsignedInt
+  notification_id Int          @db.UnsignedInt
+  status          String       @db.VarChar(50)
+  notification    notification @relation(fields: [notification_id], references: [notification_id], onDelete: Cascade)
+
+  @@index([notification_id], map: "notification_logs_notification_id_fkey")
 }
 
 model patientprofile {
-  profile_id    Int                    @id @default(autoincrement()) @db.UnsignedInt
-  user_id       Int                    @unique @db.UnsignedInt
+  profile_id    Int                       @id @default(autoincrement()) @db.UnsignedInt
+  user_id       Int                       @unique @db.UnsignedInt
   age           Int
   weight        Decimal                   @db.Decimal(8, 2)
   date_of_birth DateTime                  @db.Date
   blood_type    patientprofile_blood_type
   address       String                    @db.VarChar(255)
-  user          user                      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user          user                      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id], map: "user_id")
 }
 
-model EmailVerificationToken {
-  token_id      Int   @id @default(autoincrement()) @db.UnsignedInt
-  user_id       Int   @unique @db.UnsignedInt
-  token         String   @db.VarChar(255)
-  expiration    DateTime
-  user          user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+model emailverificationtoken {
+  token_id   Int      @id @default(autoincrement()) @db.UnsignedInt
+  user_id    Int      @unique(map: "EmailVerificationToken_user_id_key") @db.UnsignedInt
+  token      String   @db.VarChar(255)
+  expiration DateTime
+  user       user     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "EmailVerificationToken_user_id_fkey")
 
   @@index([user_id], map: "user_id")
 }
@@ -129,22 +125,15 @@ enum medication_type {
   injection
 }
 
-enum notification_repeat_frequency {
-  none
-  daily
-  weekly
-  monthly
-}
-
 enum patientprofile_blood_type {
-  A_POS @map("A+")
-  A_NEG @map("A-")
-  B_POS @map("B+")
-  B_NEG @map("B-")
+  A_POS  @map("A+")
+  A_NEG  @map("A-")
+  B_POS  @map("B+")
+  B_NEG  @map("B-")
   AB_POS @map("AB+")
   AB_NEG @map("AB-")
-  O_POS @map("O+")
-  O_NEG @map("O-")
+  O_POS  @map("O+")
+  O_NEG  @map("O-")
 }
 
 enum user_role {

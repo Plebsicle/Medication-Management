@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
                       verified: false, 
                     },
                   });
-                await prisma.emailVerificationToken.create({
+                await prisma.emailverificationtoken.create({
                     data: {
                       user_id : placeholderUser.id,
                       token : emailToken,

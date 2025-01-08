@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient();
 const router = express.Router();
 
-router.get('/:name', async (req, res) => {
+router.get('/:id', async (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         res.status(401).json({ error: "Authorization header is missing" });
@@ -39,9 +39,10 @@ router.get('/:name', async (req, res) => {
             return;
         }
 
-        const medicationName : string = req.params.name;
+        const medication_id : string = req.params.id;
+        const med_id = parseInt(medication_id);
         const medication = await prisma.medication.findFirst({
-            where: { name: medicationName, user_id: user.id },
+            where: { medication_id : med_id, user_id: user.id },
             include: { medication_times: true, notification: true },
         });
 

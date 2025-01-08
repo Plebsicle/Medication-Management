@@ -16,7 +16,7 @@ router.post("/", async (req, res) => {
       res.status(400).json({ message: "Invalid token." });
     }
 
-    const tokenRecord = await prisma.emailVerificationToken.findFirst({
+    const tokenRecord = await prisma.emailverificationtoken.findFirst({
       where: { token: token as string },
       include: { user: true },
     });
@@ -55,7 +55,7 @@ router.post("/", async (req, res) => {
       jwt: jwtToken,
     });
     try {
-      await prisma.emailVerificationToken.delete({ where: { token_id: tokenRecord.token_id, user_id: tokenRecord.user_id } });
+      await prisma.emailverificationtoken.delete({ where: { token_id: tokenRecord.token_id, user_id: tokenRecord.user_id } });
       console.log("Token deleted successfully.");
     } catch (deleteError: any) {
       if (deleteError.code === "P2025") {

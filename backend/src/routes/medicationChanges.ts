@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 const router = express.Router();
 const prisma = new PrismaClient();
 
-router.put("/:name", async (req: Request, res: Response) => {
+router.put("/:id", async (req: Request, res: Response) => {
     console.log(req.body);
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -36,16 +36,7 @@ router.put("/:name", async (req: Request, res: Response) => {
         return;
     }
 
-    const { name } = req.params;
-    const {
-        type,
-        dosage,
-        start_date,
-        end_date,
-        instructions,
-        intake_times,
-        notification,
-        frequency,
+    const {medication_id,type,dosage,start_date,end_date,instructions,intake_times,notification,frequency,
     } = req.body;
 
     try {
@@ -57,10 +48,7 @@ router.put("/:name", async (req: Request, res: Response) => {
 
         const medication = await prisma.medication.findUnique({
             where: {
-                user_id_name: {
-                    user_id: user.id,
-                    name,
-                },
+                medication_id
             },
         });
 

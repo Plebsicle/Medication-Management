@@ -38,7 +38,7 @@ function Routing(){
         <Route path='/health-records' element={<HealthRecords/>}></Route>
         <Route path='/healthRecordsForm' element={<HealthRecordsForm/>}></Route>
         <Route path='/notifications' element={<NotificationSystem/>}></Route>
-        <Route path='/medications/:medicationName' element={<MedicationDetails/>}></Route>
+        <Route path='/medications/:medication_id' element={<MedicationDetails/>}></Route>
       </Routes>
     </div>
   );

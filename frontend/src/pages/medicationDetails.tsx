@@ -6,33 +6,35 @@ import DashboardTopBar from "../components/dashboardNavbar";
 import {toast,Bounce} from 'react-toastify'
 
 type FormDataType = {
+    medication_id : number,
     name: string;
     type: string;
     dosage: string;
     start_date: string;
     end_date: string;
     frequency: number;
-    intake_times: string[]; // Adjusted to an array of strings
+    intake_times: string[]; 
     instructions: string;
     notification_on: boolean;
 };
 
 export default function MedicationDetails() {
-    const { medicationName } = useParams<{ medicationName: string }>();
+    const { medication_id } = useParams<{ medication_id: string }>();
+    console.log(medication_id);
     const navigate = useNavigate();
     const [medication, setMedication] = useState<FormDataType | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         const jwt = localStorage.getItem("jwt");
-        if (jwt && medicationName) {
-            fetchMedicationDetails(jwt, medicationName);
+        if (jwt && medication_id) {
+            fetchMedicationDetails(jwt, medication_id);
         }
-    }, [medicationName]);
+    }, [medication_id]);
 
-    async function fetchMedicationDetails(jwt: string, name: string) {
+    async function fetchMedicationDetails(jwt: string,id : string) {
         try {
-            const response = await axios.get(`http://localhost:8000/medications/${name}`, {
+            const response = await axios.get(`http://localhost:8000/medications/${id}`,{
                 headers: { Authorization: `Bearer ${jwt}` },
             });
             const data = response.data;
@@ -91,7 +93,7 @@ export default function MedicationDetails() {
         try {
             const payload = { ...medication, intake_times: medication.intake_times[0] };
             await axios.put(
-                `http://localhost:8000/editMedications/${medication.name}`,
+                `http://localhost:8000/editMedications/${medication.medication_id}`,
                 payload,
                 { headers: { Authorization: `Bearer ${jwt}` } }
             );
