@@ -43,9 +43,10 @@ export default function Dashboard() {
             navigate("/signin");
         } else {
             verifyJwtToken(jwt);
+
         }
     }, [navigate]);
-
+    
     async function verifyJwtToken(jwt: string) {
         try {
             const response = await axios.post(

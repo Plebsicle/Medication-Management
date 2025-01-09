@@ -1,26 +1,25 @@
 import { TextField, Button, Box, Typography } from '@mui/material';
-import {  useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios'
+import {useParams} from 'react-router-dom'
 import {toast,Bounce} from 'react-toastify'
 
 export default function ForgetPassword(){
-    const navigate= useNavigate();
-    const [email,setEmail] = useState<String>("");
+
+    const [password,setPassword] = useState<String>("");
+    const { email } = useParams<{ email: string }>();
 
     async function forgetPasswordHandler(){
-        const response = await axios.post("http://localhost:8000/forgetPassword",{email});
-        if(response.data.isEmailSent){
-            navigate('/emailSent');
+        const response = await axios.put('http://localhost:8000/forgetPassword',{password,email});
+        if(response.data.passwordChanged){
+            const channel = new BroadcastChannel('auth_channel');
+            channel.postMessage({ type: 'passwordChanged' });
+            window.close();
         }
-        const channel = new BroadcastChannel('auth_channel');
-        channel.onmessage = (event) => {
-          if (event.data.type === 'passwordChanged') {
-            window.location.href = '/signin';
-            toast.success('Password Changed Successfully!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+        if(!response.data.zodPass){
+            toast.error('Password is of incorrect type !', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
             });
-          }
-        };
+        }
     }
     return(
         <div className="flex items-center justify-center min-h-screen pr-36 pt-16"
@@ -44,13 +43,13 @@ export default function ForgetPassword(){
           Forget Password
         </Typography>
             <form onSubmit={(e) => { e.preventDefault(); forgetPasswordHandler(); }}>
-                <TextField label="Email"
+                <TextField label="Password"
                 variant="outlined"
                 fullWidth
                 margin="normal"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}/>
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}/>
                 <Button
                 type="submit"
                 variant="contained"

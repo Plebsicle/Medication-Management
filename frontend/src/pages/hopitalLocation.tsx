@@ -36,7 +36,7 @@ export default function HospitalLocation() {
                     autoClose: 5000,
                     hideProgressBar: false,
                     closeOnClick: false,
-                    pauseOnHover: true,
+                    pauseOnHover: false,
                     draggable: true,
                     progress: undefined,
                     theme: "dark",

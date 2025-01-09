@@ -10,6 +10,7 @@ import DarkModeSlider from "./darkModeSlider";
 import { useRecoilValue } from "recoil";
 import { darkModeState } from "../atoms/darkMode"; // Import dark mode state
 import {toast,Bounce} from 'react-toastify'
+import { FaAccessibleIcon } from "react-icons/fa";
 
 export default function SidebarComponent() {
   const [collapsed, setCollapsed] = useState(false);
@@ -64,6 +65,13 @@ export default function SidebarComponent() {
             style={{ backgroundColor: isDarkMode ? "#000000" : "#e2e8f0",color: isDarkMode ? "#cbd5e0" : "#000" }} // Menu item text color
           >
             Medication History
+          </MenuItem>
+          <MenuItem
+            icon={<FaAccessibleIcon />}
+            component={<Link to={"/hospital-location"} />}
+            style={{ backgroundColor: isDarkMode ? "#000000" : "#e2e8f0",color: isDarkMode ? "#cbd5e0" : "#000" }} // Menu item text color
+          >
+            Find Nearby Hospitals
           </MenuItem>
           <MenuItem
             icon={<ReceiptRoundedIcon />}

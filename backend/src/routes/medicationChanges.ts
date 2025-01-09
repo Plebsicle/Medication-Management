@@ -36,7 +36,8 @@ router.put("/:id", async (req: Request, res: Response) => {
         return;
     }
 
-    const {medication_id,type,dosage,start_date,end_date,instructions,intake_times,notification,frequency,
+    const {medication_id,type,dosage,start_date,end_date,instructions,intake_times,notification,
+frequency,
     } = req.body;
 
     try {

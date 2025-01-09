@@ -181,6 +181,16 @@ export default function Signin() {
           >
             Verify Email
           </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 2 }}
+            onClick={() => navigate('/forgetPassword')}
+          >
+            Forget Passowrd
+          </Button>
       </Box>
     </div>
   );

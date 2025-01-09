@@ -44,3 +44,39 @@ export async function sendVerificationEmail(email: string, token: string) {
     throw new Error('Failed to send verification email.');
   }
 }
+
+export async function sendResetPassword(email: string) {
+  try {
+    const accessToken = await oauth2Client.getAccessToken();
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        type: 'OAuth2',
+        user: process.env.EMAIL_USER as string,
+        clientId: CLIENT_ID,
+        clientSecret: CLIENT_SECRET,
+        refreshToken: REFRESH_TOKEN,
+        accessToken: accessToken.token as string,
+      },
+      logger: true,
+      debug: true,
+    });
+
+    const verificationUrl = `http://localhost:5173/resetPassword/${email}`;
+
+    const mailOptions = {
+      from: `"Medication-Management" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Reset Your Passsword',
+      text: `Please Reset Your Passsword by clicking this link: ${verificationUrl}`,
+      html: `<p>Please Reset Your Passsword by clicking <a href="${verificationUrl}">this link</a>.</p>`,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Verification email sent successfully:', result);
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    throw new Error('Failed to send verification email.');
+  }
+}

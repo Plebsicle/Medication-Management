@@ -17,6 +17,8 @@ import  HealthRecordsForm  from './pages/healthRecordsForm';
 import NotificationSystem from './pages/notification';
 import MedicationDetails from './pages/medicationDetails';
 import { ToastContainer } from 'react-toastify';
+import ResetPassword from './pages/resetPassword'
+import EmailSent from './pages/emailSent';
 
 const GoogleclientId =import.meta.env.VITE_GOOGLE_CLIENT_ID
 
@@ -39,6 +41,8 @@ function Routing(){
         <Route path='/healthRecordsForm' element={<HealthRecordsForm/>}></Route>
         <Route path='/notifications' element={<NotificationSystem/>}></Route>
         <Route path='/medications/:medication_id' element={<MedicationDetails/>}></Route>
+        <Route path='/resetPassword/:email' element={<ResetPassword/>}></Route>
+        <Route path='/emailSent' element={<EmailSent/>}></Route>
       </Routes>
     </div>
   );

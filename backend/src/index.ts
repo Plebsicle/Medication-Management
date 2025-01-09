@@ -17,6 +17,7 @@ import hospitalLocation from './routes/hospitalLocation'
 import healthRecords from './routes/healthRecords'
 import medicationDetails from './routes/medicationDetails'
 import medicationChanges from './routes/medicationChanges'
+import forgetPassword from './routes/forgetPassword'
 
 const app = express();
 const router = express.Router();
@@ -40,6 +41,7 @@ app.use('/hospitalLocation',hospitalLocation);
 app.use('/healthRecords',healthRecords);
 app.use('/medications',medicationDetails);
 app.use('/editMedications',medicationChanges);
+app.use('/forgetPassword',forgetPassword);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
