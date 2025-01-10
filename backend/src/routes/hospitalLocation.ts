@@ -1,5 +1,7 @@
 import express from 'express';
 import axios from 'axios';
+import redis from 'redis'
+import { createClient } from 'redis';
 
 const router = express.Router();
 
@@ -11,6 +13,11 @@ interface Hospital {
     googleMapsLink: string;
 }
 
+const cache_expiration = 3600;
+const redisClient = createClient();
+redisClient.on('error', (err) => console.error('Redis Client Error', err));
+redisClient.connect().catch(console.error);
+
 router.post('/', async (req, res) => {
     const { latitude, longitude, radius } = req.body;
 
@@ -20,7 +27,7 @@ router.post('/', async (req, res) => {
         });
         return;
     }
-
+    const cacheKey = `hospitals:${latitude}:${longitude}`;
     const query = `
         [out:json];
         node["amenity"="hospital"](around:${radius},${latitude},${longitude});
@@ -29,6 +36,19 @@ router.post('/', async (req, res) => {
     const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
     try {
+        const cachedData = await redisClient.get(cacheKey);
+        if (cachedData) {
+            console.log("Serving From Cache:", cachedData);
+            try {
+                const parsedData = JSON.parse(cachedData);
+                res.status(200).json({hospitals : parsedData});
+            } catch (error) {
+                console.error("Error parsing cached data:", error);
+                res.status(500).json({ message: "Error parsing cached data." });
+            }
+            return;
+        }
+
         const response = await axios.get(url);
         if (!response) {
             console.log("Error Fetching Data");
@@ -53,11 +73,14 @@ router.post('/', async (req, res) => {
         });
 
         if (hospitals.length === 0) {
-            res.status(404).json({
+            res.status(200).json({
                 message: "No hospitals found near the specified location.",
+                hospitals: [],
             });
             return;
         }
+
+        await redisClient.setEx(cacheKey, cache_expiration, JSON.stringify(hospitals));
         res.status(200).json({
             message: "Hospitals fetched successfully.",
             hospitals,

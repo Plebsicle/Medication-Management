@@ -72,16 +72,6 @@ export default function Signup() {
           position: "top-center",
           autoClose: 5000,
         });
-      } else if (!response.data.zodPass) {
-        toast.error('Entered Details Do Not Match the Criteria!', {
-          position: "top-center",
-          autoClose: 5000,
-        });
-      } else if (response.data.serverError) {
-        toast.error('Server Error! Please try again later.', {
-          position: "top-center",
-          autoClose: 5000,
-        });
       } else if (!response.data.isEmailVerified) {
         toast.info('Verification email sent. Please check your inbox.', {
           position: "top-center",
@@ -105,7 +95,17 @@ export default function Signup() {
             console.error('Error checking verification status', error);
           }
         }, 3000);
-      }
+      } else if (!response.data.zodPass) {
+        toast.error('Entered Details Do Not Match the Criteria!', {
+          position: "top-center",
+          autoClose: 5000,
+        });
+      } else if (response.data.serverError) {
+        toast.error('Server Error! Please try again later.', {
+          position: "top-center",
+          autoClose: 5000,
+        });
+      } 
     } catch (error) {
       toast.error('Error during manual signup!', {
         position: "top-center",

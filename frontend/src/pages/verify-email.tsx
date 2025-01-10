@@ -6,7 +6,6 @@ const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const navigate = useNavigate();
   const [verificationInProgress, setVerificationInProgress] = useState(false); // Ensures no repeated requests
 
   useEffect(() => {
@@ -29,9 +28,7 @@ const VerifyEmail: React.FC = () => {
         ,{
           Name : "Pravaz"
         });
-        const { token: jwtToken } = response.data;
-
-        // Save JWT and redirect
+        const jwtToken : any = response.data.jwt;
         localStorage.setItem("jwt", jwtToken);
         setStatusMessage("Email verified successfully! This tab will close automatically in a few seconds...");
         setTimeout(() => {

@@ -48,12 +48,14 @@ router.post("/", async (req, res) => {
       email: updatedUser.email,
       role: updatedUser.role,
     };
-
+    console.log(jwtPayload);
     const jwtToken = jwt.sign(jwtPayload, jwtSecret);
+    console.log(jwtToken);
     res.status(200).json({
       message: "Email verified successfully.",
       jwt: jwtToken,
     });
+  
     try {
       await prisma.emailverificationtoken.delete({ where: { token_id: tokenRecord.token_id, user_id: tokenRecord.user_id } });
       console.log("Token deleted successfully.");
