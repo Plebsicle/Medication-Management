@@ -20,7 +20,6 @@ type FormDataType = {
 
 export default function MedicationDetails() {
     const { medication_id } = useParams<{ medication_id: string }>();
-    console.log(medication_id);
     const navigate = useNavigate();
     const [medication, setMedication] = useState<FormDataType | null>(null);
     const [isSaving, setIsSaving] = useState(false);

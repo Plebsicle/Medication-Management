@@ -12,6 +12,3 @@ DROP INDEX `medication_name_unique` ON `medication`;
 
 -- CreateIndex
 CREATE UNIQUE INDEX `medication_name_unique` ON `medication`(`user_id`);
-
--- AddForeignKey
-ALTER TABLE `medication_times` ADD CONSTRAINT `medication_times_medication_id_fkey` FOREIGN KEY (`medication_id`) REFERENCES `medication`(`medication_id`) ON DELETE CASCADE ON UPDATE CASCADE;

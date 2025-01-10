@@ -23,6 +23,8 @@ model user {
   emailverificationtoken emailverificationtoken?
   health_records         health_records[]
   patientprofile         patientprofile?
+  subscriptions          subscription[]
+  medications            medication[] 
 }
 
 model doctor {
@@ -62,6 +64,7 @@ model medication {
   instructions     String?            @db.Text
   medication_times medication_times[]
   notification     notification[]
+  user             user               @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model medication_times {
@@ -107,6 +110,19 @@ model patientprofile {
   user          user                      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id], map: "user_id")
+}
+
+model subscription {
+  subscription_id Int      @id @default(autoincrement()) @db.UnsignedInt
+  user_id         Int      @db.UnsignedInt
+  endpoint        String   @db.VarChar(500) // Stores the push subscription endpoint
+  expiration_time DateTime?
+  p256dh_key      String   @db.VarChar(500) // Public key for encryption
+  auth_key        String   @db.VarChar(500) // Auth key for encryption
+  created_at      DateTime @default(now())
+  user            user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id], map: "subscription_user_id_fkey")
 }
 
 model emailverificationtoken {

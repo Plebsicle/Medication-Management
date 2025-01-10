@@ -17,10 +17,20 @@ import hospitalLocation from './routes/hospitalLocation'
 import healthRecords from './routes/healthRecords'
 import medicationDetails from './routes/medicationDetails'
 import medicationChanges from './routes/medicationChanges'
+import subscriptionRoutes from './routes/subscribe'
 import forgetPassword from './routes/forgetPassword'
+import webpush from 'web-push';
+import sendNotifications from './_utilities/schedule';
 
 const app = express();
 const router = express.Router();
+
+
+webpush.setVapidDetails(
+  'mailto:your-email@example.com',
+  process.env.VAPID_PUBLIC_KEY!,
+  process.env.VAPID_PRIVATE_KEY!
+);
 
 app.use(cors());
 app.use(express.json());
@@ -42,6 +52,8 @@ app.use('/healthRecords',healthRecords);
 app.use('/medications',medicationDetails);
 app.use('/editMedications',medicationChanges);
 app.use('/forgetPassword',forgetPassword);
+app.use('/',subscriptionRoutes);
+sendNotifications();
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
