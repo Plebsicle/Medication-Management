@@ -77,7 +77,7 @@ frequency,
                 medication_times: {
                     deleteMany: {},
                     create: intakeTimesArray.map((time: string) => ({
-                        intake_time: new Date(`1970-01-01T${time}`), 
+                        intake_time: time, 
                     })),
                 },
                 notification: {

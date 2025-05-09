@@ -1,58 +1,40 @@
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import webpush from 'web-push';
+import schedule from 'node-schedule';
 
 const prisma = new PrismaClient();
 
-// Validate FCM endpoint format
+// Helper to validate and fix FCM endpoints
 function validateAndFixEndpoint(endpoint: string): string {
-  // Log the endpoint for debugging
   console.log('Raw endpoint:', endpoint);
-  
-  // Check Google FCM endpoints
   if (endpoint.includes('fcm.googleapis.com/fcm/send/')) {
-    console.log('Fixing FCM endpoint format (send → wp)');
     return endpoint.replace('fcm.googleapis.com/fcm/send/', 'fcm.googleapis.com/wp/');
   }
-  
-  // Handle various FCM endpoint formats
   if (endpoint.includes('fcm.googleapis.com/') && !endpoint.includes('/wp/')) {
     const parts = endpoint.split('fcm.googleapis.com/');
-    if (parts.length > 1) {
-      const token = parts[1].split('/').pop();
-      if (token) {
-        console.log('Reconstructing FCM endpoint with proper format');
-        return `https://fcm.googleapis.com/wp/${token}`;
-      }
-    }
+    const token = parts[1].split('/').pop();
+    if (token) return `https://fcm.googleapis.com/wp/${token}`;
   }
-  
   return endpoint;
 }
 
+// Main notification scheduler
 async function sendNotifications() {
   const now = new Date();
-  console.log("Scheduler checking for notifications at:", now.toISOString());
+  const currentTimeHHMM = now.toTimeString().slice(0, 5); // "HH:mm"
+  console.log("Scheduler checking for notifications at:", currentTimeHHMM);
 
   try {
-    // Fetch medication_times for the current minute
-    const currentMinute = new Date();
-    const startOfMinute = new Date(currentMinute.setSeconds(0, 0));
-    const endOfMinute = new Date(currentMinute.setSeconds(59, 999));
-
-    console.log(`Checking medications between ${startOfMinute.toISOString()} and ${endOfMinute.toISOString()}`);
-
     const medicationTimes = await prisma.medication_times.findMany({
       where: {
-        intake_time: {
-          gte: startOfMinute,
-          lt: endOfMinute,
-        },
+        intake_time: currentTimeHHMM,
       },
       include: {
         medication: {
           include: {
             user: true,
+            notification: true,
           },
         },
       },
@@ -60,67 +42,47 @@ async function sendNotifications() {
 
     console.log(`Found ${medicationTimes.length} medications due for notification`);
 
-    // Process each medication_time record
     for (const medTime of medicationTimes) {
       const { medication } = medTime;
-      
-      // First check if the medication is valid
-      if (!medication || typeof medication !== 'object') {
-        console.warn('Invalid medication record');
-        continue;
-      }
-      
-      // Check notification status if it exists
-      if ('notification_on' in medication && medication.notification_on === false) {
-        console.log(`Skipping notification for ${medication.name} - notifications disabled`);
+      if (!medication || !medication.user) continue;
+
+      // Check if notification is enabled
+      const isNotifEnabled = medication.notification.some(n => n.notification_on);
+      if (!isNotifEnabled) {
+        console.log(`Skipping ${medication.name}: notifications off`);
         continue;
       }
 
-      // Skip if medication is not active (outside date range)
-      if (medication.start_date > now || medication.end_date < now) {
-        console.log(`Skipping notification for ${medication.name} - outside active date range`);
+      // Check medication is active (within start and end date)
+      const nowDate = new Date();
+      if (medication.start_date > nowDate || medication.end_date < nowDate) {
+        console.log(`Skipping ${medication.name}: outside active date range`);
         continue;
       }
 
-      // Ensure the medication has an associated user
       const user = medication.user;
-      if (!user) {
-        console.warn(`No user found for medication: ${medication.name}`);
-        continue;
-      }
-
-      // Get subscription for this user
       const subscription = await prisma.subscription.findFirst({
         where: { user_id: user.id },
       });
 
+      const message = `It's time to take your medication: ${medication.name}`;
+      await logNotification(medication.medication_id, message);
+
       if (!subscription) {
-        console.warn(`No subscription found for user ID: ${user.id}`);
-        // Log the notification anyway even if we can't send it
-        await logNotification(medication.medication_id, `It's time to take your medication: ${medication.name}`);
+        console.warn(`No subscription for user ID ${user.id}`);
         continue;
       }
 
-      // Fix the endpoint format if needed
       const fixedEndpoint = validateAndFixEndpoint(subscription.endpoint);
       if (fixedEndpoint !== subscription.endpoint) {
-        // Update the subscription with the fixed endpoint
         await prisma.subscription.update({
           where: { subscription_id: subscription.subscription_id },
-          data: { endpoint: fixedEndpoint }
+          data: { endpoint: fixedEndpoint },
         });
-        console.log(`Updated endpoint format for subscription: ${subscription.subscription_id}`);
+        console.log(`Fixed subscription endpoint for user ${user.id}`);
       }
 
-      // Prepare notification message
-      const message = `It's time to take your medication: ${medication.name}`;
-      console.log(`Preparing to send notification to user ${user.id}: ${message}`);
-
-      // Log the notification in the database
-      await logNotification(medication.medication_id, message);
-
       try {
-        // Create a properly formatted subscription object
         const pushSubscription = {
           endpoint: fixedEndpoint,
           keys: {
@@ -129,43 +91,41 @@ async function sendNotifications() {
           },
         };
 
-        // Send direct web push notification
         const payload = JSON.stringify({
           title: 'Medication Reminder',
           body: message,
         });
 
         await webpush.sendNotification(pushSubscription, payload);
-        console.log(`Web Push notification sent directly to user: ${user.id}`);
-      } catch (error: any) {
-        console.error(`Failed to send push notification:`, error);
-        
-        // If the subscription is invalid or expired, remove it
-        if (error.statusCode === 404 || error.statusCode === 410) {
-          console.log(`Removing invalid subscription for user ${user.id}`);
+        console.log(`Notification sent to user ${user.id}`);
+      } catch (err: any) {
+        console.error(`Push failed for user ${user.id}:`, err);
+
+        if (err.statusCode === 404 || err.statusCode === 410) {
           await prisma.subscription.delete({
-            where: { subscription_id: subscription.subscription_id }
+            where: { subscription_id: subscription.subscription_id },
           });
+          console.log(`Deleted expired subscription for user ${user.id}`);
         }
-        
-        // Fallback to the /notify endpoint if direct push fails
+
+        // Fallback API push
         try {
           await axios.post('http://localhost:8000/notify', {
             userId: user.id,
             message,
           });
-          console.log(`Notification sent via API for user: ${user.id}`);
-        } catch (apiError) {
-          console.error(`Failed to send notification via API:`, apiError);
+          console.log(`Fallback notification sent for user ${user.id}`);
+        } catch (fallbackErr) {
+          console.error(`Fallback failed:`, fallbackErr);
         }
       }
     }
   } catch (err) {
-    console.error('Error in notification scheduler:', err);
+    console.error("Scheduler error:", err);
   }
 }
 
-// Helper function to log notifications to the database
+// Log the notification
 async function logNotification(medication_id: number, message: string) {
   try {
     const notification = await prisma.notification.create({
@@ -183,22 +143,17 @@ async function logNotification(medication_id: number, message: string) {
       },
     });
 
-    console.log(`Notification logged for medication ID: ${medication_id}`);
-    return notification;
-  } catch (error) {
-    console.error('Error logging notification:', error);
-    return null;
+    console.log(`Logged notification for medication ID ${medication_id}`);
+  } catch (err) {
+    console.error(`Logging failed for medication ${medication_id}:`, err);
   }
 }
 
-// Schedule the function to run every minute
-import schedule from 'node-schedule';
-const job = schedule.scheduleJob('* * * * *', sendNotifications);
-console.log('Notification scheduler initialized');
+// Start the scheduler
+schedule.scheduleJob('* * * * *', sendNotifications);
+console.log("Notification scheduler initialized");
 
-// Run immediately on startup
-sendNotifications().catch(err => {
-  console.error('Error running initial notification check:', err);
-});
+// Run once at startup
+sendNotifications().catch(console.error);
 
 export default sendNotifications;

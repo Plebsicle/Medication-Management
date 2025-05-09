@@ -123,38 +123,42 @@ export default function Dashboard() {
       const registration = await navigator.serviceWorker.ready;
       console.log("Service worker is ready for push");
   
-      const existingSubscription = await registration.pushManager.getSubscription();
+      // const subscription = await registration.pushManager.getSubscription();
   
-      if (!existingSubscription) {
-        const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-        if (!vapidPublicKey) throw new Error("VAPID Public Key is missing");
-  
-        const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
-  
-        const newSubscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey,
-        });
-  
-        console.log("New push subscription:", newSubscription);
-  
-        const jwt = localStorage.getItem("jwt");
-        if (jwt) {
-          await axios.post("http://localhost:8000/subscribe", {
-            subscription: newSubscription,
-          }, {
-            headers: { Authorization: `Bearer ${jwt}` }
-          });
-  
-          toast({
-            variant: "success",
-            title: "Success",
-            description: "Push subscription saved",
-          });
-        }
-      } else {
-        console.log("Already subscribed to push notifications");
+      let subscription = await registration.pushManager.getSubscription();
+
+if (!subscription) {
+  const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+  if (!vapidPublicKey) throw new Error("VAPID Public Key is missing");
+
+  const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
+
+  subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey,
+  });
+
+  console.log("New push subscription:", subscription);
+} else {
+  console.log("Already subscribed to push notifications:", subscription);
+}
+
+// ✅ Always send subscription to backend
+      const jwt = localStorage.getItem("jwt");
+      if (jwt) {
+      await axios.post("http://localhost:8000/subscribe", {
+      subscription,
+      }, {
+      headers: { Authorization: `Bearer ${jwt}` }
+      });
+
+      toast({
+      variant: "success",
+      title: "Success",
+      description: "Push subscription saved",
+      });
       }
+
     } catch (error) {
       console.error("Push setup error:", error);
       toast({

@@ -89,7 +89,7 @@ router.post('/', async (req, res) => {
 
         const medicationTimesData = formData.intakeTimes.map((time: string) => ({
             medication_id: medication.medication_id,
-            intake_time: new Date(`1970-01-01T${time}:00`),
+            intake_time: time,
         }));
 
         await prisma.medication_times.createMany({
@@ -173,7 +173,7 @@ router.get('/',async (req,res)=>{
         start_date: medication.start_date.toISOString().split('T')[0],
         end_date: medication.end_date.toISOString().split('T')[0],
         frequency: medication.medication_times.length, 
-        intake_times: medication.medication_times.map((time) => time.intake_time.toISOString().split('T')[1]),
+        intake_times: medication.medication_times.map((time) => time.intake_time),
         instructions: medication.instructions || "",
         notification_on: medication.notification.some((notif) => notif.notification_on),
     }));

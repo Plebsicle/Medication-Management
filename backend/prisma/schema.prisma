@@ -3,155 +3,163 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model user {
-  id                     Int                     @id @default(autoincrement()) @db.UnsignedInt
-  email                  String                  @unique(map: "user_email_unique") @db.VarChar(100)
-  password               String?                 @db.VarChar(255)
-  name                   String                  @db.VarChar(50)
-  phone_number           String?                 @db.VarChar(15)
-  role                   user_role               @default(patient)
-  verified               Boolean                 @default(false)
-  created_at             DateTime                @default(now())
-  updated_at             DateTime                @updatedAt
-  google_id              String?                 @unique @db.VarChar(255)
-  profile_photo_path     String?                 @db.VarChar(255)
-  doctor                 doctor?
-  emailverificationtoken emailverificationtoken?
-  health_records         health_records[]
-  patientprofile         patientprofile?
-  subscriptions          subscription[]
-  medications            medication[] 
-  patients              patient_caretaker[]      @relation("CaretakerRelation")
-  caretakers            patient_caretaker[]      @relation("PatientRelation")
-  caretaker_healthRecords health_records[]       @relation("caretaker_healthRecords")
-  caretaker_medication    medication[]           @relation("caretaker_medication")
+  id                       Int                     @id @default(autoincrement())
+  email                    String                  @unique
+  password                 String?
+  name                     String
+  phone_number             String?
+  role                     user_role               @default(patient)
+  verified                 Boolean                 @default(false)
+  created_at               DateTime                @default(now())
+  updated_at               DateTime                @updatedAt
+  google_id                String?                 @unique
+  profile_photo_path       String?
+  doctor                   doctor?
+  emailverificationtoken   emailverificationtoken?
+  health_records           health_records[]
+  patientprofile           patientprofile?
+  subscriptions            subscription[]
+  medications              medication[]
+  patients                 patient_caretaker[]      @relation("CaretakerRelation")
+  caretakers               patient_caretaker[]      @relation("PatientRelation")
+  caretaker_healthRecords  health_records[]         @relation("caretaker_healthRecords")
+  caretaker_medication     medication[]             @relation("caretaker_medication")
 }
 
 model doctor {
-  doctor_id    Int    @id @default(autoincrement()) @db.UnsignedInt
-  user_id      Int    @unique @db.UnsignedInt
-  speciality   String @db.VarChar(255)
-  phone_number String @db.VarChar(15)
+  doctor_id    Int    @id @default(autoincrement())
+  user_id      Int    @unique
+  speciality   String
+  phone_number String
   user         user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@index([user_id], map: "user_id")
+  @@index([user_id])
 }
 
 model patient_caretaker {
-  patient_id   Int @db.UnsignedInt
-  caretaker_id Int @db.UnsignedInt
+  patient_id   Int
+  caretaker_id Int
 
   patient   user @relation("PatientRelation", fields: [patient_id], references: [id], onDelete: Cascade)
   caretaker user @relation("CaretakerRelation", fields: [caretaker_id], references: [id], onDelete: Cascade)
+
   @@id([patient_id, caretaker_id])
   @@index([patient_id])
   @@index([caretaker_id])
 }
 
 model health_records {
-  health_records_id Int      @id @default(autoincrement()) @db.UnsignedInt
-  user_id           Int      @db.UnsignedInt
-  caretaker_id      Int?     @db.UnsignedInt
-  record_date       DateTime @db.Date
-  blood_pressure    String?  @db.VarChar(50)
+  health_records_id Int      @id @default(autoincrement())
+  user_id           Int
+  caretaker_id      Int?
+  record_date       DateTime
+  blood_pressure    String?
   heart_rate        Int?
-  weight            Decimal? @db.Decimal(8, 2)
-  temperature       Decimal? @db.Decimal(8, 2)
-  notes             String?  @db.Text
+  weight            Decimal?
+  temperature       Decimal?
+  notes             String?
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
-  user              user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  caretaker         user?    @relation("caretaker_healthRecords",fields: [caretaker_id],references: [id],onDelete: SetNull)
-  @@index([user_id], map: "user_id")
+
+  user      user  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  caretaker user? @relation("caretaker_healthRecords", fields: [caretaker_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
 }
 
 model medication {
-  medication_id    Int                @id @default(autoincrement()) @db.UnsignedInt
-  user_id          Int                @db.UnsignedInt
-  caretaker_id     Int?               @db.UnsignedInt
-  name             String             @db.VarChar(255)
-  type             medication_type
-  dosage           String             @db.VarChar(50)
-  start_date       DateTime           @db.Date
-  end_date         DateTime           @db.Date
-  instructions     String?            @db.Text
-  frequency        Int                @db.UnsignedInt @default(0)
-  medication_times medication_times[]
-  notification     notification[]
-  user             user               @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  caretaker        user?              @relation("caretaker_medication", fields: [caretaker_id], references: [id], onDelete: SetNull)
+  medication_id     Int                @id @default(autoincrement())
+  user_id           Int
+  caretaker_id      Int?
+  name              String
+  type              medication_type
+  dosage            String
+  start_date        DateTime
+  end_date          DateTime
+  instructions      String?
+  frequency         Int                @default(0)
+  medication_times  medication_times[]
+  notification      notification[]
+
+  user              user               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  caretaker         user?              @relation("caretaker_medication", fields: [caretaker_id], references: [id], onDelete: SetNull)
 }
 
 model medication_times {
-  medication_time_id Int        @id @default(autoincrement()) @db.UnsignedInt
-  medication_id      Int        @db.UnsignedInt
-  intake_time        DateTime   @db.Time(0)
+  medication_time_id Int        @id @default(autoincrement())
+  medication_id      Int
+  intake_time        String     @db.VarChar(5) // Store as "HH:mm"
   medication         medication @relation(fields: [medication_id], references: [medication_id], onDelete: Cascade)
 
-  @@index([medication_id], map: "medication_id")
+  @@index([medication_id])
 }
-
 model notification {
-  notification_id   Int                 @id @default(autoincrement()) @db.UnsignedInt
-  message           String              @db.Text
+  notification_id   Int                 @id @default(autoincrement())
+  message           String
   created_at        DateTime            @default(now())
-  medication_id     Int                 @db.UnsignedInt
+  medication_id     Int
   notification_on   Boolean             @default(true)
   updated_at        DateTime            @updatedAt
+
   medication        medication          @relation(fields: [medication_id], references: [medication_id], onDelete: Cascade)
   notification_logs notification_logs[]
 
-  @@index([medication_id], map: "notification_medication_id_fkey")
+  @@index([medication_id])
 }
 
 model notification_logs {
+  log_id          Int          @id @default(autoincrement())
   sent_at         DateTime     @default(now())
-  log_id          Int          @id @default(autoincrement()) @db.UnsignedInt
-  notification_id Int          @db.UnsignedInt
-  status          String       @db.VarChar(50)
+  notification_id Int
+  status          String
+
   notification    notification @relation(fields: [notification_id], references: [notification_id], onDelete: Cascade)
 
-  @@index([notification_id], map: "notification_logs_notification_id_fkey")
+  @@index([notification_id])
 }
 
 model patientprofile {
-  profile_id    Int                       @id @default(autoincrement()) @db.UnsignedInt
-  user_id       Int                       @unique @db.UnsignedInt
+  profile_id    Int                       @id @default(autoincrement())
+  user_id       Int                       @unique
   age           Int
-  weight        Decimal                   @db.Decimal(8, 2)
-  date_of_birth DateTime                  @db.Date
+  weight        Decimal
+  date_of_birth DateTime
   blood_type    patientprofile_blood_type
-  address       String                    @db.VarChar(255)
+  address       String
+
   user          user                      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@index([user_id], map: "user_id")
+  @@index([user_id])
 }
 
 model subscription {
-  subscription_id Int      @id @default(autoincrement()) @db.UnsignedInt
-  user_id         Int      @db.UnsignedInt
-  endpoint        String   @db.VarChar(500) // Stores the push subscription endpoint
+  subscription_id Int      @id @default(autoincrement())
+  user_id         Int
+  endpoint        String
   expiration_time DateTime?
-  p256dh_key      String   @db.VarChar(500) // Public key for encryption
-  auth_key        String   @db.VarChar(500) // Auth key for encryption
+  p256dh_key      String
+  auth_key        String
   created_at      DateTime @default(now())
+
   user            user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@index([user_id], map: "subscription_user_id_fkey")
+  @@index([user_id])
 }
 
 model emailverificationtoken {
-  token_id   Int      @id @default(autoincrement()) @db.UnsignedInt
-  user_id    Int      @unique(map: "EmailVerificationToken_user_id_key") @db.UnsignedInt
-  token      String   @db.VarChar(255)
+  token_id   Int      @id @default(autoincrement())
+  user_id    Int      @unique
+  token      String
   expiration DateTime
-  user       user     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "EmailVerificationToken_user_id_fkey")
 
-  @@index([user_id], map: "user_id")
+  user       user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
 }
 
 enum medication_type {
@@ -161,14 +169,14 @@ enum medication_type {
 }
 
 enum patientprofile_blood_type {
-  A_POS  @map("A+")
-  A_NEG  @map("A-")
-  B_POS  @map("B+")
-  B_NEG  @map("B-")
-  AB_POS @map("AB+")
-  AB_NEG @map("AB-")
-  O_POS  @map("O+")
-  O_NEG  @map("O-")
+  A_POS
+  A_NEG
+  B_POS
+  B_NEG
+  AB_POS
+  AB_NEG
+  O_POS
+  O_NEG
 }
 
 enum user_role {
