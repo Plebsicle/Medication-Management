@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
-import DashboardTopBar from "../components/dashboardNavbar";
 import axios from "axios";
-import Sidebar from "../components/sidebar";
-import {toast,Bounce} from 'react-toastify'
+import { toast } from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Camera, User, Mail, Shield } from "lucide-react";
+// import { MainLayout } from "@/components/layout/MainLayout";
 
 export default function Profile() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -16,7 +21,7 @@ export default function Profile() {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [updatedValue, setUpdatedValue] = useState<string>("");
 
-  const BASE_URL = "http://localhost:8000"; 
+  const BASE_URL = "http://localhost:8000";
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -24,17 +29,7 @@ export default function Profile() {
         const token = localStorage.getItem("jwt");
         if (!token) {
           console.error("JWT token is missing");
-          toast.error('Sign In Please!', {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-            transition: Bounce,
-            });
+          toast.error("Please sign in to view your profile");
           return;
         }
 
@@ -57,6 +52,7 @@ export default function Profile() {
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
+        toast.error("Failed to fetch profile data");
       }
     };
 
@@ -66,26 +62,16 @@ export default function Profile() {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-  
+
       const reader = new FileReader();
       reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
-  
+
       try {
         const token = localStorage.getItem("jwt");
         if (!token) {
           console.error("JWT token is missing");
-          toast.error('Sign In Please!', {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
-            transition: Bounce,
-          });
+          toast.error("Please sign in to update your profile");
           return;
         }
         const formData = new FormData();
@@ -93,17 +79,19 @@ export default function Profile() {
         const response = await axios.post(`${BASE_URL}/profilePhoto`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",  
+            "Content-Type": "multipart/form-data",
           },
         });
 
-        const imagePath = `${BASE_URL}${response.data.path}`; 
+        const imagePath = `${BASE_URL}${response.data.path}`;
         setImagePreview(imagePath);
         setProfileData((prev) =>
           prev ? { ...prev, path: response.data.path } : null
         );
+        toast.success("Profile photo updated successfully");
       } catch (error) {
         console.error("Error uploading profile photo:", error);
+        toast.error("Failed to upload profile photo");
       }
     }
   };
@@ -127,21 +115,11 @@ export default function Profile() {
       const token = localStorage.getItem("jwt");
       if (!token) {
         console.error("JWT token is missing");
-        toast.error('Sign In Please!', {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-          transition: Bounce,
-        });
+        toast.error("Please sign in to update your profile");
         return;
       }
 
-      const response1 = await axios.post(
+      const response = await axios.post(
         `${BASE_URL}/serveProfile`,
         { [field]: updatedValue },
         {
@@ -150,124 +128,130 @@ export default function Profile() {
           },
         }
       );
-      if(response1.data){
-        toast.success('Updated Profile Successfully!', {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-          transition: Bounce,
-          });
+
+      if (response.data) {
+        toast.success("Profile updated successfully");
+        setProfileData((prev) =>
+          prev ? { ...prev, [field]: updatedValue } : null
+        );
+        setEditingField(null);
       }
-      setProfileData((prev) =>
-        prev ? { ...prev, [field]: updatedValue } : null
-      );
-      setEditingField(null);
     } catch (error) {
       console.error("Error updating profile data:", error);
-      toast.error('Error updating profile data!', {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-        transition: Bounce,
-        });
+      toast.error("Failed to update profile");
     }
   };
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <div className="ml-20 pt-12 w-full">
-        <DashboardTopBar />
-        <div className="ml-20 pt-12 w-full">
-          <div className="flex">
-            <div
-              className="w-40 h-40 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center cursor-pointer relative"
-              style={{
-                border: "2px solid #ccc",
-              }}
-              onClick={handleUploadClick}
-            >
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
+    
+      <div className="container mx-auto p-6">
+        <Card className="max-w-2xl mx-auto">
+          <CardHeader>
+            <CardTitle>Profile Settings</CardTitle>
+            <CardDescription>Manage your account settings and preferences</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex flex-col items-center space-y-4">
+              <div
+                className="relative w-32 h-32 rounded-full overflow-hidden cursor-pointer group"
+                onClick={handleUploadClick}
+              >
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted flex items-center justify-center">
+                    <User className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="h-8 w-8 text-white" />
+                </div>
+                <input
+                  id="file-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
                 />
-              ) : (
-                <span className="text-gray-500">No Image</span>
-              )}
-              <input
-                id="file-input"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
+              </div>
+              <p className="text-sm text-muted-foreground">Click to change profile photo</p>
             </div>
-            <div className="ml-10 flex flex-col gap-4">
+
+            <div className="space-y-4">
               {["name", "role"].map((field) => (
-                <div key={field} className="flex items-center gap-4">
-                  <p className="text-lg font-semibold capitalize w-32">
-                    {field}:
-                  </p>
+                <div key={field} className="space-y-2">
+                  <Label className="capitalize">{field}</Label>
                   {editingField === field ? (
-                    <>
+                    <div className="flex gap-2">
                       {field === "role" ? (
-                        <select
+                        <Select
                           value={updatedValue}
-                          onChange={(e) => setUpdatedValue(e.target.value)}
-                          className="border rounded px-2 py-1 w-64"
+                          onValueChange={setUpdatedValue}
                         >
-                          <option value="patient">Patient</option>
-                          <option value="caregiver">Caregiver</option>
-                          <option value="doctor">Doctor</option>
-                        </select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="patient">Patient</SelectItem>
+                            <SelectItem value="caregiver">Caregiver</SelectItem>
+                            <SelectItem value="doctor">Doctor</SelectItem>
+                          </SelectContent>
+                        </Select>
                       ) : (
-                        <input
+                        <Input
                           type="text"
                           value={updatedValue}
                           onChange={(e) => setUpdatedValue(e.target.value)}
-                          className="border rounded px-2 py-1 w-64"
                         />
                       )}
-                      <button
+                      <Button
+                        variant="outline"
                         onClick={() => handleSaveClick(field)}
-                        className="bg-green-500 text-white px-3 py-1 rounded"
                       >
                         Save
-                      </button>
-                    </>
+                      </Button>
+                    </div>
                   ) : (
-                    <>
-                      <p className="w-64">
-                        {profileData
-                          ? profileData[field as keyof typeof profileData]
-                          : "Loading..."}
-                      </p>
-                      <button
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {field === "name" ? (
+                          <User className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Shield className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <p className="text-sm">
+                          {profileData
+                            ? profileData[field as keyof typeof profileData]
+                            : "Loading..."}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleEditClick(field)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded"
                       >
                         Edit
-                      </button>
-                    </>
+                      </Button>
+                    </div>
                   )}
                 </div>
               ))}
+
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm">{profileData?.email}</p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    
   );
 }

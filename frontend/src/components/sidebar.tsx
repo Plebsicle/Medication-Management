@@ -6,15 +6,11 @@ import ReceiptRoundedIcon from "@mui/icons-material/ReceiptRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import { SpeedDialIcon } from "@mui/material";
 import { Link } from "react-router-dom";
-import DarkModeSlider from "./darkModeSlider";
-import { useRecoilValue } from "recoil";
-import { darkModeState } from "../atoms/darkMode"; // Import dark mode state
 import {toast,Bounce} from 'react-toastify'
 import { FaAccessibleIcon } from "react-icons/fa";
 
 export default function SidebarComponent() {
   const [collapsed, setCollapsed] = useState(false);
-  const isDarkMode = useRecoilValue(darkModeState); // Get dark mode state from Recoil
 
   const toggleSidebar = () => {
     setCollapsed((prevState) => !prevState);
@@ -36,8 +32,8 @@ export default function SidebarComponent() {
           top: 48,
           height: "100vh",
           zIndex: 1000,
-          backgroundColor: isDarkMode ? "#000000" : "#FFFFFF", // Sidebar background
-          color: isDarkMode ? "#FFFFFF" : "#000000", // Sidebar text color
+          backgroundColor:  "#FFFFFF", // Sidebar background
+          color: "#000000", // Sidebar text color
         }}
       >
         <Menu>
@@ -46,37 +42,37 @@ export default function SidebarComponent() {
             icon={<MenuRoundedIcon />}
             onClick={toggleSidebar}
             style={{
-              backgroundColor: isDarkMode ? "#000000" : "#e2e8f0", // Menu background
-              color: isDarkMode ? "#e2e8f0" : "#000", // Menu text color
+              backgroundColor: "#e2e8f0", // Menu background
+              color:  "#000", // Menu text color
             }}
           >
             <h2>Manage Medicine</h2>
           </MenuItem>
           <MenuItem
             icon={<GridViewRoundedIcon />}
-            component={<Link to={"/dashboard"} />}
-            style={{ backgroundColor: isDarkMode ? "#000000" : "#e2e8f0",color: isDarkMode ? "#cbd5e0" : "#000" }} // Menu item text color
+            component={<Link to={"/dashboard"}/>}
+            style={{ backgroundColor:"#e2e8f0",color: "#000" }} // Menu item text color
           >
             Dashboard
           </MenuItem>
           <MenuItem
             icon={<SpeedDialIcon />}
             component={<Link to={"/medicationHistory"} />}
-            style={{ backgroundColor: isDarkMode ? "#000000" : "#e2e8f0",color: isDarkMode ? "#cbd5e0" : "#000" }} // Menu item text color
+            style={{ backgroundColor: "#e2e8f0",color: "#000" }} // Menu item text color
           >
             Medication History
           </MenuItem>
           <MenuItem
             icon={<FaAccessibleIcon />}
             component={<Link to={"/hospital-location"} />}
-            style={{ backgroundColor: isDarkMode ? "#000000" : "#e2e8f0",color: isDarkMode ? "#cbd5e0" : "#000" }} // Menu item text color
+            style={{ backgroundColor:  "#e2e8f0",color: "#000" }} // Menu item text color
           >
             Find Nearby Hospitals
           </MenuItem>
           <MenuItem
             icon={<ReceiptRoundedIcon />}
             component={<Link to={"/health-records"} />}
-            style={{ backgroundColor: isDarkMode ? "#000000" : "#e2e8f0",color: isDarkMode ? "#cbd5e0" : "#000" }} // Menu item text color
+            style={{ backgroundColor:  "#e2e8f0",color:  "#000" }} // Menu item text color
           >
             Health Records
           </MenuItem>
@@ -88,13 +84,11 @@ export default function SidebarComponent() {
               toast.success('Logged Out Successfully!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
               });
             }}
-            style={{ backgroundColor: isDarkMode ? "#000000" : "#e2e8f0",color: isDarkMode ? "#cbd5e0" : "#000" }} // Menu item text color
+            style={{ backgroundColor: "#e2e8f0",color:  "#000" }} // Menu item text color
           >
             Logout
           </MenuItem>
         </Menu>
-        {/* Dark Mode Slider */}
-        <DarkModeSlider />
       </Sidebar>
 
       {/* Content Area */}

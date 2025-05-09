@@ -1,6 +1,5 @@
 import express from 'express';
 import axios from 'axios';
-import redis from 'redis'
 import { createClient } from 'redis';
 
 const router = express.Router();
@@ -15,7 +14,7 @@ interface Hospital {
 
 const cache_expiration = 3600;
 const redisClient = createClient();
-redisClient.on('error', (err) => console.error('Redis Client Error', err));
+redisClient.on('error', (err : any) => console.error('Redis Client Error', err));
 redisClient.connect().catch(console.error);
 
 router.post('/', async (req, res) => {

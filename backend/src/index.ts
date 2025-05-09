@@ -23,7 +23,6 @@ import webpush from 'web-push';
 import sendNotifications from './_utilities/schedule';
 
 const app = express();
-const router = express.Router();
 
 
 webpush.setVapidDetails(
@@ -34,6 +33,8 @@ webpush.setVapidDetails(
 
 app.use(cors());
 app.use(express.json());
+
+
 
 app.use('/signup', Signup);
 app.use('/signin',Signin);

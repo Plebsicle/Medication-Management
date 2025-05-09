@@ -1,8 +1,11 @@
-import DashboardTopBar from "../components/dashboardNavbar";
-import Sidebar from "../components/sidebar";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Calendar, Pill, Info } from "lucide-react";
+import { useToast } from '@/hooks/use-toast';
+// import { MainLayout } from "@/components/layout/MainLayout";
 
 type FormDataType = {
     name: string;
@@ -16,66 +19,165 @@ type FormDataType = {
     notification_on: boolean;
 };
 
+// Helper to format date
+function formatDate(dateStr: string) {
+    // If already in a readable format (e.g., contains a comma), return as is
+    if (dateStr && dateStr.match(/\w+, \d{1,2}, \d{4}/)) return dateStr;
+    // Otherwise, try to parse and format
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
+    }
+    return dateStr; // fallback
+}
+
+// Helper to format frequency
+function formatFrequency(freq: number | undefined) {
+    if (!freq || freq < 1) return 'N/A';
+    if (freq === 1) return 'Once per day';
+    return `${freq} times per day`;
+}
+
 export default function MedicationHistory() {
     const navigate = useNavigate();
+    const { toast } = useToast();
     const [medications, setMedications] = useState<FormDataType[]>([]);
     const [isMedication, setIsMedication] = useState(false);
 
     useEffect(() => {
-        const jwt = localStorage.getItem("jwt");
-        if (!jwt) {
-            navigate("/signin");
-        } else {
-            fetchMedicationHistory(jwt);
-        }
-    }, [navigate]);
+        const fetchMedicationHistory = async () => {
+            try {
+                const jwt = localStorage.getItem('jwt');
+                if (!jwt) {
+                    toast({
+                        variant: "destructive",
+                        title: "Authentication Required",
+                        description: "Please sign in to view medication history",
+                    });
+                    navigate('/signin');
+                    return;
+                }
 
-    async function fetchMedicationHistory(jwt: string) {
-        try {
-            const response = await axios.get("http://localhost:8000/medicationHistory", {
-                headers: {
-                    Authorization: `Bearer ${jwt}`,
-                },
-            });
+                const response = await axios.get('http://localhost:8000/medicationHistory', {
+                    headers: {
+                        Authorization: `Bearer ${jwt}`
+                    }
+                });
 
-            if (response.data && response.data.length > 0) {
-                setMedications(response.data);
-                setIsMedication(true);
-            } else {
+                if (response.data && response.data.length > 0) {
+                    setMedications(response.data);
+                    setIsMedication(true);
+                } else {
+                    setIsMedication(false);
+                }
+            } catch (error) {
+                console.error('Error fetching medication history:', error);
                 setIsMedication(false);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Failed to fetch medication history",
+                });
             }
-        } catch (error) {
-            console.error("Error fetching medication history:", error);
-            setIsMedication(false);
-        }
-    }
+        };
+
+        fetchMedicationHistory();
+    }, []);
 
     return (
-        <div className="flex">
-            <Sidebar />
-            <div className="ml-20 pt-12 w-full">
-                <DashboardTopBar />
-                <div className="p-4">
-                    {isMedication ? (
-                        <div className="grid grid-cols-3 gap-4">
-                            {medications.map((medication, index) => (
-                                <div key={index} className="p-4 border rounded shadow">
-                                    <h3 className="text-lg font-semibold">{medication.name}</h3>
-                                    <p><strong>Type:</strong> {medication.type}</p>
-                                    <p><strong>Dosage:</strong> {medication.dosage}</p>
-                                    <p><strong>Start Date:</strong> {medication.start_date}</p>
-                                    <p><strong>End Date:</strong> {medication.end_date}</p>
-                                    <p><strong>Frequency:</strong> {medication.frequency}</p>
-                                    <p><strong>Instructions:</strong> {medication.instructions}</p>
-                                    <p><strong>Notifications:</strong> {medication.notification_on ? "On" : "Off"}</p>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-red-500 font-semibold">No medication history available.</p>
-                    )}
-                </div>
+        // <MainLayout>
+            <div className="container mx-auto p-6">
+                <h1 className="text-3xl font-bold mb-6">Medication History</h1>
+                {isMedication ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {medications.map((medication, index) => (
+                            <Card key={index} className="hover:shadow-lg transition-shadow">
+                                <CardHeader>
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <CardTitle className="text-xl">{medication.name}</CardTitle>
+                                            <CardDescription className="flex items-center gap-2 mt-1">
+                                                <Pill className="h-4 w-4" />
+                                                <span className="capitalize">{medication.type}</span>
+                                            </CardDescription>
+                                        </div>
+                                        <Badge variant={medication.notification_on ? "default" : "secondary"}>
+                                            {medication.notification_on ? "Active" : "Inactive"}
+                                        </Badge>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-sm text-muted-foreground">
+                                            {formatFrequency(medication.frequency)}
+                                        </span>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                                            <div className="text-sm">
+                                                <span className="font-medium">Start:</span>{" "}
+                                                <span className="text-muted-foreground">{formatDate(medication.start_date)}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                                            <div className="text-sm">
+                                                <span className="font-medium">End:</span>{" "}
+                                                <span className="text-muted-foreground">{formatDate(medication.end_date)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="text-sm">
+                                        <strong>Dosage:</strong>{" "}
+                                        <span className="text-muted-foreground">{medication.dosage}</span>
+                                    </div>
+                                    {medication.intake_times && medication.intake_times.length > 0 && (
+                                        <div className="text-sm">
+                                            <strong>Intake Times:</strong>
+                                            <ul className="mt-1 text-muted-foreground pl-4">
+                                                {medication.intake_times.map((time, i) => {
+                                                    const [hours, minutes] = time.split(':');
+                                                    const hour = parseInt(hours);
+                                                    const ampm = hour >= 12 ? 'PM' : 'AM';
+                                                    const displayHour = hour % 12 || 12;
+                                                    const formattedTime = `${displayHour}:${minutes} ${ampm}`;
+                                                    return (
+                                                        <li key={i} className="flex items-center gap-2">
+                                                            <Clock className="h-3 w-3" />
+                                                            {formattedTime}
+                                                        </li>
+                                                    );
+                                                })}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    {medication.instructions && (
+                                        <div className="text-sm">
+                                            <div className="flex items-center gap-2">
+                                                <Info className="h-4 w-4 text-muted-foreground" />
+                                                <strong>Instructions:</strong>
+                                            </div>
+                                            <p className="mt-1 text-muted-foreground">{medication.instructions}</p>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    <Card>
+                        <CardContent className="p-6 text-center">
+                            <p className="text-muted-foreground">No medication history available.</p>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
-        </div>
+        // </MainLayout>
     );
 }

@@ -1,10 +1,15 @@
 import { useState } from 'react';
-import { TextField, Button, MenuItem, Select, InputLabel, FormControl, Box, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { toast, Bounce } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { AuthLayout } from '@/components/layout/AuthLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 type Role = 'patient' | 'caregiver' | 'doctor';
 
@@ -14,6 +19,7 @@ export default function Signup() {
   const [password, setPassword] = useState<string>('');
   const [role, setRole] = useState<Role>('patient');
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     try {
@@ -25,36 +31,39 @@ export default function Signup() {
 
       if (response.data.jwt) {
         localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
-        toast.success('Sign Up Successful!', {
-          position: "top-center",
-          autoClose: 5000,
-          theme: "dark",
-          transition: Bounce,
+        toast({
+          variant: "success",
+          title: "Success",
+          description: "Sign Up Successful!",
         });
         navigate('/dashboard');
       } else if (response.data.EmailinUse) {
-        toast.error('Email is already in use!', {
-          position: "top-center",
-          autoClose: 5000,
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Email is already in use!",
         });
       } else if (!response.data.validDetails) {
-        toast.error('Invalid Google Credentials!', {
-          position: "top-center",
-          autoClose: 5000,
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Invalid Google Credentials!",
         });
       }
     } catch (error) {
-      toast.error('Error during Google signup!', {
-        position: "top-center",
-        autoClose: 5000,
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Error during Google signup!",
       });
     }
   };
 
   const handleGoogleFailure = () => {
-    toast.error('Google login failed!', {
-      position: "top-center",
-      autoClose: 5000,
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Google login failed!",
     });
   };
 
@@ -68,14 +77,16 @@ export default function Signup() {
       });
 
       if (response.data.EmailinUse) {
-        toast.error('Email is already in use!', {
-          position: "top-center",
-          autoClose: 5000,
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Email is already in use!",
         });
       } else if (!response.data.isEmailVerified) {
-        toast.info('Verification email sent. Please check your inbox.', {
-          position: "top-center",
-          autoClose: 5000,
+        toast({
+          variant: "default",
+          title: "Info",
+          description: "Verification email sent. Please check your inbox.",
         });
         navigate('/redirect-verify');
         const interval = setInterval(async () => {
@@ -85,9 +96,10 @@ export default function Signup() {
             });
             if (verifiedResponse.data.verified) {
               clearInterval(interval);
-              toast.success('Email Verified! Redirecting to Dashboard...', {
-                position: "top-center",
-                autoClose: 5000,
+              toast({
+                variant: "success",
+                title: "Success",
+                description: "Email Verified! Redirecting to Dashboard...",
               });
               navigate('/dashboard');
             }
@@ -96,129 +108,130 @@ export default function Signup() {
           }
         }, 3000);
       } else if (!response.data.zodPass) {
-        toast.error('Entered Details Do Not Match the Criteria!', {
-          position: "top-center",
-          autoClose: 5000,
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Entered Details Do Not Match the Criteria!",
         });
       } else if (response.data.serverError) {
-        toast.error('Server Error! Please try again later.', {
-          position: "top-center",
-          autoClose: 5000,
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Server Error! Please try again later.",
         });
       } 
     } catch (error) {
-      toast.error('Error during manual signup!', {
-        position: "top-center",
-        autoClose: 5000,
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Error during manual signup!",
       });
     }
   }
 
   return (
-    <div
-      className="flex items-center justify-center min-h-screen min-w-full pr-36 pt-12"
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '80vh',
-        width: '88vw',
+    <AuthLayout
+      title="Create an account"
+      description="Sign up to get started"
+      footerText="Already have an account?"
+      footerLink={{
+        text: "Sign in",
+        href: "/signin"
       }}
     >
-      <Box
-        sx={{
-          width: '100%',
-          maxWidth: 400,
-          bgcolor: 'white',
-          p: 4,
-          borderRadius: 2,
-          boxShadow: 3,
-        }}
-      >
-        <Typography variant="h4" component="h1" gutterBottom align="center">
-          Sign Up
-        </Typography>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            manualSignuphandler();
-          }}
-        >
-          <TextField
-            label="Name"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-
-          <TextField
-            label="Email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <TextField
-            label="Password"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="role-label">Role</InputLabel>
-            <Select
-              labelId="role-label"
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
-            >
-              <MenuItem value="patient">Patient</MenuItem>
-              <MenuItem value="caregiver">Caregiver</MenuItem>
-              <MenuItem value="doctor">Doctor</MenuItem>
-            </Select>
-          </FormControl>
-
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2 }}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Sign Up</CardTitle>
+          <CardDescription>Fill in your details to create an account</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              manualSignuphandler();
+            }}
+            className="space-y-4"
           >
-            Sign Up
-          </Button>
-        </form>
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
 
-        <Typography variant="body1" align="center" sx={{ my: 2 }}>
-          Or sign up with Google
-        </Typography>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleFailure}
-          theme="filled_blue"
-          text="continue_with"
-        />
-        <Button
-          type="button"
-          variant="contained"
-          color="primary"
-          fullWidth
-          sx={{ mt: 2 }}
-          onClick={() => navigate('/signin')}
-        >
-          Sign In
-        </Button>
-      </Box>
-    </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Create a password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select
+                value={role}
+                onValueChange={(value) => setRole(value as Role)}
+              >
+                <SelectTrigger id="role">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="patient">Patient</SelectItem>
+                  <SelectItem value="caregiver">Caregiver</SelectItem>
+                  <SelectItem value="doctor">Doctor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button type="submit" className="w-full">
+              Sign Up
+            </Button>
+          </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or sign up with
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-4 flex justify-center [&>div]:!bg-transparent [&>div]:!backdrop-blur-none [&>div]:!shadow-none">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleFailure}
+                theme="outline"
+                text="continue_with"
+                shape="rectangular"
+                width="250"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </AuthLayout>
   );
 }

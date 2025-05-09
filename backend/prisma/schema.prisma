@@ -25,6 +25,10 @@ model user {
   patientprofile         patientprofile?
   subscriptions          subscription[]
   medications            medication[] 
+  patients              patient_caretaker[]      @relation("CaretakerRelation")
+  caretakers            patient_caretaker[]      @relation("PatientRelation")
+  caretaker_healthRecords health_records[]       @relation("caretaker_healthRecords")
+  caretaker_medication    medication[]           @relation("caretaker_medication")
 }
 
 model doctor {
@@ -37,9 +41,21 @@ model doctor {
   @@index([user_id], map: "user_id")
 }
 
+model patient_caretaker {
+  patient_id   Int @db.UnsignedInt
+  caretaker_id Int @db.UnsignedInt
+
+  patient   user @relation("PatientRelation", fields: [patient_id], references: [id], onDelete: Cascade)
+  caretaker user @relation("CaretakerRelation", fields: [caretaker_id], references: [id], onDelete: Cascade)
+  @@id([patient_id, caretaker_id])
+  @@index([patient_id])
+  @@index([caretaker_id])
+}
+
 model health_records {
   health_records_id Int      @id @default(autoincrement()) @db.UnsignedInt
   user_id           Int      @db.UnsignedInt
+  caretaker_id      Int?     @db.UnsignedInt
   record_date       DateTime @db.Date
   blood_pressure    String?  @db.VarChar(50)
   heart_rate        Int?
@@ -49,22 +65,25 @@ model health_records {
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
   user              user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
+  caretaker         user?    @relation("caretaker_healthRecords",fields: [caretaker_id],references: [id],onDelete: SetNull)
   @@index([user_id], map: "user_id")
 }
 
 model medication {
   medication_id    Int                @id @default(autoincrement()) @db.UnsignedInt
   user_id          Int                @db.UnsignedInt
+  caretaker_id     Int?               @db.UnsignedInt
   name             String             @db.VarChar(255)
   type             medication_type
   dosage           String             @db.VarChar(50)
   start_date       DateTime           @db.Date
   end_date         DateTime           @db.Date
   instructions     String?            @db.Text
+  frequency        Int                @db.UnsignedInt @default(0)
   medication_times medication_times[]
   notification     notification[]
   user             user               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  caretaker        user?              @relation("caretaker_medication", fields: [caretaker_id], references: [id], onDelete: SetNull)
 }
 
 model medication_times {

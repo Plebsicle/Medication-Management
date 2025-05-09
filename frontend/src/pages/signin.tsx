@@ -1,14 +1,21 @@
-import  { useState } from 'react';
-import { TextField, Button, Box, Typography } from '@mui/material';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import {toast,Bounce} from 'react-toastify'
+// import { toast, Bounce } from 'react-toastify';
+import { AuthLayout } from '@/components/layout/AuthLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Signin() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
@@ -18,180 +25,153 @@ export default function Signin() {
       });
   
       if (response.data.userFound === false) {
-        toast.error('Account does not exist. Please sign up.', {
-          position: "top-center",
-          autoClose: 5000,
-          theme: "dark",
-          transition: Bounce,
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Account does not exist. Please sign up.",
         });
         return;
       }
   
       if (response.data.jwt) {
         localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
-        toast.success('Sign In Successful!', {
-          position: "top-center",
-          autoClose: 5000,
-          theme: "dark",
-          transition: Bounce,
+        toast({
+          variant: "success",
+          title: "Success",
+          description: "Sign In Successful!",
         });
         navigate('/dashboard');
       }
     } catch (error) {
       console.error('Error in Google Signin:', error);
-      toast.error('An error occurred during Google Signin.', {
-        position: "top-center",
-        autoClose: 5000,
-        theme: "dark",
-        transition: Bounce,
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An error occurred during Google Signin.",
       });
     }
   };
-  
 
   const handleGoogleFailure = () => {
-    toast.error('Google Login Failed!', {
-      position: "top-center",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-      transition: Bounce,
-      });
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Google Login Failed!",
+    });
   };
 
-  async function manualSigninHandler() {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8000/signin', {email,password,});
-      console.log(response.data);
-      if (response.data.jwt) {
-        localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
-        toast.success('Sign In Successful!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+      const response = await axios.post('http://localhost:8000/signin', {
+        email,
+        password
+      });
+
+      if (response.data.token) {
+        localStorage.setItem('jwt', response.data.token);
+        toast({
+          variant: "success",
+          title: "Success",
+          description: "Signed in successfully",
         });
         navigate('/dashboard');
-      } 
-      else if(response.data.zodpass === false){toast.error('Entered Details do not match the criteria!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
-      });}
-      else if(response.data.userFound === false){toast.error('Signup Before you Sign in!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
-      });}
-      else if(response.data.isPasswordSet === false){toast.error('Your Password has not been set up yet , signin with Google!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
-      });}
-      else if(response.data.isEmailVerified === false){toast.error('Verify Your Email Before You signin!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
-      });}
-      else if(response.data.isPasswordCorrect === false){toast.error('Enter The Correct Password!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
-      });}
-      else if(response.data.fullDetails === false){toast.error('Please Enter Complete Details!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
-      });}
-      else if(response.data.serverError){toast.error('Server Error!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
-      });}
+      }
     } catch (error) {
-      console.log("Error from manual Signin", error);
-      toast.error('Error from manual Signin!', {position: "top-center",autoClose: 5000,theme: "dark",transition: Bounce,
+      console.error('Error signing in:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Invalid email or password",
       });
     }
-  }
+  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen pr-36 pt-16"
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '80vh',
-        width: '88vw',
+    <AuthLayout
+      title="Welcome back"
+      description="Sign in to your account"
+      footerText="Don't have an account?"
+      footerLink={{
+        text: "Sign up",
+        href: "/signup"
       }}
     >
-      <Box 
-        sx={{
-          width: '100%',
-          maxWidth: 400,
-          bgcolor: 'white',
-          p: 4,
-          borderRadius: 2,
-          boxShadow: 3
-        }}
-      >
-        <Typography variant="h4" component="h1" gutterBottom align="center">
-          Sign In
-        </Typography>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Sign In</CardTitle>
+          <CardDescription>Enter your credentials to access your account</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Sign In
+            </Button>
+          </form>
 
-        <form onSubmit={(e) => { e.preventDefault(); manualSigninHandler(); }}>
-          <TextField
-            label="Email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
 
-          <TextField
-            label="Password"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
+            <div className="mt-4 flex justify-center [&>div]:!bg-transparent [&>div]:!backdrop-blur-none [&>div]:!shadow-none">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleFailure}
+                theme="outline"
+                text="signin_with"
+                shape="rectangular"
+                width="250"
+              />
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-2">
           <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2 }}
-          >
-            Sign In
-          </Button>
-          
-        </form>
-
-        <Typography variant="body1" align="center" sx={{ my: 2 }}>
-          Or sign in with Google
-        </Typography>
-
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleFailure}
-          theme="filled_blue"
-          text="signin_with"
-        />
-        <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2 }}
-            onClick={() => navigate('/signup')}
-          >
-            Sign Up
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2 }}
+            variant="link"
+            className="w-full"
             onClick={() => navigate('/manualEmailVerification')}
           >
             Verify Email
           </Button>
           <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2 }}
+            variant="link"
+            className="w-full"
             onClick={() => navigate('/forgetPassword')}
           >
-            Forget Passowrd
+            Forgot Password?
           </Button>
-      </Box>
-    </div>
+        </CardFooter>
+      </Card>
+    </AuthLayout>
   );
 }

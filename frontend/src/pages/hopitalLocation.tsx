@@ -1,8 +1,11 @@
-import DashboardTopBar from "../components/dashboardNavbar";
-import Sidebar from "../components/sidebar";
 import { useState } from "react";
 import axios from "axios";
-import {toast,Bounce} from 'react-toastify'
+import { toast } from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+// import { Badge } from "@/components/ui/badge";
+import { MapPin, ExternalLink, Loader2 } from "lucide-react";
+// import { MainLayout } from "@/components/layout/MainLayout";
 
 type Hospital = {
     id: number;
@@ -28,85 +31,95 @@ export default function HospitalLocation() {
             const response = await axios.post("http://localhost:8000/hospitalLocation", {
                 latitude: coords.latitude,
                 longitude: coords.longitude,
-                radius: 5000, 
+                radius: 5000,
             });
-            if(response.data){
-                toast.success('NearBy Hospitals Found!', {
-                    position: "top-center",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: false,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    transition: Bounce,
-                    });
+
+            if (response.data) {
+                toast.success('Nearby hospitals found!');
+                setHospitals(response.data.hospitals);
             }
-            setHospitals(response.data.hospitals);
         } catch (err: any) {
             console.error("Error fetching hospitals:", err.message);
             setError(err.response?.data?.message || "An error occurred while fetching hospitals.");
-            toast.error('error occurred while fetching hospitals!', {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                transition: Bounce,
-                });
+            toast.error('Error occurred while fetching hospitals');
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="flex">
-            <Sidebar />
-            <div className="ml-20 pt-12 w-full">
-                <DashboardTopBar />
-                <div className="p-4">
-                    <button
-                        onClick={fetchHospitals}
-                        className="mb-4 px-6 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded shadow"
-                    >
-                        Find Hospitals
-                    </button>
-
-                    {isLoading ? (
-                        <p className="text-blue-500 font-semibold">Loading hospitals...</p>
-                    ) : error ? (
-                        <p className="text-red-500 font-semibold">{error}</p>
-                    ) : hospitals.length > 0 ? (
-                        <div className="grid grid-cols-3 gap-4">
-                            {hospitals.map((hospital) => (
-                                <div key={hospital.id} className="p-4 border rounded shadow">
-                                    <h3 className="text-lg font-semibold">{hospital.name || "Unknown Hospital"}</h3>
-                                    <p>
-                                        <strong>Address:</strong> {hospital.address || "Address not available"}
-                                    </p>
-                                    <p>
-                                        <strong>Postcode:</strong> {hospital.postcode || "Postcode not available"}
-                                    </p>
-                                    <a
-                                        href={hospital.googleMapsLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-500 underline"
-                                    >
-                                        View on Google Maps
-                                    </a>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-red-500 font-semibold">No hospitals found nearby.</p>
-                    )}
+        // <MainLayout>
+            <div className="container mx-auto p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold">Nearby Hospitals</h1>
+                    <Button onClick={fetchHospitals} disabled={isLoading}>
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Finding Hospitals...
+                            </>
+                        ) : (
+                            <>
+                                <MapPin className="mr-2 h-4 w-4" />
+                                Find Hospitals
+                            </>
+                        )}
+                    </Button>
                 </div>
+
+                {error ? (
+                    <Card>
+                        <CardContent className="p-6 text-center">
+                            <p className="text-destructive">{error}</p>
+                        </CardContent>
+                    </Card>
+                ) : hospitals.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {hospitals.map((hospital) => (
+                            <Card key={hospital.id} className="hover:shadow-lg transition-shadow">
+                                <CardHeader>
+                                    <CardTitle>{hospital.name || "Unknown Hospital"}</CardTitle>
+                                    <CardDescription className="flex items-center gap-2">
+                                        <MapPin className="h-4 w-4" />
+                                        {hospital.postcode || "Postcode not available"}
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="text-sm">
+                                        <strong>Address:</strong>
+                                        <p className="text-muted-foreground mt-1">
+                                            {hospital.address || "Address not available"}
+                                        </p>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full"
+                                        asChild
+                                    >
+                                        <a
+                                            href={hospital.googleMapsLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-2"
+                                        >
+                                            <ExternalLink className="h-4 w-4" />
+                                            View on Google Maps
+                                        </a>
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    <Card>
+                        <CardContent className="p-6 text-center">
+                            <p className="text-muted-foreground">
+                                {isLoading ? "Finding nearby hospitals..." : "No hospitals found nearby."}
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
-        </div>
+        // </MainLayout>
     );
 }

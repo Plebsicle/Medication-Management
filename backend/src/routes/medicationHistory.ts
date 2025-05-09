@@ -45,7 +45,22 @@ router.get('/',async (req,res)=>{
             })
             if(!medicationData){res.status(400).json({message : "No Medication Data Exists"});return;}
             
-            res.status(200).json(medicationData);
+            // Format the dates in a human-readable format
+            const formattedMedicationData = medicationData.map(medication => ({
+                ...medication,
+                start_date: new Date(medication.start_date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }),
+                end_date: new Date(medication.end_date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                })
+            }));
+            
+            res.status(200).json(formattedMedicationData);
         }   
         catch(e){
             console.log("Error in Fetching Medication History",e);

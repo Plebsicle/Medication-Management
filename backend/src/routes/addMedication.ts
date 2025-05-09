@@ -36,11 +36,12 @@ router.post('/', async (req, res) => {
     }
 
     let email;
-
+    // console.log(token);
     try {
+        console.log(token);
         const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string); 
         email = decoded.email;
-
+        // console.log(email);
         if (!email) {
             res.status(400).json({ error: "Email not found in token" });
             return;
@@ -51,7 +52,7 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const { formData} = req.body;
+        const { formData } = req.body;
         console.log(req.body);
         console.log(formData);
         if (!formData) {
@@ -79,15 +80,16 @@ router.post('/', async (req, res) => {
                 name: formData.name,
                 type: formData.type,
                 dosage: formData.dosage,
-                start_date: new Date(formData.start_date),
-                end_date: new Date(formData.end_date),
-                instructions: formData.instructions,
+                frequency: parseInt(formData.frequency),
+                start_date: new Date(formData.startDate),
+                end_date: new Date(formData.endDate),
+                instructions: formData.instructions || "",
             },
         });
 
-        const medicationTimesData = formData.intake_times.map((time : any) => ({
+        const medicationTimesData = formData.intakeTimes.map((time: string) => ({
             medication_id: medication.medication_id,
-            intake_time: new Date(`1970-01-01T${time}:00`), 
+            intake_time: new Date(`1970-01-01T${time}:00`),
         }));
 
         await prisma.medication_times.createMany({

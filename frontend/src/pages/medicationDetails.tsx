@@ -3,7 +3,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../components/sidebar";
 import DashboardTopBar from "../components/dashboardNavbar";
-import {toast,Bounce} from 'react-toastify'
+import { toast, Bounce } from 'react-toastify'
+import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 type FormDataType = {
     medication_id : number,
@@ -19,32 +25,49 @@ type FormDataType = {
 };
 
 export default function MedicationDetails() {
-    const { medication_id } = useParams<{ medication_id: string }>();
+    const { toast } = useToast();
     const navigate = useNavigate();
+    const { medication_id } = useParams();
     const [medication, setMedication] = useState<FormDataType | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        const jwt = localStorage.getItem("jwt");
-        if (jwt && medication_id) {
-            fetchMedicationDetails(jwt, medication_id);
-        }
-    }, [medication_id]);
+        const fetchMedicationDetails = async () => {
+            try {
+                const jwt = localStorage.getItem('jwt');
+                if (!jwt) {
+                    toast({
+                        variant: "destructive",
+                        title: "Authentication Required",
+                        description: "Please sign in to view medication details",
+                    });
+                    navigate('/signin');
+                    return;
+                }
 
-    async function fetchMedicationDetails(jwt: string,id : string) {
-        try {
-            const response = await axios.get(`http://localhost:8000/medications/${id}`,{
-                headers: { Authorization: `Bearer ${jwt}` },
-            });
-            const data = response.data;
-            if (typeof data.intake_times === "string") {
-                data.intake_times = [data.intake_times]; 
+                const response = await axios.get(`http://localhost:8000/medications/${medication_id}`, {
+                    headers: {
+                        Authorization: `Bearer ${jwt}`
+                    }
+                });
+
+                const data = response.data;
+                if (typeof data.intake_times === "string") {
+                    data.intake_times = [data.intake_times];
+                }
+                setMedication(data);
+            } catch (error) {
+                console.error('Error fetching medication details:', error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Failed to fetch medication details",
+                });
             }
-            setMedication(data);
-        } catch (error) {
-            console.error("Error fetching medication details:", error);
-        }
-    }
+        };
+
+        fetchMedicationDetails();
+    }, [medication_id]);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -68,58 +91,45 @@ export default function MedicationDetails() {
         setMedication({ ...medication, intake_times: updatedTimes });
     };
 
-    const handleSave = async () => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         if (!medication) return;
+
         setIsSaving(true);
-
-        const jwt = localStorage.getItem("jwt");
-        if (!jwt) {
-            toast.error('Sign In Please!', {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                transition: Bounce,
-            });
-            navigate("/signin");
-            return;
-        }
-
         try {
+            const jwt = localStorage.getItem('jwt');
+            if (!jwt) {
+                toast({
+                    variant: "destructive",
+                    title: "Authentication Required",
+                    description: "Please sign in to update medication details",
+                });
+                navigate('/signin');
+                return;
+            }
+
             const payload = { ...medication, intake_times: medication.intake_times[0] };
-            await axios.put(
+            const response = await axios.put(
                 `http://localhost:8000/editMedications/${medication.medication_id}`,
                 payload,
                 { headers: { Authorization: `Bearer ${jwt}` } }
             );
-            toast.success('Medication Details Edited SuccessFully!', {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                transition: Bounce,
-            });
-        } catch (error) {
-            console.error("Error updating medication details:", error);
-            toast.error('Failed to update medication details!', {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                transition: Bounce,
+
+            if (response.data.message === "Medication updated successfully") {
+                toast({
+                    variant: "success",
+                    title: "Success",
+                    description: "Medication details updated successfully",
                 });
+                navigate('/medicationHistory');
+            }
+        } catch (error) {
+            console.error('Error updating medication details:', error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to update medication details",
+            });
         } finally {
             setIsSaving(false);
         }
@@ -134,7 +144,7 @@ export default function MedicationDetails() {
                 <DashboardTopBar />
                 <div className="p-4">
                     <h1 className="text-2xl font-semibold mb-4">Edit Medication Details</h1>
-                    <form className="grid gap-4">
+                    <form className="grid gap-4" onSubmit={handleSubmit}>
                         <label>
                             <strong>Name:</strong>
                             <input
@@ -239,8 +249,7 @@ export default function MedicationDetails() {
                             />
                         </div>
                         <button
-                            type="button"
-                            onClick={handleSave}
+                            type="submit"
                             className={`px-6 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded shadow ${
                                 isSaving && "opacity-50 cursor-not-allowed"
                             }`}
