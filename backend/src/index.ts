@@ -1,8 +1,16 @@
+// Load environment variables first
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express'
 import cors from 'cors'
 import http from 'http';
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
+
+// Import database after environment variables are loaded
+import prisma from './database';
+
 import Signup from './routes/signup';
 import Signin from './routes/signin'
 import emailVerification from './routes/emailVerification'
@@ -22,8 +30,10 @@ import medicationDetails from './routes/medicationDetails'
 import medicationChanges from './routes/medicationChanges'
 import forgetPassword from './routes/forgetPassword'
 import chatbot from './routes/chatbot';
+import medicalDocuments from './routes/medicalDocuments';
 import sendNotifications from './_utilities/schedule';
 import { processMedicalQuery } from './_utilities/chatbot';
+import { incrementAiPromptCount } from './_utilities/aiLimitMiddleware';
 
 const app = express();
 const server = http.createServer(app);
@@ -33,6 +43,7 @@ const io = new Server(server, {
     methods: ["GET", "POST"]
   }
 });
+const MAX_AI_PROMPTS = 10;
 
 app.use(cors());
 app.use(express.json());
@@ -69,8 +80,30 @@ io.on('connection', (socket) => {
         return;
       }
 
-      console.log(`Processing message from user ${socket.data.userId}: ${message}`);
-      const response = await processMedicalQuery(socket.data.userId, message);
+      const userId = socket.data.userId;
+      
+      // Use raw query to get the current AI prompts count
+      const rawUser = await prisma.$queryRaw`SELECT ai_prompts_count FROM "user" WHERE id = ${userId}` as { ai_prompts_count: number }[];
+
+      if (!rawUser || rawUser.length === 0) {
+        socket.emit('error', 'User not found');
+        return;
+      }
+      
+      if (rawUser[0].ai_prompts_count >= MAX_AI_PROMPTS) {
+        socket.emit('limit reached', {
+          error: 'AI prompt limit reached',
+          message: 'You have reached your limit of 10 AI prompts. Please contact support for more information.'
+        });
+        return;
+      }
+
+      console.log(`Processing message from user ${userId}: ${message}`);
+      const response = await processMedicalQuery(userId, message);
+      
+      // Increment the user's AI prompt count
+      await incrementAiPromptCount(userId);
+      
       socket.emit('chat response', response);
     } catch (error) {
       console.error('Error processing message:', error);
@@ -106,6 +139,7 @@ app.use('/medications',medicationDetails);
 app.use('/editMedications',medicationChanges);
 app.use('/forgetPassword',forgetPassword);
 app.use('/chatbot', chatbot);
+app.use('/medicalDocuments', medicalDocuments);
 sendNotifications();
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

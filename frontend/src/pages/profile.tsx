@@ -1,61 +1,62 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Camera, User, Mail, Shield, Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-// import { MainLayout } from "@/components/layout/MainLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
+
+const BASE_URL = "http://localhost:8000";
 
 export default function Profile() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [profileData, setProfileData] = useState<{
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [updatedValue, setUpdatedValue] = useState<string>("");
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+
+  interface ProfileData {
     name: string;
     email: string;
     role: string;
     path: string | null;
     email_notifications: boolean;
     sms_notifications: boolean;
-  } | null>(null);
+  }
 
-  const [editingField, setEditingField] = useState<string | null>(null);
-  const [updatedValue, setUpdatedValue] = useState<string>("");
-
-  const BASE_URL = "http://localhost:8000";
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("jwt");
+    if (!token) throw new Error("JWT token is missing");
+    return { Authorization: `Bearer ${token}` };
+  };
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const token = localStorage.getItem("jwt");
-        if (!token) {
-          console.error("JWT token is missing");
-          toast.error("Please sign in to view your profile");
-          return;
-        }
-
-        const response = await axios.get(`${BASE_URL}/serveProfile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const { data } = await axios.get(`${BASE_URL}/serveProfile`, {
+          headers: getAuthHeaders(),
         });
 
-        const data = response.data;
         setProfileData({
           name: data.name,
           email: data.email,
           role: data.role,
           path: data.path,
-          email_notifications: data.email_notifications || true,
-          sms_notifications: data.sms_notifications || true,
+          email_notifications: data.email_notifications ?? true,
+          sms_notifications: data.sms_notifications ?? true,
         });
 
         if (data.path) {
-          setImagePreview(`${BASE_URL}${data.path}`);
+          const imageUrlRes = await axios.get(`${BASE_URL}/serveProfile/getPhotoUrl`, {
+            headers: getAuthHeaders(),
+          });
+          if (imageUrlRes.data.url) setImagePreview(imageUrlRes.data.url);
         }
-      } catch (error) {
-        console.error("Error fetching profile data:", error);
+      } catch (err) {
+        console.error(err);
         toast.error("Failed to fetch profile data");
       }
     };
@@ -64,132 +65,115 @@ export default function Profile() {
   }, []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(file);
+    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+    if (!validTypes.includes(file.type)) return toast.error("Only JPEG, JPG, PNG allowed");
+    if (file.size > 5 * 1024 * 1024) return toast.error("File too large (max 5MB)");
 
-      try {
-        const token = localStorage.getItem("jwt");
-        if (!token) {
-          console.error("JWT token is missing");
-          toast.error("Please sign in to update your profile");
-          return;
-        }
-        const formData = new FormData();
-        formData.append("profilePhoto", file);
-        const response = await axios.post(`${BASE_URL}/profilePhoto`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
+    // Show local preview immediately
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
 
-        const imagePath = `${BASE_URL}${response.data.path}`;
-        setImagePreview(imagePath);
-        setProfileData((prev) =>
-          prev ? { ...prev, path: response.data.path } : null
-        );
-        toast.success("Profile photo updated successfully");
-      } catch (error) {
-        console.error("Error uploading profile photo:", error);
-        toast.error("Failed to upload profile photo");
+    try {
+      setIsUploading(true);
+
+      // Step 1: Request a presigned URL from the backend
+      const { data } = await axios.post(
+        `${BASE_URL}/serveProfile/profilePhoto`,
+        { fileType: file.type },
+        { headers: getAuthHeaders() }
+      );
+
+      if (!data.uploadUrl) {
+        toast.error("Failed to get upload URL");
+        return;
       }
-    }
-  };
 
-  const handleUploadClick = () => {
-    const fileInput = document.getElementById("file-input") as HTMLInputElement;
-    fileInput.click();
+      // Step 2: Upload file directly to S3 using the presigned URL
+      const uploadResponse = await fetch(data.uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        }
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload to S3");
+      }
+
+      // Step 3: Get a signed URL for viewing the uploaded image
+      const { data: urlData } = await axios.get(
+        `${BASE_URL}/serveProfile/getPhotoUrl`,
+        { headers: getAuthHeaders() }
+      );
+
+      if (urlData.url) {
+        setImagePreview(urlData.url);
+      }
+
+      setProfileData(prev => prev ? { ...prev, path: data.path } : null);
+      toast.success("Profile photo updated");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to upload profile photo");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleEditClick = (field: string) => {
     setEditingField(field);
-    setUpdatedValue(
-      profileData && profileData[field as keyof typeof profileData]
-        ? (profileData[field as keyof typeof profileData] as string)
-        : ""
-    );
-  };
-
-  const handleNotificationToggle = async (type: "email_notifications" | "sms_notifications") => {
-    try {
-      if (!profileData) return;
-      
-      const token = localStorage.getItem("jwt");
-      if (!token) {
-        console.error("JWT token is missing");
-        toast.error("Please sign in to update your preferences");
-        return;
-      }
-
-      const newValue = !profileData[type];
-      
-      // Optimistically update UI
-      setProfileData((prev) => prev ? { ...prev, [type]: newValue } : null);
-
-      const response = await axios.post(
-        `${BASE_URL}/serveProfile/updateNotificationPreferences`,
-        { [type]: newValue },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.data.success) {
-        setProfileData((prev) => prev ? { ...prev, [type]: !newValue } : null);
-        toast.error(`Failed to update ${type.replace('_', ' ')}`);
-      } else {
-        toast.success("Notification preferences updated");
-      }
-    } catch (error) {
-      console.error("Error updating notification preferences:", error);
-      if (profileData) {
-        setProfileData((prev) => prev ? { ...prev, [type]: !profileData[type] } : null);
-      }
-      toast.error("Failed to update notification preferences");
-    }
+    setUpdatedValue(profileData?.[field as keyof ProfileData] as string || "");
   };
 
   const handleSaveClick = async (field: string) => {
     try {
-      const token = localStorage.getItem("jwt");
-      if (!token) {
-        console.error("JWT token is missing");
-        toast.error("Please sign in to update your profile");
-        return;
-      }
+      await axios.post(`${BASE_URL}/serveProfile`, {
+        [field]: updatedValue,
+      }, {
+        headers: getAuthHeaders(),
+      });
 
-      const response = await axios.post(
-        `${BASE_URL}/serveProfile`,
-        { [field]: updatedValue },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data) {
-        toast.success("Profile updated successfully");
-        setProfileData((prev) =>
-          prev ? { ...prev, [field]: updatedValue } : null
-        );
-        setEditingField(null);
-      }
-    } catch (error) {
-      console.error("Error updating profile data:", error);
-      toast.error("Failed to update profile");
+      setProfileData(prev => prev ? { ...prev, [field]: updatedValue } : null);
+      setEditingField(null);
+      toast.success("Profile updated");
+    } catch (err) {
+      console.error(err);
+      toast.error("Update failed");
     }
   };
 
+  const handleNotificationToggle = async (type: "email_notifications" | "sms_notifications") => {
+    if (!profileData) return;
+    const newValue = !profileData[type];
+
+    setProfileData(prev => prev ? { ...prev, [type]: newValue } : null);
+
+    try {
+      const { data } = await axios.post(`${BASE_URL}/serveProfile/updateNotificationPreferences`, {
+        [type]: newValue,
+      }, {
+        headers: getAuthHeaders(),
+      });
+
+      if (!data.success) throw new Error();
+      toast.success("Notification preferences updated");
+    } catch (err) {
+      setProfileData(prev => prev ? { ...prev, [type]: !newValue } : null);
+      toast.error(`Failed to update ${type.replace("_", " ")}`);
+    }
+  };
+
+  const handleUploadClick = () => {
+    document.getElementById("file-input")?.click();
+  };
   return (
-    
-      <div className="container mx-auto p-6">
+    <AppLayout>
+      <div className="container mx-auto">
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
             <CardTitle>Profile Settings</CardTitle>
@@ -213,17 +197,23 @@ export default function Profile() {
                   </div>
                 )}
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Camera className="h-8 w-8 text-white" />
+                  {isUploading ? (
+                    <div className="animate-spin h-6 w-6 border-2 border-white rounded-full border-t-transparent"></div>
+                  ) : (
+                    <Camera className="h-8 w-8 text-white" />
+                  )}
                 </div>
                 <input
                   id="file-input"
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/jpg,image/png"
                   onChange={handleFileChange}
                   className="hidden"
                 />
               </div>
-              <p className="text-sm text-muted-foreground">Click to change profile photo</p>
+              <p className="text-sm text-muted-foreground">
+                {isUploading ? "Uploading..." : "Click to change profile photo"}
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -313,6 +303,9 @@ export default function Profile() {
           </CardContent>
         </Card>
       </div>
-    
+    </AppLayout>
   );
 }
+
+
+  

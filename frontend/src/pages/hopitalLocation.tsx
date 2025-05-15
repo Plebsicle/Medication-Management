@@ -1,10 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 // import { Badge } from "@/components/ui/badge";
 import { MapPin, ExternalLink, Loader2 } from "lucide-react";
+import { AppLayout } from "@/components/layout/AppLayout";
 // import { MainLayout } from "@/components/layout/MainLayout";
 
 type Hospital = {
@@ -48,8 +49,8 @@ export default function HospitalLocation() {
     };
 
     return (
-        // <MainLayout>
-            <div className="container mx-auto p-6">
+        <AppLayout>
+            <div className="container mx-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold">Nearby Hospitals</h1>
                     <Button onClick={fetchHospitals} disabled={isLoading}>
@@ -120,6 +121,6 @@ export default function HospitalLocation() {
                     </Card>
                 )}
             </div>
-        // </MainLayout>
+        </AppLayout>
     );
 }

@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
-import { AuthLayout } from '@/components/layout/AuthLayout';
+import { SimpleAuthLayout } from '@/components/layout/SimpleAuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { PhoneVerification } from '@/components/PhoneVerification';
 
 type Role = 'patient' | 'caregiver' | 'doctor';
@@ -30,7 +30,6 @@ export default function Signup() {
   const [showPhoneVerification, setShowPhoneVerification] = useState(false);
   const [googleData, setGoogleData] = useState<GoogleData | null>(null);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     try {
@@ -42,44 +41,24 @@ export default function Signup() {
 
       if (response.data.jwt) {
         localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
-        toast({
-          variant: "success",
-          title: "Success",
-          description: "Sign Up Successful!",
-        });
+        toast.success("Sign Up Successful!");
         navigate('/dashboard');
       } else if (response.data.requirePhoneNumber) {
         // Show phone verification popup
         setGoogleData(response.data.googleData);
         setShowPhoneVerification(true);
       } else if (response.data.EmailinUse) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Email is already in use!",
-        });
+        toast.error("Email is already in use!");
       } else if (!response.data.validDetails) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Invalid Google Credentials!",
-        });
+        toast.error("Invalid Google Credentials!");
       }
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Error during Google signup!",
-      });
+      toast.error("Error during Google signup!");
     }
   };
 
   const handleGoogleFailure = () => {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Google login failed!",
-    });
+    toast.error("Google login failed!");
   };
 
   async function manualSignuphandler() {
@@ -93,17 +72,9 @@ export default function Signup() {
       });
 
       if (response.data.EmailinUse) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Email is already in use!",
-        });
+        toast.error("Email is already in use!");
       } else if (!response.data.isEmailVerified) {
-        toast({
-          variant: "default",
-          title: "Info",
-          description: "Verification email sent. Please check your inbox.",
-        });
+        toast.info("Verification email sent. Please check your inbox.");
         navigate('/redirect-verify');
         const interval = setInterval(async () => {
           try {
@@ -112,11 +83,7 @@ export default function Signup() {
             });
             if (verifiedResponse.data.verified) {
               clearInterval(interval);
-              toast({
-                variant: "success",
-                title: "Success",
-                description: "Email Verified! Redirecting to Dashboard...",
-              });
+              toast.success("Email Verified! Redirecting to Dashboard...");
               navigate('/dashboard');
             }
           } catch (error) {
@@ -124,29 +91,17 @@ export default function Signup() {
           }
         }, 3000);
       } else if (!response.data.zodPass) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Entered Details Do Not Match the Criteria!",
-        });
+        toast.error("Entered Details Do Not Match the Criteria!");
       } else if (response.data.serverError) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Server Error! Please try again later.",
-        });
+        toast.error("Server Error! Please try again later.");
       } 
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Error during manual signup!",
-      });
+      toast.error("Error during manual signup!");
     }
   }
 
   return (
-    <AuthLayout
+    <SimpleAuthLayout
       title="Create an account"
       description="Sign up to get started"
       footerText="Already have an account?"
@@ -273,6 +228,6 @@ export default function Signup() {
           </div>
         </CardContent>
       </Card>
-    </AuthLayout>
+    </SimpleAuthLayout>
   );
 }

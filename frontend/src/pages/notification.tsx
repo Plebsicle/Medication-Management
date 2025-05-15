@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Bell } from "lucide-react";
 
 const NotificationSystem = () => {
   const [notifications, setNotifications] = useState<{ title: string; body: string }[]>([]);
@@ -44,16 +47,30 @@ const NotificationSystem = () => {
   }, []);
 
   return (
-    <div>
-      <h1>Notifications</h1>
-      <ul>
-        {notifications.map((notification, index) => (
-          <li key={index}>
-            <strong>{notification.title}:</strong> {notification.body}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <AppLayout>
+      <div className="container mx-auto p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" /> Notifications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {notifications.length > 0 ? (
+              <ul className="space-y-2">
+                {notifications.map((notification, index) => (
+                  <li key={index} className="p-3 border rounded-md hover:bg-muted/50">
+                    <strong>{notification.title}:</strong> {notification.body}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">No notifications yet</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </AppLayout>
   );
 };
 

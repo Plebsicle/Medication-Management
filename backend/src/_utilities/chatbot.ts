@@ -1,7 +1,5 @@
 import OpenAI from 'openai';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../database';
 
 // Define fallback responses for when OpenAI is not available
 const fallbackResponses = [

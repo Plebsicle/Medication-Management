@@ -1,11 +1,10 @@
 import express from 'express'
 import { sendVerificationEmail } from '../_utilities/mailer';
 import tokenGenerator from '../_utilities/tokenGenerator';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../database';
 import { verifyEmailAlone } from '../middlewares/zodverification';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 router.post('/',async (req,res)=>{
     try{

@@ -1,7 +1,6 @@
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './App.css';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
-import { MainLayout } from '@/components/layout/MainLayout';
 import Signup from './pages/signup';
 import Signin from './pages/signin';
 import Dashboard from './pages/dashboard';
@@ -20,7 +19,7 @@ import MedicationDetails from './pages/medicationDetails';
 import ResetPassword from './pages/resetPassword';
 import EmailSent from './pages/emailSent';
 import Chatbot from './pages/chatbot';
-import { Toaster } from "@/components/ui/toaster"
+import MedicalDocuments from './pages/health-records';
 
 const GoogleclientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -46,7 +45,6 @@ function App() {
           <Route
             path="/*"
             element={
-              <MainLayout>
                 <Routes>
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="addMedication" element={<AddMedication />} />
@@ -58,14 +56,13 @@ function App() {
                   <Route path="notifications" element={<NotificationSystem />} />
                   <Route path="medications/:medication_id" element={<MedicationDetails />} />
                   <Route path="chatbot" element={<Chatbot />} />
+                  <Route path="medical-documents" element={<MedicalDocuments />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
-              </MainLayout>
             }
           />
         </Routes>
       </BrowserRouter>
-      <Toaster />
     </GoogleOAuthProvider>
   );
 }

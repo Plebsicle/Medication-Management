@@ -1,12 +1,12 @@
 import express from 'express'
-import { PrismaClient } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 import { sendResetPassword } from '../_utilities/mailer';
 import { hashPassword } from '../_utilities/hash';
 import { verifyEmailAlone,verifySigninManualDetails } from '../middlewares/zodverification';
+import prisma from '../database';
 
 const router = express.Router();
-const prisma = new PrismaClient();
+const jwtSecret = process.env.JWT_SECRET as string;
 
 router.post('/',async ( req,res)=>{
     try{

@@ -1,8 +1,7 @@
 import express from 'express'
-import { Prisma, PrismaClient } from '@prisma/client'
+import prisma from '../database/client'
 import jwt from 'jsonwebtoken'
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 router.get('/',async (req,res)=>{
@@ -120,7 +119,5 @@ router.post('/', async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
-
-
 
 export default router

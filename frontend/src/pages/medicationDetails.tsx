@@ -1,15 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Sidebar from "../components/sidebar";
-import DashboardTopBar from "../components/dashboardNavbar";
-import { toast, Bounce } from 'react-toastify'
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { AppLayout } from "@/components/layout/AppLayout";
 
 type FormDataType = {
     medication_id : number,
@@ -25,7 +23,6 @@ type FormDataType = {
 };
 
 export default function MedicationDetails() {
-    const { toast } = useToast();
     const navigate = useNavigate();
     const { medication_id } = useParams();
     const [medication, setMedication] = useState<FormDataType | null>(null);
@@ -36,10 +33,8 @@ export default function MedicationDetails() {
             try {
                 const jwt = localStorage.getItem('jwt');
                 if (!jwt) {
-                    toast({
-                        variant: "destructive",
-                        title: "Authentication Required",
-                        description: "Please sign in to view medication details",
+                    toast.error("Authentication Required", {
+                        description: "Please sign in to view medication details"
                     });
                     navigate('/signin');
                     return;
@@ -58,10 +53,8 @@ export default function MedicationDetails() {
                 setMedication(data);
             } catch (error) {
                 console.error('Error fetching medication details:', error);
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Failed to fetch medication details",
+                toast.error("Error", {
+                    description: "Failed to fetch medication details"
                 });
             }
         };
@@ -99,10 +92,8 @@ export default function MedicationDetails() {
         try {
             const jwt = localStorage.getItem('jwt');
             if (!jwt) {
-                toast({
-                    variant: "destructive",
-                    title: "Authentication Required",
-                    description: "Please sign in to update medication details",
+                toast.error("Authentication Required", {
+                    description: "Please sign in to update medication details"
                 });
                 navigate('/signin');
                 return;
@@ -116,150 +107,141 @@ export default function MedicationDetails() {
             );
 
             if (response.data.message === "Medication updated successfully") {
-                toast({
-                    variant: "success",
-                    title: "Success",
-                    description: "Medication details updated successfully",
+                toast.success("Success", {
+                    description: "Medication details updated successfully"
                 });
                 navigate('/medicationHistory');
             }
         } catch (error) {
             console.error('Error updating medication details:', error);
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Failed to update medication details",
+            toast.error("Error", {
+                description: "Failed to update medication details"
             });
         } finally {
             setIsSaving(false);
         }
     };
 
-    if (!medication) return <p>Loading...</p>;
+    if (!medication) return (
+        <AppLayout>
+            <div className="flex items-center justify-center h-screen">
+                <p>Loading...</p>
+            </div>
+        </AppLayout>
+    );
 
     return (
-        <div className="flex">
-            <Sidebar />
-            <div className="ml-20 pt-12 w-full">
-                <DashboardTopBar />
-                <div className="p-4">
-                    <h1 className="text-2xl font-semibold mb-4">Edit Medication Details</h1>
-                    <form className="grid gap-4" onSubmit={handleSubmit}>
-                        <label>
-                            <strong>Name:</strong>
-                            <input
-                                type="text"
-                                name="name"
-                                value={medication.name}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            />
-                        </label>
-                        <label>
-                            <strong>Type:</strong>
-                            <select
-                                name="type"
-                                value={medication.type}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            >
-                                <option value="pills">Pills</option>
-                                <option value="syrup">Syrup</option>
-                                <option value="injection">Injection</option>
-                            </select>
-                        </label>
-                        <label>
-                            <strong>Dosage:</strong>
-                            <input
-                                type="text"
-                                name="dosage"
-                                value={medication.dosage}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            />
-                        </label>
-                        <label>
-                            <strong>Start Date:</strong>
-                            <input
-                                type="date"
-                                name="start_date"
-                                value={medication.start_date}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            />
-                        </label>
-                        <label>
-                            <strong>End Date:</strong>
-                            <input
-                                type="date"
-                                name="end_date"
-                                value={medication.end_date}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            />
-                        </label>
-                        <label>
-                            <strong>Frequency:</strong>
-                            <input
-                                type="number"
-                                name="frequency"
-                                value={medication.frequency}
-                                onChange={handleFrequencyChange}
-                                min={1}
-                                className="w-full p-2 border rounded"
-                            />
-                        </label>
-                        <label>
-                                <strong>Intake Times:</strong>
-                                {Array.isArray(medication.intake_times) ? (
-                                    medication.intake_times.map((time, index) => (
-                                        <input
-                                            key={index}
-                                            type="time"
-                                            value={time}
-                                            onChange={(e) => handleTimeChange(index, e.target.value)}
-                                            className="w-full p-2 border rounded mb-2"
-                                        />
-                                    ))
-                                ) : (
-                                    <p>No intake times specified</p>
-                                )}
-                            </label>
-                        <label>
-                            <strong>Instructions:</strong>
-                            <textarea
-                                name="instructions"
-                                value={medication.instructions}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded"
-                            />
-                        </label>
-                        <div>
-                            <strong>Notifications:</strong>
-                            <input
-                                type="checkbox"
-                                name="notification_on"
-                                checked={medication.notification_on}
-                                onChange={(e) =>
-                                    setMedication((prev) =>
-                                        prev && { ...prev, notification_on: e.target.checked }
-                                    )
-                                }
-                                className="ml-2"
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            className={`px-6 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded shadow ${
-                                isSaving && "opacity-50 cursor-not-allowed"
-                            }`}
-                            disabled={isSaving}
-                        >
-                            {isSaving ? "Saving..." : "Save Changes"}
-                        </button>
-                    </form>
-                </div>
+        <AppLayout>
+            <div className="container mx-auto p-4">
+                <Card className="max-w-3xl mx-auto">
+                    <CardHeader>
+                        <CardTitle>Edit Medication Details</CardTitle>
+                        <CardDescription>Update the details for {medication.name}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form className="grid gap-4" onSubmit={handleSubmit}>
+                            <div className="space-y-2">
+                                <Label htmlFor="name">Name</Label>
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    value={medication.name}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="type">Type</Label>
+                                <select
+                                    id="type"
+                                    name="type"
+                                    value={medication.type}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border rounded"
+                                >
+                                    <option value="pills">Pills</option>
+                                    <option value="syrup">Syrup</option>
+                                    <option value="injection">Injection</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="dosage">Dosage</Label>
+                                <Input
+                                    id="dosage"
+                                    name="dosage"
+                                    value={medication.dosage}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="start_date">Start Date</Label>
+                                <Input
+                                    id="start_date"
+                                    name="start_date"
+                                    type="date"
+                                    value={medication.start_date}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="end_date">End Date</Label>
+                                <Input
+                                    id="end_date"
+                                    name="end_date"
+                                    type="date"
+                                    value={medication.end_date}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="frequency">Frequency (times per day)</Label>
+                                <Input
+                                    id="frequency"
+                                    name="frequency"
+                                    type="number"
+                                    min="1"
+                                    value={medication.frequency}
+                                    onChange={handleFrequencyChange}
+                                />
+                            </div>
+                            {medication.intake_times.map((time, index) => (
+                                <div key={index} className="space-y-2">
+                                    <Label htmlFor={`time-${index}`}>Intake Time {index + 1}</Label>
+                                    <Input
+                                        id={`time-${index}`}
+                                        type="time"
+                                        value={time}
+                                        onChange={(e) => handleTimeChange(index, e.target.value)}
+                                    />
+                                </div>
+                            ))}
+                            <div className="space-y-2">
+                                <Label htmlFor="instructions">Instructions</Label>
+                                <Textarea
+                                    id="instructions"
+                                    name="instructions"
+                                    value={medication.instructions}
+                                    onChange={handleInputChange}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="notification">Notifications</Label>
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        id="notification"
+                                        type="checkbox"
+                                        checked={medication.notification_on}
+                                        onChange={(e) => setMedication(prev => prev && { ...prev, notification_on: e.target.checked })}
+                                    />
+                                    <span className="text-sm">Enable notifications</span>
+                                </div>
+                            </div>
+                            <Button type="submit" disabled={isSaving}>
+                                {isSaving ? "Saving..." : "Save Changes"}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
             </div>
-        </div>
+        </AppLayout>
     );
 }

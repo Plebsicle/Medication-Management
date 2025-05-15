@@ -1,7 +1,7 @@
 import express from 'express'
-import { PrismaClient } from '@prisma/client';
+import prisma from '../database';
+
 const router = express.Router();
-const prisma = new PrismaClient();
 
 export default router.post('/',async (req,res)=>{
     const {email} = req.body;

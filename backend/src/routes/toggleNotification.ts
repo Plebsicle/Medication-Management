@@ -1,8 +1,8 @@
-import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Router, Request, Response } from 'express';
+import prisma from '../database';
 import jwt from 'jsonwebtoken'; 
-const router = express.Router();
-const prisma = new PrismaClient();
+
+const router = Router();
 
 router.put('/', async (req, res) => {
     const authHeader = req.headers.authorization;

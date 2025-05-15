@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
 import webpush from 'web-push';
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
+import prisma from '../database';
 
-const prisma = new PrismaClient();
 const router = Router();
 
 // Web Push VAPID keys (store these in environment variables)

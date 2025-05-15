@@ -6,11 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-// import { MainLayout } from '@/components/layout/MainLayout';
+import { toast } from 'sonner';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function HealthRecordsForm() {
-    const { toast } = useToast();
     const [formData, setFormData] = useState({
         record_date: '',
         blood_pressure: '',
@@ -35,10 +34,8 @@ export default function HealthRecordsForm() {
         try {
             const jwt = localStorage.getItem('jwt');
             if (!jwt) {
-                toast({
-                    variant: "destructive",
-                    title: "Authentication Required",
-                    description: "Please sign in to continue",
+                toast.error("Authentication Required", {
+                    description: "Please sign in to continue"
                 });
                 navigate('/signin');
                 return;
@@ -50,25 +47,21 @@ export default function HealthRecordsForm() {
                 }
             });
             if (response.data.message === "Health record added successfully.") {
-                toast({
-                    variant: "success",
-                    title: "Success",
-                    description: "Health records added successfully!",
+                toast.success("Success", {
+                    description: "Health records added successfully!"
                 });
                 navigate('/healthRecords');
             }
         } catch (error) {
             console.error('Error submitting health records:', error);
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Failed to submit health records",
+            toast.error("Error", {
+                description: "Failed to submit health records"
             });
         }
     };
 
     return (
-        // <MainLayout>
+        <AppLayout>
             <div className="container mx-auto p-6">
                 <Card className="max-w-2xl mx-auto">
                     <CardHeader>
@@ -168,6 +161,6 @@ export default function HealthRecordsForm() {
                     </CardContent>
                 </Card>
             </div>
-        // </MainLayout>
+        </AppLayout>
     );
 }

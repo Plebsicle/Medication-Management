@@ -3,19 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 // import { toast, Bounce } from 'react-toastify';
-import { AuthLayout } from '@/components/layout/AuthLayout';
+import { SimpleAuthLayout } from '@/components/layout/SimpleAuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export default function Signin() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
@@ -25,39 +24,23 @@ export default function Signin() {
       });
   
       if (response.data.userFound === false) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Account does not exist. Please sign up.",
-        });
+        toast.error("Account does not exist. Please sign up.");
         return;
       }
   
       if (response.data.jwt) {
         localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
-        toast({
-          variant: "success",
-          title: "Success",
-          description: "Sign In Successful!",
-        });
+        toast.success("Sign In Successful!");
         navigate('/dashboard');
       }
     } catch (error) {
       console.error('Error in Google Signin:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "An error occurred during Google Signin.",
-      });
+      toast.error("An error occurred during Google Signin.");
     }
   };
 
   const handleGoogleFailure = () => {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Google Login Failed!",
-    });
+    toast.error("Google Login Failed!");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -70,25 +53,17 @@ export default function Signin() {
 
       if (response.data.token) {
         localStorage.setItem('jwt', response.data.token);
-        toast({
-          variant: "success",
-          title: "Success",
-          description: "Signed in successfully",
-        });
+        toast.success("Signed in successfully");
         navigate('/dashboard');
       }
     } catch (error) {
       console.error('Error signing in:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Invalid email or password",
-      });
+      toast.error("Invalid email or password");
     }
   };
 
   return (
-    <AuthLayout
+    <SimpleAuthLayout
       title="Welcome back"
       description="Sign in to your account"
       footerText="Don't have an account?"
@@ -172,6 +147,6 @@ export default function Signin() {
           </Button>
         </CardFooter>
       </Card>
-    </AuthLayout>
+    </SimpleAuthLayout>
   );
 }

@@ -1,23 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { sendSMS } from './twilio';
 import { sendEmail } from './mailer';
 import schedule from 'node-schedule';
+import prisma from '../database';
 
-const prisma = new PrismaClient();
-
-// Helper to validate and fix FCM endpoints
-function validateAndFixEndpoint(endpoint: string): string {
-  console.log('Raw endpoint:', endpoint);
-  if (endpoint.includes('fcm.googleapis.com/fcm/send/')) {
-    return endpoint.replace('fcm.googleapis.com/fcm/send/', 'fcm.googleapis.com/wp/');
-  }
-  if (endpoint.includes('fcm.googleapis.com/') && !endpoint.includes('/wp/')) {
-    const parts = endpoint.split('fcm.googleapis.com/');
-    const token = parts[1].split('/').pop();
-    if (token) return `https://fcm.googleapis.com/wp/${token}`;
-  }
-  return endpoint;
-}
 
 // Main notification scheduler
 async function sendNotifications() {

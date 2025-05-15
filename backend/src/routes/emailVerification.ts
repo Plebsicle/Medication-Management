@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import express from "express";
 import jwt from "jsonwebtoken";
+import prisma from '../database';
 
-const prisma = new PrismaClient();
 const router = express.Router();
 const jwtSecret = process.env.JWT_SECRET as string;
 

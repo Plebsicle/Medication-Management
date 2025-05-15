@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 
 interface PhoneVerificationProps {
   googleData: {
@@ -20,17 +20,14 @@ interface PhoneVerificationProps {
 export function PhoneVerification({ googleData, onClose }: PhoneVerificationProps) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!phoneNumber.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Phone number is required",
+      toast.error("Error", {
+        description: "Phone number is required"
       });
       return;
     }
@@ -45,19 +42,15 @@ export function PhoneVerification({ googleData, onClose }: PhoneVerificationProp
       
       if (response.data.jwt) {
         localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
-        toast({
-          variant: "success",
-          title: "Success",
-          description: "Phone number verified successfully!",
+        toast.success("Success", {
+          description: "Phone number verified successfully!"
         });
         navigate('/dashboard');
       }
     } catch (error) {
       console.error('Phone verification error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to verify phone number. Please try again.",
+      toast.error("Error", {
+        description: "Failed to verify phone number. Please try again."
       });
     } finally {
       setIsSubmitting(false);

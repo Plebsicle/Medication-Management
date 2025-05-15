@@ -1,8 +1,7 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../database';
 import jwt from 'jsonwebtoken'; 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 
 router.post('/', async (req, res) => {

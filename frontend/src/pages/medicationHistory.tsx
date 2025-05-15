@@ -4,8 +4,8 @@ import axios from "axios";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Calendar, Pill, Info } from "lucide-react";
-import { useToast } from '@/hooks/use-toast';
-// import { MainLayout } from "@/components/layout/MainLayout";
+import { toast } from "sonner";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 type FormDataType = {
     name: string;
@@ -44,7 +44,6 @@ function formatFrequency(freq: number | undefined) {
 
 export default function MedicationHistory() {
     const navigate = useNavigate();
-    const { toast } = useToast();
     const [medications, setMedications] = useState<FormDataType[]>([]);
     const [isMedication, setIsMedication] = useState(false);
 
@@ -53,10 +52,8 @@ export default function MedicationHistory() {
             try {
                 const jwt = localStorage.getItem('jwt');
                 if (!jwt) {
-                    toast({
-                        variant: "destructive",
-                        title: "Authentication Required",
-                        description: "Please sign in to view medication history",
+                    toast.error("Authentication Required", {
+                        description: "Please sign in to view medication history"
                     });
                     navigate('/signin');
                     return;
@@ -77,10 +74,8 @@ export default function MedicationHistory() {
             } catch (error) {
                 console.error('Error fetching medication history:', error);
                 setIsMedication(false);
-                toast({
-                    variant: "destructive",
-                    title: "Error",
-                    description: "Failed to fetch medication history",
+                toast.error("Error", {
+                    description: "Failed to fetch medication history"
                 });
             }
         };
@@ -89,8 +84,8 @@ export default function MedicationHistory() {
     }, []);
 
     return (
-        // <MainLayout>
-            <div className="container mx-auto p-6">
+        <AppLayout>
+            <div className="container mx-auto">
                 <h1 className="text-3xl font-bold mb-6">Medication History</h1>
                 {isMedication ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -178,6 +173,6 @@ export default function MedicationHistory() {
                     </Card>
                 )}
             </div>
-        // </MainLayout>
+        </AppLayout>
     );
 }

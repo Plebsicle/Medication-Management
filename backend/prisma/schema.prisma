@@ -21,6 +21,7 @@ model user {
   profile_photo_path       String?
   email_notifications      Boolean                 @default(true)
   sms_notifications        Boolean                 @default(true)
+  ai_prompts_count         Int                     @default(0)
   doctor                   doctor?
   emailverificationtoken   emailverificationtoken?
   health_records           health_records[]
@@ -32,6 +33,7 @@ model user {
   caretaker_healthRecords  health_records[]         @relation("caretaker_healthRecords")
   caretaker_medication     medication[]             @relation("caretaker_medication")
   chat_messages            chat_message[]
+  medicalDocuments         medicalDocument[]
 }
 
 model doctor {
@@ -198,4 +200,20 @@ model chat_message {
   user        user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   
   @@index([user_id])
+}
+
+model medicalDocument {
+  id           String   @id @default(uuid())
+  name         String
+  documentType String
+  filePath     String
+  fileType     String
+  fileSize     Int
+  userId       Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

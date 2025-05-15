@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 // import { Badge } from "@/components/ui/badge";
 import { PlusCircle, Activity, Heart, Thermometer, Scale, FileText } from "lucide-react";
-// import { MainLayout } from "@/components/layout/MainLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 type healthrecord = {
     record_id: number;
@@ -47,7 +47,7 @@ export default function HealthRecords() {
     }, []);
 
     return (
-        
+        <AppLayout>
             <div className="container mx-auto p-6">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold">Health Records</h1>
@@ -127,6 +127,6 @@ export default function HealthRecords() {
                     </Card>
                 )}
             </div>
-        
+        </AppLayout>
     );
 }

@@ -1,24 +1,12 @@
-import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Router } from 'express';
 import jwt from 'jsonwebtoken';
-import multer from 'multer';
-import path from 'path';
+import { Request, Response } from 'express';
+import prisma from '../database';
+import {uploadDocument} from '../_utilities/aws-s3';
 
-const router = express.Router();
-const prisma = new PrismaClient();
+const router = Router();
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../uploads'));
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    },
-});
-
-const upload = multer({ storage });
-
-router.post('/', upload.single('profilePhoto'), async (req, res) => {
+router.post('/', async (req, res) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         res.status(401).json({ error: "Authorization header is missing" });
@@ -44,30 +32,18 @@ router.post('/', upload.single('profilePhoto'), async (req, res) => {
             res.status(400).json({ error: "Email not found in token" });
             return;
         }
+        const userId = decoded.userId;
+        let {fileName,fileType} = req.body;
+        const newFileName = `${userId}-${fileName}`;
+        const url = await uploadDocument(newFileName,fileType);
+        res.status(200).json({"s3-url" : url });
+        return;
     } catch (error) {
         res.status(401).json({ error: "Invalid or expired token" });
         return;
     }
 
-    try {
-        if (!req.file) {
-            res.status(400).json({ error: "No file uploaded" });
-            return;
-        }
-
-        const filePath = `/uploads/${req.file.filename}`;
-        const user = await prisma.user.update({
-            where: { email },
-            data: { profile_photo_path: filePath },
-        });
-        res.status(200).json({
-            message: "Profile photo uploaded successfully",
-            path: filePath,
-        });
-    } catch (error) {
-        console.error("Error uploading profile photo", error);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
+    
 });
 
 export default router;

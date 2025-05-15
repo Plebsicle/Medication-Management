@@ -1,14 +1,13 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken'
 import {verifyUserDetails,verifyGoogleDetails} from '../middlewares/zodverification';
 import { hashPassword } from '../_utilities/hash';
 import verifyGoogleToken from '../_utilities/googleAuthService';
 import { sendVerificationEmail } from '../_utilities/mailer';
 import tokenGenerator from '../_utilities/tokenGenerator';
+import prisma from '../database';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 const jwtSecret = process.env.JWT_SECRET as string;
 
 router.post('/', async (req, res) => {
