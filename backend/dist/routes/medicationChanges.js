@@ -78,7 +78,7 @@ router.put("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 medication_times: {
                     deleteMany: {},
                     create: intakeTimesArray.map((time) => ({
-                        intake_time: new Date(`1970-01-01T${time}`),
+                        intake_time: time,
                     })),
                 },
                 notification: {

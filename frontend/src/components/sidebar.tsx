@@ -5,6 +5,7 @@ import GridViewRoundedIcon from "@mui/icons-material/GridViewRounded";
 import ReceiptRoundedIcon from "@mui/icons-material/ReceiptRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import { SpeedDialIcon } from "@mui/material";
+import ChatIcon from "@mui/icons-material/Chat";
 import { Link } from "react-router-dom";
 import {toast,Bounce} from 'react-toastify'
 import { FaAccessibleIcon } from "react-icons/fa";
@@ -77,6 +78,13 @@ export default function SidebarComponent() {
             Health Records
           </MenuItem>
           <MenuItem
+            icon={<ChatIcon />}
+            component={<Link to={"/chatbot"} />}
+            style={{ backgroundColor:  "#e2e8f0",color:  "#000" }} // Menu item text color
+          >
+            Medical Assistant
+          </MenuItem>
+          <MenuItem
             icon={<LogoutRoundedIcon />}
             component={<Link to={"/signin"} />}
             onClick={() => {
@@ -86,7 +94,7 @@ export default function SidebarComponent() {
             }}
             style={{ backgroundColor: "#e2e8f0",color:  "#000" }} // Menu item text color
           >
-            Logout
+            
           </MenuItem>
         </Menu>
       </Sidebar>

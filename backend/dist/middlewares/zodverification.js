@@ -16,6 +16,7 @@ exports.verifyUserDetails = verifyUserDetails;
 exports.verifySigninManualDetails = verifySigninManualDetails;
 exports.verifyEmailAlone = verifyEmailAlone;
 exports.verifyGoogleDetails = verifyGoogleDetails;
+exports.validatePhoneNumber = validatePhoneNumber;
 const zod_1 = __importDefault(require("zod"));
 var roles;
 (function (roles) {
@@ -27,6 +28,7 @@ const userSchema = zod_1.default.object({
     name: zod_1.default.string(),
     email: zod_1.default.string().min(1, { message: "This field has to be filled." }).email("This is not a valid email"),
     role: zod_1.default.nativeEnum(roles),
+    phone_number: zod_1.default.string().min(10, { message: "Phone number must be at least 10 digits" }).max(15, { message: "Phone number is too long" }).regex(/^\+?[0-9\s\-\(\)]+$/, { message: "Invalid phone number format" }),
 });
 const userSigninSchema = zod_1.default.object({
     email: zod_1.default.string().min(1, { message: "This field has to be filled." }).email("This is not a valid email"),
@@ -37,11 +39,11 @@ const passwordSchema = zod_1.default.string()
     .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
     .regex(/[0-9]/, { message: "Password must contain at least one number" })
     .regex(/[\W_]/, { message: "Password must contain at least one special character" });
-function verifyUserDetails(name, email, role, password) {
+function verifyUserDetails(name, email, role, password, phone_number) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b;
         try {
-            const validationResult = userSchema.safeParse({ name, email, role });
+            const validationResult = userSchema.safeParse({ name, email, role, phone_number });
             const passwordResult = passwordSchema.safeParse(password);
             if (validationResult.success && passwordResult.success) {
                 return true;
@@ -95,11 +97,11 @@ function verifyEmailAlone(email) {
         }
     });
 }
-function verifyGoogleDetails(name, email, role) {
+function verifyGoogleDetails(name, email, role, phone_number) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         try {
-            const validationResult = userSchema.safeParse({ name, email, role });
+            const validationResult = userSchema.safeParse({ name, email, role, phone_number });
             if (validationResult.success) {
                 return true;
             }
@@ -113,4 +115,7 @@ function verifyGoogleDetails(name, email, role) {
             return false;
         }
     });
+}
+function validatePhoneNumber(phone_number) {
+    return userSchema.shape.phone_number.safeParse(phone_number);
 }

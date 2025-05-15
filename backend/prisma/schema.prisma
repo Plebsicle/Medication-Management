@@ -12,13 +12,15 @@ model user {
   email                    String                  @unique
   password                 String?
   name                     String
-  phone_number             String?
+  phone_number             String
   role                     user_role               @default(patient)
   verified                 Boolean                 @default(false)
   created_at               DateTime                @default(now())
   updated_at               DateTime                @updatedAt
   google_id                String?                 @unique
   profile_photo_path       String?
+  email_notifications      Boolean                 @default(true)
+  sms_notifications        Boolean                 @default(true)
   doctor                   doctor?
   emailverificationtoken   emailverificationtoken?
   health_records           health_records[]
@@ -29,6 +31,7 @@ model user {
   caretakers               patient_caretaker[]      @relation("PatientRelation")
   caretaker_healthRecords  health_records[]         @relation("caretaker_healthRecords")
   caretaker_medication     medication[]             @relation("caretaker_medication")
+  chat_messages            chat_message[]
 }
 
 model doctor {
@@ -183,4 +186,16 @@ enum user_role {
   patient
   caregiver
   doctor
+}
+
+model chat_message {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  content     String
+  is_ai       Boolean  @default(false)
+  created_at  DateTime @default(now())
+  
+  user        user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
 }

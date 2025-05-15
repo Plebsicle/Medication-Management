@@ -10,6 +10,7 @@ const userSchema = zod.object({
   name: zod.string(),
   email: zod.string().min(1, { message: "This field has to be filled." }).email("This is not a valid email"),
   role: zod.nativeEnum(roles),
+  phone_number: zod.string().min(10, { message: "Phone number must be at least 10 digits" }).max(15, { message: "Phone number is too long" }).regex(/^\+?[0-9\s\-\(\)]+$/, { message: "Invalid phone number format" }),
 });
 
 const userSigninSchema = zod.object({
@@ -23,9 +24,9 @@ const passwordSchema = zod.string()
   .regex(/[0-9]/, { message: "Password must contain at least one number" })
   .regex(/[\W_]/, { message: "Password must contain at least one special character" });
 
-export async function verifyUserDetails(name: string, email: string, role: roles, password: string) {
+export async function verifyUserDetails(name: string, email: string, role: roles, password: string, phone_number: string) {
   try {
-    const validationResult = userSchema.safeParse({ name, email, role });
+    const validationResult = userSchema.safeParse({ name, email, role, phone_number });
     const passwordResult = passwordSchema.safeParse(password);
     if (validationResult.success && passwordResult.success) {
       return true;
@@ -72,9 +73,9 @@ export async function verifyEmailAlone(email : string){
     }
 }
 
-export async function verifyGoogleDetails(name: string, email: string, role: roles) {
+export async function verifyGoogleDetails(name: string, email: string, role: roles, phone_number: string) {
   try {
-    const validationResult = userSchema.safeParse({ name, email, role });
+    const validationResult = userSchema.safeParse({ name, email, role, phone_number });
     if (validationResult.success) {
       return true;
     } else {
@@ -85,4 +86,8 @@ export async function verifyGoogleDetails(name: string, email: string, role: rol
     console.log("Error in Google Zod Verification", error);
     return false;
   }
+}
+
+export function validatePhoneNumber(phone_number: string) {
+  return userSchema.shape.phone_number.safeParse(phone_number);
 }

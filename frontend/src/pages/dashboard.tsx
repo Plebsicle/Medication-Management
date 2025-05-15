@@ -42,7 +42,6 @@ export default function Dashboard() {
         return;
       }
       verifyJwtToken(jwt);
-      handleNotificationPermission();
     };
     checkAuth();
   }, []);
@@ -85,102 +84,6 @@ export default function Dashboard() {
         description: "Please sign up to continue",
       });
     }
-  }
-
-  const handleNotificationPermission = async () => {
-    try {
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        toast({
-          variant: "destructive",
-          title: "Not Supported",
-          description: "Push notifications are not supported in this browser",
-        });
-        return;
-      }
-  
-      const permission = await Notification.requestPermission();
-  
-      if (permission !== 'granted') {
-        toast({
-          variant: "destructive",
-          title: "Permission Denied",
-          description: "Notifications permission was not granted",
-        });
-        return;
-      }
-  
-      toast({
-        variant: "success",
-        title: "Success",
-        description: "Notifications permission granted!",
-      });
-  
-      // Register the service worker
-      const swRegistration = await navigator.serviceWorker.register('/service-worker.js');
-      console.log("Service worker registered:", swRegistration);
-  
-      // Wait for the service worker to become active
-      const registration = await navigator.serviceWorker.ready;
-      console.log("Service worker is ready for push");
-  
-      // const subscription = await registration.pushManager.getSubscription();
-  
-      let subscription = await registration.pushManager.getSubscription();
-
-if (!subscription) {
-  const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-  if (!vapidPublicKey) throw new Error("VAPID Public Key is missing");
-
-  const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
-
-  subscription = await registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey,
-  });
-
-  console.log("New push subscription:", subscription);
-} else {
-  console.log("Already subscribed to push notifications:", subscription);
-}
-
-// ✅ Always send subscription to backend
-      const jwt = localStorage.getItem("jwt");
-      if (jwt) {
-      await axios.post("http://localhost:8000/subscribe", {
-      subscription,
-      }, {
-      headers: { Authorization: `Bearer ${jwt}` }
-      });
-
-      toast({
-      variant: "success",
-      title: "Success",
-      description: "Push subscription saved",
-      });
-      }
-
-    } catch (error) {
-      console.error("Push setup error:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  };
-  
-
-  function urlBase64ToUint8Array(base64String: string): Uint8Array {
-    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding)
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-    return outputArray;
   }
 
   const toggleNotification = async (index: number) => {

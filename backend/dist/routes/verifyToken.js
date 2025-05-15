@@ -12,12 +12,20 @@ router.post('/', (req, res) => {
     try {
         let token = req.body.jwt || ((_a = req.headers['authorization']) === null || _a === void 0 ? void 0 : _a.split(' ')[1]);
         console.log("Original Token:", token);
-        if (token) {
-            token = token.replace(/^"|"$/g, '');
-        }
-        console.log("Processed Token:", token);
         if (!token) {
             res.status(202).json({ message: "No Token Received", isTokenPresent: false });
+            return;
+        }
+        // Remove any quotes that might be present
+        token = token.replace(/^"|"$/g, '');
+        // Check if token is a valid JWT format
+        if (!token.match(/^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/)) {
+            console.error("Invalid JWT format detected");
+            res.status(401).json({
+                message: "Invalid Token Format",
+                isTokenPresent: true,
+                error: "Token is not in valid JWT format"
+            });
             return;
         }
         const tokenVerified = jsonwebtoken_1.default.verify(token, jwtSecret);
@@ -28,15 +36,31 @@ router.post('/', (req, res) => {
         });
     }
     catch (e) {
-        console.error("JWT Verification Error:", e.name, e.message);
+        console.error("JWT Verification Error:", {
+            name: e.name,
+            message: e.message,
+            token: req.body.jwt || req.headers['authorization']
+        });
         if (e.name === 'JsonWebTokenError') {
-            res.status(401).json({ message: "Invalid Token", isTokenPresent: true });
+            res.status(401).json({
+                message: "Invalid Token",
+                isTokenPresent: true,
+                error: e.message
+            });
         }
         else if (e.name === 'TokenExpiredError') {
-            res.status(401).json({ message: "Token Expired", isTokenPresent: true });
+            res.status(401).json({
+                message: "Token Expired",
+                isTokenPresent: true,
+                error: e.message
+            });
         }
         else {
-            res.status(500).json({ message: "Internal Server Error", isTokenPresent: true });
+            res.status(500).json({
+                message: "Internal Server Error",
+                isTokenPresent: true,
+                error: e.message
+            });
         }
     }
 });

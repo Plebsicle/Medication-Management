@@ -35,9 +35,12 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         token = token.replace(/^"|"$/g, '');
     }
     let email;
+    // console.log(token);
     try {
+        console.log(token);
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
         email = decoded.email;
+        // console.log(email);
         if (!email) {
             res.status(400).json({ error: "Email not found in token" });
             return;
@@ -72,14 +75,15 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 name: formData.name,
                 type: formData.type,
                 dosage: formData.dosage,
-                start_date: new Date(formData.start_date),
-                end_date: new Date(formData.end_date),
-                instructions: formData.instructions,
+                frequency: parseInt(formData.frequency),
+                start_date: new Date(formData.startDate),
+                end_date: new Date(formData.endDate),
+                instructions: formData.instructions || "",
             },
         });
-        const medicationTimesData = formData.intake_times.map((time) => ({
+        const medicationTimesData = formData.intakeTimes.map((time) => ({
             medication_id: medication.medication_id,
-            intake_time: new Date(`1970-01-01T${time}:00`),
+            intake_time: time,
         }));
         yield prisma.medication_times.createMany({
             data: medicationTimesData,
@@ -155,7 +159,7 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             start_date: medication.start_date.toISOString().split('T')[0],
             end_date: medication.end_date.toISOString().split('T')[0],
             frequency: medication.medication_times.length,
-            intake_times: medication.medication_times.map((time) => time.intake_time.toISOString().split('T')[1]),
+            intake_times: medication.medication_times.map((time) => time.intake_time),
             instructions: medication.instructions || "",
             notification_on: medication.notification.some((notif) => notif.notification_on),
         }));

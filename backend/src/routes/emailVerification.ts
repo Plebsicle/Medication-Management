@@ -44,6 +44,7 @@ router.post("/", async (req, res) => {
 
     console.log("User Verified:", updatedUser);
     const jwtPayload = {
+      userId: updatedUser.id,
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,

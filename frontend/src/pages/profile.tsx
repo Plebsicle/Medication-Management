@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Camera, User, Mail, Shield } from "lucide-react";
+import { Camera, User, Mail, Shield, Bell } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 // import { MainLayout } from "@/components/layout/MainLayout";
 
 export default function Profile() {
@@ -16,6 +16,8 @@ export default function Profile() {
     email: string;
     role: string;
     path: string | null;
+    email_notifications: boolean;
+    sms_notifications: boolean;
   } | null>(null);
 
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -45,6 +47,8 @@ export default function Profile() {
           email: data.email,
           role: data.role,
           path: data.path,
+          email_notifications: data.email_notifications || true,
+          sms_notifications: data.sms_notifications || true,
         });
 
         if (data.path) {
@@ -108,6 +112,47 @@ export default function Profile() {
         ? (profileData[field as keyof typeof profileData] as string)
         : ""
     );
+  };
+
+  const handleNotificationToggle = async (type: "email_notifications" | "sms_notifications") => {
+    try {
+      if (!profileData) return;
+      
+      const token = localStorage.getItem("jwt");
+      if (!token) {
+        console.error("JWT token is missing");
+        toast.error("Please sign in to update your preferences");
+        return;
+      }
+
+      const newValue = !profileData[type];
+      
+      // Optimistically update UI
+      setProfileData((prev) => prev ? { ...prev, [type]: newValue } : null);
+
+      const response = await axios.post(
+        `${BASE_URL}/serveProfile/updateNotificationPreferences`,
+        { [type]: newValue },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.data.success) {
+        setProfileData((prev) => prev ? { ...prev, [type]: !newValue } : null);
+        toast.error(`Failed to update ${type.replace('_', ' ')}`);
+      } else {
+        toast.success("Notification preferences updated");
+      }
+    } catch (error) {
+      console.error("Error updating notification preferences:", error);
+      if (profileData) {
+        setProfileData((prev) => prev ? { ...prev, [type]: !profileData[type] } : null);
+      }
+      toast.error("Failed to update notification preferences");
+    }
   };
 
   const handleSaveClick = async (field: string) => {
@@ -182,70 +227,86 @@ export default function Profile() {
             </div>
 
             <div className="space-y-4">
-              {["name", "role"].map((field) => (
-                <div key={field} className="space-y-2">
-                  <Label className="capitalize">{field}</Label>
-                  {editingField === field ? (
-                    <div className="flex gap-2">
-                      {field === "role" ? (
-                        <Select
-                          value={updatedValue}
-                          onValueChange={setUpdatedValue}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select role" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="patient">Patient</SelectItem>
-                            <SelectItem value="caregiver">Caregiver</SelectItem>
-                            <SelectItem value="doctor">Doctor</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input
-                          type="text"
-                          value={updatedValue}
-                          onChange={(e) => setUpdatedValue(e.target.value)}
-                        />
-                      )}
-                      <Button
-                        variant="outline"
-                        onClick={() => handleSaveClick(field)}
-                      >
-                        Save
-                      </Button>
+              <div className="space-y-2">
+                <Label className="capitalize">Name</Label>
+                {editingField === "name" ? (
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      value={updatedValue}
+                      onChange={(e) => setUpdatedValue(e.target.value)}
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => handleSaveClick("name")}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <p className="text-sm">
+                        {profileData
+                          ? profileData.name
+                          : "Loading..."}
+                      </p>
                     </div>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {field === "name" ? (
-                          <User className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Shield className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <p className="text-sm">
-                          {profileData
-                            ? profileData[field as keyof typeof profileData]
-                            : "Loading..."}
-                        </p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditClick(field)}
-                      >
-                        Edit
-                      </Button>
-                    </div>
-                  )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEditClick("name")}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm">{profileData?.role}</p>
                 </div>
-              ))}
+              </div>
 
               <div className="space-y-2">
                 <Label>Email</Label>
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm">{profileData?.email}</p>
+                </div>
+              </div>
+              
+              <div className="pt-4 border-t">
+                <h3 className="text-lg font-medium mb-4">Notification Preferences</h3>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Bell className="h-4 w-4 text-muted-foreground" />
+                      <Label htmlFor="email-notifications" className="text-sm">Email Notifications</Label>
+                    </div>
+                    <Switch
+                      id="email-notifications"
+                      checked={profileData?.email_notifications || false}
+                      onCheckedChange={() => handleNotificationToggle("email_notifications")}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Bell className="h-4 w-4 text-muted-foreground" />
+                      <Label htmlFor="sms-notifications" className="text-sm">SMS Notifications</Label>
+                    </div>
+                    <Switch
+                      id="sms-notifications"
+                      checked={profileData?.sms_notifications || false}
+                      onCheckedChange={() => handleNotificationToggle("sms_notifications")}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

@@ -23,7 +23,7 @@ router.post("/", async (req, res) => {
       const name =payload.name;
       let user = await prisma.user.findFirst({ where: { email } });
       if (user) {
-        const jwtToken = jwt.sign({ name : user.name , email: user.email ,role : user.role}, jwtSecret);
+        const jwtToken = jwt.sign({ userId : user.id , name : user.name , email: user.email ,role : user.role}, jwtSecret);
         res.status(200).json({ jwt: jwtToken });
         return;
       } else {
@@ -60,7 +60,7 @@ router.post("/", async (req, res) => {
             res.status(202).json({ message: "Incorrect password. Please try again." ,isPasswordCorrect : false});
             return;
         }
-        const jwtToken = jwt.sign({ name : user.name , email: user.email ,role : user.role }, jwtSecret);
+        const jwtToken = jwt.sign({ userId : user.id , name : user.name , email: user.email ,role : user.role }, jwtSecret);
         res.status(200).json({ jwt: jwtToken });
         return;
     }

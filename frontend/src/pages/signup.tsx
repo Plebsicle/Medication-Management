@@ -10,14 +10,25 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { PhoneVerification } from '@/components/PhoneVerification';
 
 type Role = 'patient' | 'caregiver' | 'doctor';
+
+interface GoogleData {
+  email: string;
+  name: string;
+  googleId: string;
+  role: string;
+}
 
 export default function Signup() {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [role, setRole] = useState<Role>('patient');
+  const [showPhoneVerification, setShowPhoneVerification] = useState(false);
+  const [googleData, setGoogleData] = useState<GoogleData | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -37,6 +48,10 @@ export default function Signup() {
           description: "Sign Up Successful!",
         });
         navigate('/dashboard');
+      } else if (response.data.requirePhoneNumber) {
+        // Show phone verification popup
+        setGoogleData(response.data.googleData);
+        setShowPhoneVerification(true);
       } else if (response.data.EmailinUse) {
         toast({
           variant: "destructive",
@@ -74,6 +89,7 @@ export default function Signup() {
         email,
         password,
         role,
+        phone_number: phoneNumber,
       });
 
       if (response.data.EmailinUse) {
@@ -139,6 +155,13 @@ export default function Signup() {
         href: "/signin"
       }}
     >
+      {showPhoneVerification && googleData && (
+        <PhoneVerification 
+          googleData={googleData} 
+          onClose={() => setShowPhoneVerification(false)} 
+        />
+      )}
+      
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Sign Up</CardTitle>
@@ -160,6 +183,7 @@ export default function Signup() {
                 placeholder="Enter your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                required
               />
             </div>
 
@@ -171,6 +195,7 @@ export default function Signup() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
 
@@ -182,7 +207,23 @@ export default function Signup() {
                 placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                placeholder="+1 (555) 123-4567"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                required
+              />
+              <p className="text-xs text-gray-500">
+                Please include your country code (e.g., +1 for US)
+              </p>
             </div>
 
             <div className="space-y-2">

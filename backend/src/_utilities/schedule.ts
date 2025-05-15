@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import axios from 'axios';
-import webpush from 'web-push';
+import { sendSMS } from './twilio';
+import { sendEmail } from './mailer';
 import schedule from 'node-schedule';
 
 const prisma = new PrismaClient();
@@ -26,6 +26,7 @@ async function sendNotifications() {
   console.log("Scheduler checking for notifications at:", currentTimeHHMM);
 
   try {
+    // Get all medication times for the current time
     const medicationTimes = await prisma.medication_times.findMany({
       where: {
         intake_time: currentTimeHHMM,
@@ -43,11 +44,11 @@ async function sendNotifications() {
     console.log(`Found ${medicationTimes.length} medications due for notification`);
 
     for (const medTime of medicationTimes) {
-      const { medication } = medTime;
+      const { medication } = medTime as any;
       if (!medication || !medication.user) continue;
 
       // Check if notification is enabled
-      const isNotifEnabled = medication.notification.some(n => n.notification_on);
+      const isNotifEnabled = medication.notification.some((n: any) => n.notification_on);
       if (!isNotifEnabled) {
         console.log(`Skipping ${medication.name}: notifications off`);
         continue;
@@ -60,64 +61,44 @@ async function sendNotifications() {
         continue;
       }
 
-      const user = medication.user;
-      const subscription = await prisma.subscription.findFirst({
-        where: { user_id: user.id },
-      });
+      const user = medication.user as any;
+      const messageText = `It's time to take your medication: ${medication.name}`;
+      await logNotification(medication.medication_id, messageText);
 
-      const message = `It's time to take your medication: ${medication.name}`;
-      await logNotification(medication.medication_id, message);
-
-      if (!subscription) {
-        console.warn(`No subscription for user ID ${user.id}`);
-        continue;
-      }
-
-      const fixedEndpoint = validateAndFixEndpoint(subscription.endpoint);
-      if (fixedEndpoint !== subscription.endpoint) {
-        await prisma.subscription.update({
-          where: { subscription_id: subscription.subscription_id },
-          data: { endpoint: fixedEndpoint },
-        });
-        console.log(`Fixed subscription endpoint for user ${user.id}`);
-      }
-
-      try {
-        const pushSubscription = {
-          endpoint: fixedEndpoint,
-          keys: {
-            p256dh: subscription.p256dh_key,
-            auth: subscription.auth_key,
-          },
-        };
-
-        const payload = JSON.stringify({
-          title: 'Medication Reminder',
-          body: message,
-        });
-
-        await webpush.sendNotification(pushSubscription, payload);
-        console.log(`Notification sent to user ${user.id}`);
-      } catch (err: any) {
-        console.error(`Push failed for user ${user.id}:`, err);
-
-        if (err.statusCode === 404 || err.statusCode === 410) {
-          await prisma.subscription.delete({
-            where: { subscription_id: subscription.subscription_id },
-          });
-          console.log(`Deleted expired subscription for user ${user.id}`);
-        }
-
-        // Fallback API push
+      // Send SMS notification via Twilio if user has SMS notifications enabled
+      if (user.phone_number && user.sms_notifications) {
         try {
-          await axios.post('http://localhost:8000/notify', {
-            userId: user.id,
-            message,
-          });
-          console.log(`Fallback notification sent for user ${user.id}`);
-        } catch (fallbackErr) {
-          console.error(`Fallback failed:`, fallbackErr);
+          await sendSMS(
+            user.phone_number, 
+            `Medication Reminder: It's time to take ${medication.name}. ${medication.dosage} ${medication.instructions ? '- ' + medication.instructions : ''}`
+          );
+          console.log(`SMS notification sent to ${user.phone_number}`);
+        } catch (smsError) {
+          console.error(`Failed to send SMS to ${user.phone_number}:`, smsError);
         }
+      } else if (user.phone_number) {
+        console.log(`Skipping SMS for user ${user.id}: SMS notifications disabled`);
+      }
+
+      // Send email notification if user has email notifications enabled
+      if (user.email && user.email_notifications) {
+        try {
+          await sendEmail(
+            user.email,
+            'Medication Reminder',
+            `<h2>Medication Reminder</h2>
+            <p>Hello ${user.name},</p>
+            <p>It's time to take your medication: <strong>${medication.name}</strong></p>
+            <p>Dosage: ${medication.dosage}</p>
+            ${medication.instructions ? `<p>Instructions: ${medication.instructions}</p>` : ''}
+            <p>This is an automated reminder from your medication management system.</p>`
+          );
+          console.log(`Email notification sent to ${user.email}`);
+        } catch (emailError) {
+          console.error(`Failed to send email to ${user.email}:`, emailError);
+        }
+      } else if (user.email) {
+        console.log(`Skipping email for user ${user.id}: Email notifications disabled`);
       }
     }
   } catch (err) {

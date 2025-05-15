@@ -8,7 +8,6 @@ import {
   User,
   Hospital,
   FileText,
-  Bell,
   LogOut
 } from 'lucide-react';
 
@@ -23,7 +22,7 @@ const navigation = [
   { name: 'Profile', href: '/profile', icon: User },
   { name: 'Hospital Location', href: '/hospital-location', icon: Hospital },
   { name: 'Health Records', href: '/health-records', icon: FileText },
-  { name: 'Notifications', href: '/notifications', icon: Bell },
+  { name: 'Medical Assistant', href: '/chatbot', icon: User },
 ];
 
 export function MainLayout({ children }: MainLayoutProps) {

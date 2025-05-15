@@ -35,7 +35,7 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             const name = payload.name;
             let user = yield prisma.user.findFirst({ where: { email } });
             if (user) {
-                const jwtToken = jsonwebtoken_1.default.sign({ name: user.name, email: user.email, role: user.role }, jwtSecret);
+                const jwtToken = jsonwebtoken_1.default.sign({ userId: user.id, name: user.name, email: user.email, role: user.role }, jwtSecret);
                 res.status(200).json({ jwt: jwtToken });
                 return;
             }
@@ -72,7 +72,7 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 res.status(202).json({ message: "Incorrect password. Please try again.", isPasswordCorrect: false });
                 return;
             }
-            const jwtToken = jsonwebtoken_1.default.sign({ name: user.name, email: user.email, role: user.role }, jwtSecret);
+            const jwtToken = jsonwebtoken_1.default.sign({ userId: user.id, name: user.name, email: user.email, role: user.role }, jwtSecret);
             res.status(200).json({ jwt: jwtToken });
             return;
         }

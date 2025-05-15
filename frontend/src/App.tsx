@@ -19,6 +19,7 @@ import NotificationSystem from './pages/notification';
 import MedicationDetails from './pages/medicationDetails';
 import ResetPassword from './pages/resetPassword';
 import EmailSent from './pages/emailSent';
+import Chatbot from './pages/chatbot';
 import { Toaster } from "@/components/ui/toaster"
 
 const GoogleclientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -56,6 +57,7 @@ function App() {
                   <Route path="healthRecordsForm" element={<HealthRecordsForm />} />
                   <Route path="notifications" element={<NotificationSystem />} />
                   <Route path="medications/:medication_id" element={<MedicationDetails />} />
+                  <Route path="chatbot" element={<Chatbot />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
               </MainLayout>

@@ -1,9 +1,39 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 
+interface AuthenticatedRequest extends Request {
+  user: {
+    email: string;
+  };
+}
+
 const router = express.Router();
 const prisma = new PrismaClient();
+
+// Helper middleware for token authentication
+const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    res.status(401).json({ error: "Authorization header is missing" });
+    return;
+  }
+
+  let token = authHeader.split(' ')[1]; 
+  if (token) {
+    token = token.replace(/^"|"$/g, ''); 
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { email: string };
+    (req as AuthenticatedRequest).user = { email: decoded.email };
+    next();
+  } catch (error) {
+    res.status(401).json({ error: "Invalid or expired token" });
+    return;
+  }
+};
 
 router.get('/', async (req, res) => {
     const authHeader = req.headers.authorization;
@@ -43,11 +73,16 @@ router.get('/', async (req, res) => {
             return;
         }
 
+        // Using type assertion to access all user properties
+        const userData = user as any;
+
         res.status(200).json({
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            path: user.profile_photo_path || null, 
+            name: userData.name,
+            email: userData.email,
+            role: userData.role,
+            path: userData.profile_photo_path || null,
+            email_notifications: userData.email_notifications,
+            sms_notifications: userData.sms_notifications,
         });
     } catch (error) {
         console.error("Error in serving profile data", error);
@@ -90,7 +125,8 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const validFields = ["name", "role", "profile_photo_path"];
+        // Only allow updating name and profile photo
+        const validFields = ["name", "profile_photo_path"];
         const updateData: Record<string, any> = {};  
         for (const key in updates) {
             if (validFields.includes(key)) {
@@ -110,5 +146,60 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
+// Add updateNotificationPreferences route to handle notification preference changes
+router.post('/updateNotificationPreferences', 
+  authenticateToken, 
+  async (req, res) => {
+    try {
+      const { email } = (req as any).user;
+      const { email_notifications, sms_notifications } = req.body;
+
+      const user = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+      }
+
+      const updateData: Record<string, boolean> = {};
+
+      if (email_notifications !== undefined) {
+        updateData.email_notifications = email_notifications;
+      }
+
+      if (sms_notifications !== undefined) {
+        updateData.sms_notifications = sms_notifications;
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        res.status(400).json({ error: 'No valid notification preferences provided' });
+        return;
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { id: user.id },
+        data: updateData,
+      }) as any;
+
+      res.status(200).json({
+        message: 'Notification preferences updated successfully',
+        success: true,
+        preferences: {
+          email_notifications: updatedUser.email_notifications,
+          sms_notifications: updatedUser.sms_notifications
+        }
+      });
+    } catch (error) {
+      console.error('Error updating notification preferences:', error);
+      res.status(500).json({ 
+        error: 'Internal server error',
+        success: false 
+      });
+    }
+  }
+);
 
 export default router;
