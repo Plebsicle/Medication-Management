@@ -1,4 +1,4 @@
-import {Request,Response} from 'express'
+import express from 'express';
 import prisma from '../../database';
 import jwt from 'jsonwebtoken'; 
 import z from 'zod'
@@ -9,7 +9,7 @@ const ChatHistorySchema = z.object({
   token: z.string(),
 });
 
-export const AIHistory = async (req : Request, res : Response): Promise<void> => {
+export const AIHistory = async (req : express.Request, res : express.Response): Promise<void> => {
   try {
     // console.log(req.body);
     const validatedData = ChatHistorySchema.parse(req.body);

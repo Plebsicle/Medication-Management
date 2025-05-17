@@ -1,7 +1,7 @@
 import prisma from "../../database";
-import {Request,Response} from 'express'
+import express from 'express';
 
-export const postProfile =  async (req : Request, res : Response) => {
+export const postProfile =  async (req : express.Request, res : express.Response) => {
     
     const updates = req.body;
 

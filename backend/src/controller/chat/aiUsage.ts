@@ -1,10 +1,10 @@
-import {Request,Response} from 'express'
+import express from 'express';
 import prisma from '../../database';
 import jwt from 'jsonwebtoken'; 
 
 
 
-export const AIUsage = async (req: Request, res: Response): Promise<void> => {
+export const AIUsage = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {

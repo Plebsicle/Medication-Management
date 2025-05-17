@@ -1,8 +1,8 @@
-import  { Request, Response } from 'express';
+import  express  from 'express';
 import jwt from 'jsonwebtoken'
 import prisma from '../../database';
 
-export const medicationChanges = async (req: Request, res: Response) => {
+export const medicationChanges = async (req: express.Request, res: express.Response) => {
     // console.log(req.body);
     const email = req.userEmail;
 

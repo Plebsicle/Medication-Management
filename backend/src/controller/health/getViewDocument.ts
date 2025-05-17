@@ -1,10 +1,9 @@
-
-import  { Request, Response } from 'express';
+import  express  from 'express';
 import prisma from '../../database';
 import { getDocument } from '../../_utilities/aws-s3';
 
 
-export const getViewDocument = async (req: Request, res: Response) => {
+export const getViewDocument = async (req: express.Request, res: express.Response) => {
   const userId = req.userId;
   try {
     const documentId = req.params.id;

@@ -1,10 +1,10 @@
 import { verifyEmailAlone } from "../../middlewares/zodverification";
-import  { Request, Response } from 'express';
+import  express  from 'express';
 import prisma from "../../database";
 import tokenGenerator from "../../_utilities/tokenGenerator";
 import { sendVerificationEmail } from "../../_utilities/mailer";
 
-export const postManualEmail = async (req : Request,res : Response)=>{
+export const postManualEmail = async (req : express.Request,res : express.Response)=>{
     try{
     const {email} = req.body;
     const respon = await verifyEmailAlone(email);

@@ -1,11 +1,11 @@
-import  { Request, Response } from 'express';
+import  express  from 'express';
 import prisma from '../../database';
 import { v4 as uuidv4 } from 'uuid';
 import { uploadDocument } from '../../_utilities/aws-s3';
 
 
 
-export const postMedicalUrl = async (req: Request, res: Response) => {
+export const postMedicalUrl = async (req: express.Request, res: express.Response) => {
   const userId = req.userId;
   try {
    
@@ -30,7 +30,7 @@ export const postMedicalUrl = async (req: Request, res: Response) => {
     
     // Generate a unique filename with the correct extension
     const fileExtension = fileType === 'application/pdf' ? '.pdf' : `.${fileType.split('/')[1]}`;
-    const fileName = `document-${uuidv4()}${fileExtension}`;
+    const fileName = `${name}-${req.userId}${fileExtension}`;
     
     // Get presigned URL for upload
     console.log(fileType);

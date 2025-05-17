@@ -1,8 +1,8 @@
-import  { Request, Response } from 'express';
+import express from 'express';
 import prisma from '../../database';
 
 
-export const postIsVerification = async (req : Request,res : Response)=>{
+export const postIsVerification = async (req : express.Request,res : express.Response)=>{
     const {email} = req.body;
     const response = await prisma.user.findFirst({
         where : {

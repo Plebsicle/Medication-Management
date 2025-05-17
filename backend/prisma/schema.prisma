@@ -34,6 +34,8 @@ model user {
   caretaker_medication     medication[]             @relation("caretaker_medication")
   chat_messages            chat_message[]
   medicalDocuments         medicalDocument[]
+  doctorChats              doctor_patient_chat[]    @relation("doctor_chats")
+  patientChats             doctor_patient_chat[]    @relation("patient_chats")
 }
 
 model doctor {
@@ -191,15 +193,18 @@ enum user_role {
 }
 
 model chat_message {
-  id          Int      @id @default(autoincrement())
+  id          Int                  @id @default(autoincrement())
   user_id     Int
+  chat_id     Int?
   content     String
-  is_ai       Boolean  @default(false)
-  created_at  DateTime @default(now())
+  is_ai       Boolean              @default(false)
+  created_at  DateTime             @default(now())
   
-  user        user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user        user                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  chat        doctor_patient_chat? @relation(fields: [chat_id], references: [chat_id], onDelete: Cascade)
   
   @@index([user_id])
+  @@index([chat_id])
 }
 
 model medicalDocument {
@@ -216,4 +221,21 @@ model medicalDocument {
   user         user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model doctor_patient_chat {
+  chat_id     Int      @id @default(autoincrement())
+  doctor_id   Int
+  patient_id  Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  doctor      user     @relation("doctor_chats", fields: [doctor_id], references: [id], onDelete: Cascade)
+  patient     user     @relation("patient_chats", fields: [patient_id], references: [id], onDelete: Cascade)
+
+  chatMessages chat_message[]
+
+  @@unique([doctor_id, patient_id])
+  @@index([doctor_id])
+  @@index([patient_id])
 }

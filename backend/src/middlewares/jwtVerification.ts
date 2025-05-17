@@ -1,7 +1,8 @@
-import { NextFunction,Request,Response } from 'express';
+import  express  from 'express';
 import jwt from 'jsonwebtoken'
 
-export default function jwtVerification(req : Request,res : Response,next: NextFunction){
+export default function jwtVerification(req : express.Request,res : express.Response,next: express.NextFunction){
+
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         res.status(401).json({ error: "Authorization header is missing" });
@@ -16,9 +17,8 @@ export default function jwtVerification(req : Request,res : Response,next: NextF
     let email;
 
     try {
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string); 
+        const decoded : any = jwt.verify(token, process.env.JWT_SECRET as string) 
         email = decoded.email;
-
         if (!email) {
             res.status(400).json({ error: "Email not found in token" });
             return;

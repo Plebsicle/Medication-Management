@@ -29,9 +29,17 @@ export default function Signin() {
       }
   
       if (response.data.jwt) {
-        localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
-        toast.success("Sign In Successful!");
-        navigate('/dashboard');
+        localStorage.setItem('jwt', response.data.jwt);
+        // console.log(response.data);
+        console.log(response.data.role === "doctor");
+        if(response.data.role === "doctor"){
+          toast.success("Sign In Successful!");
+          navigate('/doctorDashboard');
+        }
+        else{
+          toast.success("Sign In Successful!");
+          navigate('/dashboard');
+        }
       }
     } catch (error) {
       console.error('Error in Google Signin:', error);
@@ -53,8 +61,16 @@ export default function Signin() {
 
       if (response.data.token) {
         localStorage.setItem('jwt', response.data.token);
-        toast.success("Signed in successfully");
-        navigate('/dashboard');
+        
+        // Store user data including role
+        if(response.data.role === "doctor"){
+          toast.success("Signed in successfully");
+          navigate('/doctorDashboard');
+        }
+        else{
+          toast.success("Signed in successfully");
+          navigate('/dashboard');
+        }
       }
     } catch (error) {
       console.error('Error signing in:', error);

@@ -163,7 +163,7 @@ export default function HealthRecords() {
     if (!confirm(`Are you sure you want to delete "${document.name}"?`)) {
       return;
     }
-
+    console.log(document);
     try {
       const token = localStorage.getItem("jwt");
       if (!token) {

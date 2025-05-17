@@ -1,6 +1,5 @@
-import {Request,Response} from 'express'
+import express from 'express';
 import prisma from '../../database';
-import jwt from 'jsonwebtoken'; 
 
 enum medication_type {
     pills = "pills",
@@ -13,20 +12,20 @@ type FormDataType = {
     name: string;
     type: medication_type;
     dosage: string;
-    start_date: string;
-    end_date: string;
+    startDate: string;
+    endDate: string;
     frequency: number;
-    intake_times: string[];
+    intakeTimes: string[];
     instructions: string;
-    notification_on: boolean;
+    notifications : boolean;
 };
 
-export const postMedication = async (req : Request, res : Response) => {
-    const email = req.userEmail;
+export const postMedication = async (req : express.Request, res : express.Response) => {
 
+    const email = req.userEmail;
     try {
         const { formData } = req.body;
-        console.log(req.body);
+        // console.log(req.body);
         console.log(formData);
         if (!formData) {
             res.status(202).json({ message: "Form data is required", isInfopresent: false });
@@ -88,7 +87,7 @@ export const postMedication = async (req : Request, res : Response) => {
 };
 
 
-export const getMedication = async (req : Request,res : Response)=>{
+export const getMedication = async (req : express.Request,res : express.Response)=>{
     const email = req.userEmail;
     const user = await prisma.user.findUnique({
         where: { email },
@@ -119,12 +118,12 @@ export const getMedication = async (req : Request,res : Response)=>{
         name: medication.name,
         type: medication.type as medication_type,
         dosage: medication.dosage,
-        start_date: medication.start_date.toISOString().split('T')[0],
-        end_date: medication.end_date.toISOString().split('T')[0],
+        startDate: medication.start_date.toISOString().split('T')[0],
+        endDate: medication.end_date.toISOString().split('T')[0],
         frequency: medication.medication_times.length, 
-        intake_times: medication.medication_times.map((time) => time.intake_time),
+        intakeTimes: medication.medication_times.map((time) => time.intake_time),
         instructions: medication.instructions || "",
-        notification_on: medication.notification.some((notif) => notif.notification_on),
+        notifications: medication.notification.some((notif) => notif.notification_on),
     }));
 
     res.status(200).json({ medications: formattedMedications ,isMedication : true});

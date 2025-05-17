@@ -11,12 +11,12 @@ type FormDataType = {
     name: string;
     type: string;
     dosage: string;
-    start_date: string;
-    end_date: string;
+    startDate: string;
+    endDate: string;
     frequency: number;
-    intake_times: string[];
+    intakeTimes: string[];
     instructions: string;
-    notification_on: boolean;
+    notifications: boolean;
 };
 
 // Helper to format date
@@ -100,8 +100,8 @@ export default function MedicationHistory() {
                                                 <span className="capitalize">{medication.type}</span>
                                             </CardDescription>
                                         </div>
-                                        <Badge variant={medication.notification_on ? "default" : "secondary"}>
-                                            {medication.notification_on ? "Active" : "Inactive"}
+                                        <Badge variant={medication.notifications ? "default" : "secondary"}>
+                                            {medication.notifications ? "Active" : "Inactive"}
                                         </Badge>
                                     </div>
                                 </CardHeader>
@@ -117,14 +117,14 @@ export default function MedicationHistory() {
                                             <Calendar className="h-4 w-4 text-muted-foreground" />
                                             <div className="text-sm">
                                                 <span className="font-medium">Start:</span>{" "}
-                                                <span className="text-muted-foreground">{formatDate(medication.start_date)}</span>
+                                                <span className="text-muted-foreground">{formatDate(medication.startDate)}</span>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Calendar className="h-4 w-4 text-muted-foreground" />
                                             <div className="text-sm">
                                                 <span className="font-medium">End:</span>{" "}
-                                                <span className="text-muted-foreground">{formatDate(medication.end_date)}</span>
+                                                <span className="text-muted-foreground">{formatDate(medication.endDate)}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -132,11 +132,11 @@ export default function MedicationHistory() {
                                         <strong>Dosage:</strong>{" "}
                                         <span className="text-muted-foreground">{medication.dosage}</span>
                                     </div>
-                                    {medication.intake_times && medication.intake_times.length > 0 && (
+                                    {medication.intakeTimes && medication.intakeTimes.length > 0 && (
                                         <div className="text-sm">
                                             <strong>Intake Times:</strong>
                                             <ul className="mt-1 text-muted-foreground pl-4">
-                                                {medication.intake_times.map((time, i) => {
+                                                    {medication.intakeTimes.map((time, i) => {
                                                     const [hours, minutes] = time.split(':');
                                                     const hour = parseInt(hours);
                                                     const ampm = hour >= 12 ? 'PM' : 'AM';

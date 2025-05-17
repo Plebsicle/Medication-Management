@@ -14,13 +14,13 @@ const router = express.Router();
 // Helper middleware for token authentication
 
 // Get all documents for a user
-router.get('/', jwtVerification, getMedicalDocuments);
+router.get('/', jwtVerification, getMedicalDocuments); //DO=one
 
 // Get a presigned URL for document upload
-router.post('/getUploadUrl', jwtVerification, postMedicalUrl);
+router.post('/getUploadUrl', jwtVerification, postMedicalUrl); // Done
 
 // Confirm upload completion
-router.post('/:id/confirmUpload', jwtVerification, postConfirmUpload);
+router.post('/:id/confirmUpload', jwtVerification, postConfirmUpload); // Done
 
 // Get a single document
 router.get('/:id/view', jwtVerification, getViewDocument);

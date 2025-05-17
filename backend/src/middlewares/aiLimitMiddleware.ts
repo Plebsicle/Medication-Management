@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import prisma from '../database';
 
 
 const MAX_AI_PROMPTS = 10;
 
-export const checkAiLimit = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const checkAiLimit = async (req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> => {
   const userId = req.userId;
   try {
     // Check the user's current AI usage

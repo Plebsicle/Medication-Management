@@ -1,9 +1,9 @@
 import { uploadDocument } from "../../_utilities/aws-s3";
 import prisma from "../../database";
 import {v4 as uuidv4} from 'uuid'
-import { Request,Response } from "express";
+  import express from "express";
 
-export const postProfilePhoto = async (req: Request, res: Response) => {
+export const postProfilePhoto = async (req: express.Request, res: express.Response) => {
     const email = req.userEmail;
     try {
       const { fileType } = req.body;

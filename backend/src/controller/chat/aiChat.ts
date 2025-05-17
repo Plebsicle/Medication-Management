@@ -1,7 +1,7 @@
 import {incrementAiPromptCount} from '../../middlewares/aiLimitMiddleware'
-import { Request,Response } from "express";
+import express from 'express';
 
-export const AIChat = async (req : Request, res : Response): Promise<void> => {
+export const AIChat = async (req : express.Request, res : express.Response): Promise<void> => {
   try {
     const { message } = req.body;
     const userId = req.userId;

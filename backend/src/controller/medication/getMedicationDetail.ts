@@ -1,8 +1,8 @@
 import prisma from "../../database";
-import {Request,Response} from 'express'
+import express from 'express';
 
 
-export const getMedicationDetails = async (req : Request, res : Response) => {
+export const getMedicationDetails = async (req : express.Request, res : express.Response) => {
     const email = req.userEmail;
     try {
         const user = await prisma.user.findFirst({ where: { email } });

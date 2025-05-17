@@ -1,14 +1,11 @@
-
-import {Request,Response} from 'express'
+import express from 'express';
 import prisma from '../../database';
 
 
 
-export const postConfirmUpload = async (req: Request, res: Response) => {
+export const postConfirmUpload = async (req: express.Request, res: express.Response) => {
   const userId = req.userId;
   try {
-    
-
     const documentId = req.params.id;
     
     // Check if document exists and belongs to user

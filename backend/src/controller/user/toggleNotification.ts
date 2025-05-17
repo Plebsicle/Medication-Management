@@ -1,7 +1,7 @@
-import { Request,Response } from 'express';
+import express from 'express';
 import prisma from '../../database';
 
-export const toggleNotification = async (req : Request, res : Response) => {
+export const toggleNotification = async (req : express.Request, res : express.Response) => {
    
 
     try {

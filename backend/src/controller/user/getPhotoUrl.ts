@@ -1,9 +1,9 @@
-import { Request,Response } from "express";
+import express from "express";
 import prisma from "../../database";
 import path from "path";
 import { getDocument } from "../../_utilities/aws-s3";
 
-export const getPhotoUrl =  async (req: Request, res: Response) => {
+export const getPhotoUrl =  async (req: express.Request, res: express.Response) => {
     const email = req.userEmail;
     try {
       // Get user to access their profile photo path

@@ -1,13 +1,13 @@
-import  { Request, Response } from 'express';
+import  express  from 'express';
 import prisma from '../../database';
+import { deleteDocument } from '../../_utilities/aws-s3';
 
 
-
-export const deleteSingleDocument =  async (req: Request, res: Response) => {
+export const deleteSingleDocument =  async (req: express.Request, res: express.Response) => {
   const userId = req.userId;
   try {
     const documentId = req.params.id;
-
+    const {filename} = req.body;
     // Check if document exists and belongs to user
     const document = await prisma.medicalDocument.findFirst({
       where: {
@@ -28,8 +28,10 @@ export const deleteSingleDocument =  async (req: Request, res: Response) => {
       }
     });
 
+    await deleteDocument(filename);
     // Note: We're not deleting from S3 as files might be referenced elsewhere
     // In a production app, you might want to implement S3 object deletion as well
+
 
     res.status(200).json({
       success: true,

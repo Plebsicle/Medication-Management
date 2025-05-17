@@ -1,7 +1,7 @@
-import { Request,Response } from 'express';
+import express from 'express';
 import prisma from '../../database';
 
-export const deleteMedication =  async (req : Request, res : Response) => {
+export const deleteMedication =  async (req : express.Request, res : express.Response) => {
     try {
         const { medicationFull } = req.body;
 

@@ -40,9 +40,17 @@ export default function Signup() {
       });
 
       if (response.data.jwt) {
-        localStorage.setItem('jwt', JSON.stringify(response.data.jwt));
-        toast.success("Sign Up Successful!");
-        navigate('/dashboard');
+        localStorage.setItem('jwt', response.data.jwt);
+        
+        // Store user data including role
+        if(response.data.role === "doctor"){
+          toast.success("Sign Up Successful!");
+          navigate('/doctorDashboard');
+        }
+        else{
+          toast.success("Sign Up Successful!");
+          navigate('/dashboard');
+        }
       } else if (response.data.requirePhoneNumber) {
         // Show phone verification popup
         setGoogleData(response.data.googleData);
@@ -83,8 +91,14 @@ export default function Signup() {
             });
             if (verifiedResponse.data.verified) {
               clearInterval(interval);
-              toast.success("Email Verified! Redirecting to Dashboard...");
-              navigate('/dashboard');
+              if(verifiedResponse.data.role === "doctor"){
+                toast.success("Email Verified! Redirecting to Dashboard...");
+                navigate('/doctorDashboard');
+              }
+              else{
+                toast.success("Email Verified! Redirecting to Dashboard...");
+                navigate('/dashboard');
+              }
             }
           } catch (error) {
             console.error('Error checking verification status', error);

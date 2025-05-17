@@ -1,0 +1,14 @@
+import * as express from 'express';
+
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: number;
+      userEmail?: string;
+      userName?: string;
+      userRole?: string;
+    }
+  }
+}
+
+export {};

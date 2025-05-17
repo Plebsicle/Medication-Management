@@ -10,10 +10,12 @@ import {
   LogOut, 
   User,
   Menu,
-  FileText
+  FileText,
+  Stethoscope
 } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Tooltip,
   TooltipContent,
@@ -28,14 +30,13 @@ interface SidebarNavProps {
 export function SidebarNav({ className }: SidebarNavProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
-  
-  const navItems = [
-    
+  const { user } = useAuth();
+  const [navItems, setNavItems] = useState([
     {
-        title: "Profile",
-        href: "/profile",
-        icon: <User className="h-5 w-5" />,
-      },
+      title: "Profile",
+      href: "/profile",
+      icon: <User className="h-5 w-5" />,
+    },
     {
       title: "Dashboard",
       href: "/dashboard",
@@ -66,7 +67,31 @@ export function SidebarNav({ className }: SidebarNavProps) {
       href: "/chatbot",
       icon: <MessageSquare className="h-5 w-5" />,
     }
-  ];
+  ]);
+
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'doctor') {
+        setNavItems(prevItems => [
+          ...prevItems,
+          {
+            title: "Patient Chats",
+            href: "/doctor/chats",
+            icon: <Stethoscope className="h-5 w-5" />,
+          }
+        ]);
+      } else {
+        setNavItems(prevItems => [
+          ...prevItems,
+          {
+            title: "Doctor Consultations",
+            href: "/patient/chats",
+            icon: <Stethoscope className="h-5 w-5" />,
+          }
+        ]);
+      }
+    }
+  }, [user]);
 
   const handleLogout = () => {
     localStorage.clear();

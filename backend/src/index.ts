@@ -1,4 +1,3 @@
-
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -12,10 +11,10 @@ import Signin from './routes/auth/signin'
 import emailVerification from './routes/email/email'
 import isverified from './routes/user/manualEmail'
 import manualEmail from './routes/user/manualEmail'
-import addMedication from './routes/medication/medication'
+import addMedication from './routes/medication/postMedication'
 import verifyToken from './routes/user/verifyToken'
 import toggleNotification from './routes/user/toggleNotification'
-import deleteMedication from './routes/medication/medication'
+import deleteMedication from './routes/medication/postMedication'
 import medicationHistory from './routes/medication/medicationHistory'
 import serveProfile from './routes/user/serveProfile'
 import profilePhoto from './routes/user/profilePhoto'
@@ -25,9 +24,11 @@ import medicationDetails from './routes/medication/medicationDetails'
 import medicationChanges from './routes/medication/medicationChanges'
 import forgetPassword from './routes/user/forgetPassword'
 import chatbot from './routes/chat/chatbot';
+import doctorPatientChat from './routes/chat/doctorPatientChat';
 import medicalDocuments from './routes/health/medicalDocuments';
 import sendNotifications from './_utilities/schedule';
 import { configureSocket } from './AI-Socket';
+import { configureSocketHandlers } from './socket';
 
 const app = express();
 const server = http.createServer(app);
@@ -38,7 +39,11 @@ const io = new Server(server, {
   }
 });
 
+// Configure AI Socket
 configureSocket(io);
+
+// Configure doctor-patient chat socket
+configureSocketHandlers(io);
 
 app.use(cors());
 app.use(express.json());
@@ -62,6 +67,7 @@ app.use('/medications',medicationDetails);
 app.use('/editMedications',medicationChanges);
 app.use('/forgetPassword',forgetPassword);
 app.use('/chatbot', chatbot);
+app.use('/chats', doctorPatientChat);
 app.use('/medicalDocuments', medicalDocuments);
 sendNotifications();
 

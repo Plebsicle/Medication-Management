@@ -23,7 +23,7 @@ export const signin = async (req : Request, res : Response) => {
       let user = await prisma.user.findFirst({ where: { email } });
       if (user) {
         const jwtToken = jwt.sign({ userId : user.id , name : user.name , email: user.email ,role : user.role}, jwtSecret);
-        res.status(200).json({ jwt: jwtToken });
+        res.status(200).json({ jwt: jwtToken ,role : user.role });
         return;
       } else {
          res.status(202).json({ message: "User not found. Please sign up first." ,userFound : false});
@@ -60,7 +60,7 @@ export const signin = async (req : Request, res : Response) => {
             return;
         }
         const jwtToken = jwt.sign({ userId : user.id , name : user.name , email: user.email ,role : user.role }, jwtSecret);
-        res.status(200).json({ jwt: jwtToken });
+        res.status(200).json({ jwt: jwtToken ,role : user.role });
         return;
     }
     res.status(202).json({ message: "Email and password are required for manual sign-in." ,fullDetails : false});

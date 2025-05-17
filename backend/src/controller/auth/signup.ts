@@ -44,6 +44,15 @@ export const signup = async (req : Request, res : Response) => {
                       expiration,
                     },
                 });
+                if(role === "doctor"){
+                    await prisma.doctor.create({
+                        data: {
+                            user_id: placeholderUser.id,
+                            speciality: "",
+                            phone_number: "",
+                        }
+                    });
+                }
                 sendVerificationEmail(email, emailToken);
                 res.status(202).json({message: 'Email Verification Pending', isEmailVerified: false});
             }
@@ -88,7 +97,7 @@ export const signup = async (req : Request, res : Response) => {
                             }
                         });
                         const token = jwt.sign({userId: userCreationResponse.id, name, email, role}, jwtSecret);
-                        res.status(201).json({jwt: token});
+                        res.status(201).json({jwt: token, role : userCreationResponse.role});
                     }
                     else{
                         res.status(409).json({ message: "Email is already in use", EmailinUse: true});
@@ -138,7 +147,7 @@ export const googlePhoneSignup = async (req : Request, res : Response) => {
                 });
                 
                 const token = jwt.sign({userId: userExists.id, name, email, role}, jwtSecret);
-                res.status(200).json({ jwt: token });
+                res.status(200).json({ jwt: token ,role : userExists.role});
             } else {
                 // Create new user
                 const user = await prisma.user.create({
@@ -153,7 +162,7 @@ export const googlePhoneSignup = async (req : Request, res : Response) => {
                 });
                 
                 const token = jwt.sign({userId: user.id, name, email, role}, jwtSecret);
-                res.status(201).json({ jwt: token });
+                res.status(201).json({ jwt: token ,role : user.role});
             }
         } else {
             res.status(400).json({ message: "Invalid phone number format" });

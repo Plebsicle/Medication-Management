@@ -1,11 +1,11 @@
-import  { Request, Response } from 'express';
+import  express  from 'express';
 
 import jwt from "jsonwebtoken";
 import prisma from '../../database';
 
 const jwtSecret = process.env.JWT_SECRET as string;
 
-export const emailVerification = async (req : Request, res : Response) => {
+export const emailVerification = async (req : express.Request, res : express.Response) => {
   try {
     // console.log("Email Verification Endpoint Hit");
 
@@ -54,6 +54,7 @@ export const emailVerification = async (req : Request, res : Response) => {
     res.status(200).json({
       message: "Email verified successfully.",
       jwt: jwtToken,
+      role : updatedUser.role,
     });
   
     try {

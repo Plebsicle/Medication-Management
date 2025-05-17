@@ -1,7 +1,7 @@
-import  { Request, Response } from 'express';
+import  express  from 'express';
 import prisma from '../../database';
 
-export const getHealthRecords = async (req : Request,res : Response)=>{
+export const getHealthRecords = async (req : express.Request,res : express.Response)=>{
    const email = req.userEmail;
     try{
         const user = await prisma.user.findFirst({
@@ -30,7 +30,7 @@ export const getHealthRecords = async (req : Request,res : Response)=>{
     }
 }
 
-export const postHealthRecords = async (req : Request, res : Response) => {
+export const postHealthRecords = async (req : express.Request, res : express.Response) => {
     const email = req.userEmail;
 
     try {
