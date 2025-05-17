@@ -1,25 +1,24 @@
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './App.css';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
-import Signup from './pages/signup';
-import Signin from './pages/signin';
-import Dashboard from './pages/dashboard';
-import ForgetPassword from './pages/forgetpassword';
-import VerifyEmail from './pages/verify-email';
-import RedirectVerify from './pages/redirect-verify';
-import VerifyEmailManual from './pages/verify-email-manual';
-import AddMedication from './pages/addMedication';
-import MedicationHistory from './pages/medicationHistory';
-import Profile from './pages/profile';
-import HospitalLocation from './pages/hopitalLocation';
-import HealthRecords from './pages/HealthRecords';
-import HealthRecordsForm from './pages/healthRecordsForm';
-import NotificationSystem from './pages/notification';
-import MedicationDetails from './pages/medicationDetails';
-import ResetPassword from './pages/resetPassword';
-import EmailSent from './pages/emailSent';
-import Chatbot from './pages/chatbot';
-import MedicalDocuments from './pages/health-records';
+import Signup from './pages/auth/signup';
+import Signin from './pages/auth/signin';
+import Dashboard from './pages/dashboard/dashboard';
+import ForgetPassword from './pages/user/forgetpassword';
+import VerifyEmail from './pages/email/verify-email';
+import RedirectVerify from './pages/user/redirect-verify';
+import VerifyEmailManual from './pages/email/verify-email-manual';
+import AddMedication from './pages/medication/addMedication';
+import MedicationHistory from './pages/medication/medicationHistory';
+import Profile from './pages/user/profile';
+import HospitalLocation from './pages/miscellanous/hopitalLocation';
+import HealthRecords from './pages/health/HealthRecords';
+import HealthRecordsForm from './pages/health/healthRecordsForm';
+import MedicationDetails from './pages/medication/medicationDetails';
+import ResetPassword from './pages/user/resetPassword';
+import EmailSent from './pages/email/emailSent';
+import Chatbot from './pages/chats/chatbot';
+import MedicalDocuments from './pages/health/medicalDocuments';
 
 const GoogleclientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -28,10 +27,7 @@ function App() {
     <GoogleOAuthProvider clientId={GoogleclientId}>
       <BrowserRouter>
         <Routes>
-          {/* Redirect root to dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-          {/* Auth Routes */}
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin/*" element={<Signin />} />
           <Route path="/forgetpassword" element={<ForgetPassword />} />
@@ -40,8 +36,6 @@ function App() {
           <Route path="/manualEmailVerification" element={<VerifyEmailManual />} />
           <Route path="/resetPassword/:email" element={<ResetPassword />} />
           <Route path="/emailSent" element={<EmailSent />} />
-
-          {/* Protected Routes with layout */}
           <Route
             path="/*"
             element={
@@ -53,7 +47,6 @@ function App() {
                   <Route path="hospital-location" element={<HospitalLocation />} />
                   <Route path="health-records" element={<HealthRecords />} />
                   <Route path="healthRecordsForm" element={<HealthRecordsForm />} />
-                  <Route path="notifications" element={<NotificationSystem />} />
                   <Route path="medications/:medication_id" element={<MedicationDetails />} />
                   <Route path="chatbot" element={<Chatbot />} />
                   <Route path="medical-documents" element={<MedicalDocuments />} />

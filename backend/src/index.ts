@@ -1,4 +1,4 @@
-// Load environment variables first
+
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -6,34 +6,28 @@ import express from 'express'
 import cors from 'cors'
 import http from 'http';
 import { Server } from 'socket.io';
-import jwt from 'jsonwebtoken';
 
-// Import database after environment variables are loaded
-import prisma from './database';
-
-import Signup from './routes/signup';
-import Signin from './routes/signin'
-import emailVerification from './routes/emailVerification'
-import isverified from './routes/isverified'
-import manualEmail from './routes/manualEmail'
-import addMedication from './routes/addMedication'
-import verifyToken from './routes/verifyToken'
-import toggleNotification from './routes/toggleNotification'
-import deleteMedication from './routes/deleteMedication'
-import medicationHistory from './routes/medicationHistory'
-import serveProfile from './routes/serveProfile'
-import profilePhoto from './routes/profilePhoto'
-import path from 'path';
-import hospitalLocation from './routes/hospitalLocation'
-import healthRecords from './routes/healthRecords'
-import medicationDetails from './routes/medicationDetails'
-import medicationChanges from './routes/medicationChanges'
-import forgetPassword from './routes/forgetPassword'
-import chatbot from './routes/chatbot';
-import medicalDocuments from './routes/medicalDocuments';
+import Signup from './routes/auth/signup';
+import Signin from './routes/auth/signin'
+import emailVerification from './routes/email/email'
+import isverified from './routes/user/manualEmail'
+import manualEmail from './routes/user/manualEmail'
+import addMedication from './routes/medication/medication'
+import verifyToken from './routes/user/verifyToken'
+import toggleNotification from './routes/user/toggleNotification'
+import deleteMedication from './routes/medication/medication'
+import medicationHistory from './routes/medication/medicationHistory'
+import serveProfile from './routes/user/serveProfile'
+import profilePhoto from './routes/user/profilePhoto'
+import hospitalLocation from './routes/miscellanous/hospitalLocation'
+import healthRecords from './routes/health/healthRecords'
+import medicationDetails from './routes/medication/medicationDetails'
+import medicationChanges from './routes/medication/medicationChanges'
+import forgetPassword from './routes/user/forgetPassword'
+import chatbot from './routes/chat/chatbot';
+import medicalDocuments from './routes/health/medicalDocuments';
 import sendNotifications from './_utilities/schedule';
-import { processMedicalQuery } from './_utilities/chatbot';
-import { incrementAiPromptCount } from './_utilities/aiLimitMiddleware';
+import { configureSocket } from './AI-Socket';
 
 const app = express();
 const server = http.createServer(app);
@@ -43,83 +37,12 @@ const io = new Server(server, {
     methods: ["GET", "POST"]
   }
 });
-const MAX_AI_PROMPTS = 10;
+
+configureSocket(io);
 
 app.use(cors());
 app.use(express.json());
 
-// Socket.IO handler for chatbot
-io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
-
-  socket.on('authenticate', (token) => {
-    try {
-      console.log(token);
-      token = token.replace(/^"|"$/g, '');
-      if (!token) {
-        socket.emit('error', 'No authentication token provided');
-        return;
-      }
-      
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: number };
-      socket.data.userId = decoded.userId;
-      console.log('User authenticated with ID:', decoded.userId);
-      
-      // Explicitly acknowledge successful authentication
-      socket.emit('authenticated', { success: true });
-    } catch (error) {
-      console.error('Authentication failed:', error);
-      socket.emit('error', 'Authentication failed');
-    }
-  });
-
-  socket.on('chat message', async (message) => {
-    try {
-      if (!socket.data || !socket.data.userId) {
-        socket.emit('error', 'Authentication required');
-        return;
-      }
-
-      const userId = socket.data.userId;
-      
-      // Use raw query to get the current AI prompts count
-      const rawUser = await prisma.$queryRaw`SELECT ai_prompts_count FROM "user" WHERE id = ${userId}` as { ai_prompts_count: number }[];
-
-      if (!rawUser || rawUser.length === 0) {
-        socket.emit('error', 'User not found');
-        return;
-      }
-      
-      if (rawUser[0].ai_prompts_count >= MAX_AI_PROMPTS) {
-        socket.emit('limit reached', {
-          error: 'AI prompt limit reached',
-          message: 'You have reached your limit of 10 AI prompts. Please contact support for more information.'
-        });
-        return;
-      }
-
-      console.log(`Processing message from user ${userId}: ${message}`);
-      const response = await processMedicalQuery(userId, message);
-      
-      // Increment the user's AI prompt count
-      await incrementAiPromptCount(userId);
-      
-      socket.emit('chat response', response);
-    } catch (error) {
-      console.error('Error processing message:', error);
-      socket.emit('error', 'Failed to process message');
-    }
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
-
-  // Handle errors
-  socket.on('error', (error) => {
-    console.error('Socket error:', error);
-  });
-});
 
 app.use('/signup', Signup);
 app.use('/signin',Signin);
@@ -142,7 +65,6 @@ app.use('/chatbot', chatbot);
 app.use('/medicalDocuments', medicalDocuments);
 sendNotifications();
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = 8000;
 server.listen(PORT, () => {

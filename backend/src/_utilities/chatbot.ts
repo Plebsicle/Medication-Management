@@ -105,7 +105,6 @@ export async function getChatHistory(userId: number) {
     });
   } catch (error) {
     console.error('Error fetching chat history:', error);
-    // Return empty array if database query fails
     return [];
   }
 } 
