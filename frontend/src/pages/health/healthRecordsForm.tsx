@@ -9,6 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { AppLayout } from '@/components/layout/AppLayout';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 export default function HealthRecordsForm() {
     const [formData, setFormData] = useState({
         record_date: '',
@@ -41,7 +43,7 @@ export default function HealthRecordsForm() {
                 return;
             }
 
-            const response = await axios.post('http://localhost:8000/healthRecords', formData, {
+            const response = await axios.post(`${BACKEND_URL}/healthRecords`, formData, {
                 headers: {
                     Authorization: `Bearer ${jwt}`
                 }

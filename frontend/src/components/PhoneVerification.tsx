@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 interface PhoneVerificationProps {
   googleData: {
     email: string;
@@ -35,7 +37,7 @@ export function PhoneVerification({ googleData, onClose }: PhoneVerificationProp
     setIsSubmitting(true);
     
     try {
-      const response = await axios.post('http://localhost:8000/signup/google-phone', {
+      const response = await axios.post(`${BACKEND_URL}/signup/google-phone`, {
         ...googleData,
         phone_number: phoneNumber
       });

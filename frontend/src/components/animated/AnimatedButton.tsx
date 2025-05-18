@@ -1,9 +1,9 @@
 import { Button, ButtonProps } from "@/components/ui/button";
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 import { forwardRef } from "react";
 
 // Create a motion version of the Button component
-const MotionButton = motion(Button);
+// const MotionButton = motion(Button);
 
 export interface AnimatedButtonProps extends ButtonProps {
   whileHoverScale?: number;

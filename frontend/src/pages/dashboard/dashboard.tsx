@@ -11,6 +11,8 @@ import { PlusCircle, Bell, Trash2, Clock, MessageSquare, Stethoscope } from "luc
 import { AppLayout } from '@/components/layout/AppLayout';
 import formatIntakeTime from "@/lib/formatIntakeTime";
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 type FormDataType = {
   medication_id: number;
   name: string;
@@ -59,7 +61,7 @@ export default function Dashboard() {
   async function verifyJwtToken(jwt: string) {
     try {
       const response = await axios.post(
-        "http://localhost:8000/verifyToken",
+        `${BACKEND_URL}/verifyToken`,
         {},
         {
           headers: {
@@ -83,7 +85,7 @@ export default function Dashboard() {
         }
       }
 
-      const medicationResponse = await axios.get("http://localhost:8000/addMedication", {
+      const medicationResponse = await axios.get(`${BACKEND_URL}/addMedication`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
@@ -107,7 +109,7 @@ export default function Dashboard() {
   async function loadAvailableDoctors(jwt: string) {
     try {
       setLoadingDoctors(true);
-      const response = await axios.get("http://localhost:8000/chats/available-doctors", {
+      const response = await axios.get(`${BACKEND_URL}/chats/available-doctors`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
@@ -131,7 +133,7 @@ export default function Dashboard() {
     try {
       const updatedNotification = !medication.notification_on;
       await axios.put(
-        `http://localhost:8000/toggleNotification`,
+        `${BACKEND_URL}/toggleNotification`,
         { notification_on: updatedNotification, medication },
         {
           headers: {
@@ -159,7 +161,7 @@ export default function Dashboard() {
     const medication = medications[index];
     try {
       await axios.post(
-        `http://localhost:8000/deleteMedication`,
+        `${BACKEND_URL}/deleteMedication`,
         { medicationFull: medication },
         {
           headers: {
@@ -182,7 +184,7 @@ export default function Dashboard() {
       if (!jwt) return;
       
       const response = await axios.post(
-        "http://localhost:8000/chats/initiate",
+        `${BACKEND_URL}/chats/initiate`,
         { doctorId },
         {
           headers: {

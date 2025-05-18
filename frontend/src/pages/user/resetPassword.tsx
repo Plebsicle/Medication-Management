@@ -4,13 +4,15 @@ import axios from 'axios'
 import {useParams} from 'react-router-dom'
 import {toast,Bounce} from 'react-toastify'
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/"
+
 export default function ForgetPassword(){
 
     const [password,setPassword] = useState<String>("");
     const { email } = useParams<{ email: string }>();
 
     async function forgetPasswordHandler(){
-        const response = await axios.put('http://localhost:8000/forgetPassword',{password,email});
+        const response = await axios.put(`${BACKEND_URL}/forgetPassword`,{password,email});
         if(response.data.passwordChanged){
             const channel = new BroadcastChannel('auth_channel');
             channel.postMessage({ type: 'passwordChanged' });

@@ -3,17 +3,18 @@ import  { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
 export default function VerifyEmailManual(){
     const [email, setEmail] = useState<string>("");
     const navigate = useNavigate();
     async function manualEmailHandler(){
         try{
-            await axios.post('http://localhost:8000/manualEmail',{email});
+            await axios.post(`${BACKEND_URL}/manualEmail`,{email});
             navigate('/redirect-verify')
             const interval = setInterval(async () => {
                 try {
-                  const verifiedResponse = await axios.post('http://localhost:8000/isverified', {
+                  const verifiedResponse = await axios.post(`${BACKEND_URL}/isverified`, {
                     email
                   });
                   if (verifiedResponse.data.verified) {

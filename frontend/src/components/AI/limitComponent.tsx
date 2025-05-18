@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 interface AiLimitBadgeProps {
   className?: string;
 }
@@ -23,7 +25,7 @@ const AiLimitBadge: React.FC<AiLimitBadgeProps> = ({ className = '' }) => {
           return;
         }
         
-        const response = await axios.get('http://localhost:8000/chatbot/usage', {
+        const response = await axios.get(`${BACKEND_URL}/chatbot/usage`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

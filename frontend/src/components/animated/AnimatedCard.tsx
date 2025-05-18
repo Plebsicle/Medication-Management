@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { forwardRef, ReactNode, HTMLAttributes } from "react";
+import { forwardRef, HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export interface AnimatedCardProps extends HTMLAttributes<HTMLDivElement> {
@@ -27,7 +27,7 @@ export const AnimatedCard = forwardRef<HTMLDivElement, AnimatedCardProps>(
               }
             : undefined
         }
-        {...props}
+        {...props as any}
       >
         <Card className={cn(hoverEffect ? "transition-shadow" : "", className)}>
           {children}

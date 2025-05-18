@@ -19,7 +19,7 @@ const DoctorChat: React.FC = () => {
   const [chat, setChat] = useState<Chat | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { loading: authLoading } = useAuth();
 
   useEffect(() => {
     const loadChat = async () => {

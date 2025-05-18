@@ -4,12 +4,15 @@ import { useState } from 'react';
 import axios from 'axios'
 import {toast,Bounce} from 'react-toastify'
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
+
 export default function ForgetPassword(){
     const navigate= useNavigate();
     const [email,setEmail] = useState<String>("");
 
     async function forgetPasswordHandler(){
-        const response = await axios.post("http://localhost:8000/forgetPassword",{email});
+        const response = await axios.post(`${BACKEND_URL}/forgetPassword`,{email});
         if(response.data.isEmailSent){
             navigate('/emailSent');
         }

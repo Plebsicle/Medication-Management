@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,9 +18,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AnimatedButton, AnimatedCard } from "@/components/animated";
+import { AnimatedButton } from "@/components/animated";
 import { motion, AnimatePresence } from "framer-motion";
 import { staggerContainer, fadeUp } from "@/components/animated/animations";
+
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
 interface Document {
   id: string;
@@ -39,11 +40,9 @@ export default function HealthRecords() {
   const [documentName, setDocumentName] = useState("");
   const [documentType, setDocumentType] = useState("medical_report");
   const [isUploading, setIsUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // const [setPreviewUrl] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
-
-  const BASE_URL = "http://localhost:8000";
 
   useEffect(() => {
     fetchDocuments();
@@ -59,7 +58,7 @@ export default function HealthRecords() {
         return;
       }
 
-      const response = await axios.get(`${BASE_URL}/medicalDocuments`, {
+      const response = await axios.get(`${BACKEND_URL}/medicalDocuments`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -113,7 +112,7 @@ export default function HealthRecords() {
       
       // Step 1: Get a presigned URL from the backend with the document name and type
       const presignedUrlResponse = await axios.post(
-        `${BASE_URL}/medicalDocuments/getUploadUrl`,
+        `${BACKEND_URL}/medicalDocuments/getUploadUrl`,
         {
           name: documentName,
           type: documentType,
@@ -153,7 +152,7 @@ export default function HealthRecords() {
 
       // Step 3: Confirm the upload completion to the backend
       await axios.post(
-        `${BASE_URL}/medicalDocuments/${documentId}/confirmUpload`,
+        `${BACKEND_URL}/medicalDocuments/${documentId}/confirmUpload`,
         {},
         {
           headers: {
@@ -190,7 +189,7 @@ export default function HealthRecords() {
       }
 
       // Send the document ID and filename to the backend for deletion
-      const response = await axios.delete(`${BASE_URL}/medicalDocuments/${documentToDelete.id}`, {
+      const response = await axios.delete(`${BACKEND_URL}/medicalDocuments/${documentToDelete.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -222,20 +221,20 @@ export default function HealthRecords() {
 
       // If we already have the URL, just use it
       if (document.url) {
-        setPreviewUrl(document.url);
+        // setPreviewUrl(document.url);
         window.open(document.url, '_blank');
         return;
       }
 
       // Otherwise, get a new signed URL
-      const response = await axios.get(`${BASE_URL}/medicalDocuments/${document.id}/view`, {
+      const response = await axios.get(`${BACKEND_URL}/medicalDocuments/${document.id}/view`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       if (response.data.url) {
-        setPreviewUrl(response.data.url);
+        // setPreviewUrl(response.data.url);
         window.open(response.data.url, '_blank');
       }
     } catch (error) {

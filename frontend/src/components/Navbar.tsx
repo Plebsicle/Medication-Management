@@ -3,6 +3,8 @@ import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 const DashboardTopBar: React.FC = () => {
     const [menuVisible, setMenuVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -15,7 +17,7 @@ const DashboardTopBar: React.FC = () => {
     const handleSearch = async () => {
         console.log("Search Query:", searchQuery);
         try{
-            const response = await axios.post('http://localhost:8000/searchHandle',{
+            const response = await axios.post(`${BACKEND_URL}/searchHandle`,{
                 searchQuery
             })
             if(response.data.details){

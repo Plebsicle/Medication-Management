@@ -9,7 +9,7 @@ import { Camera, User, Mail, Shield, Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { AppLayout } from "@/components/layout/AppLayout";
 
-const BASE_URL = "http://localhost:8000";
+const BACKEND_URL =  import.meta.env.VITE_API_URL || "http://localhost:8000/"
 
 export default function Profile() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -36,7 +36,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const { data } = await axios.get(`${BASE_URL}/serveProfile`, {
+        const { data } = await axios.get(`${BACKEND_URL}/serveProfile`, {
           headers: getAuthHeaders(),
         });
 
@@ -50,7 +50,7 @@ export default function Profile() {
         });
 
         if (data.path) {
-          const imageUrlRes = await axios.get(`${BASE_URL}/serveProfile/getPhotoUrl`, {
+          const imageUrlRes = await axios.get(`${BACKEND_URL}/serveProfile/getPhotoUrl`, {
             headers: getAuthHeaders(),
           });
           if (imageUrlRes.data.url) setImagePreview(imageUrlRes.data.url);
@@ -82,7 +82,7 @@ export default function Profile() {
 
       // Step 1: Request a presigned URL from the backend
       const { data } = await axios.post(
-        `${BASE_URL}/serveProfile/profilePhoto`,
+        `${BACKEND_URL}/serveProfile/profilePhoto`,
         { fileType: file.type },
         { headers: getAuthHeaders() }
       );
@@ -107,7 +107,7 @@ export default function Profile() {
 
       // Step 3: Get a signed URL for viewing the uploaded image
       const { data: urlData } = await axios.get(
-        `${BASE_URL}/serveProfile/getPhotoUrl`,
+        `${BACKEND_URL}/serveProfile/getPhotoUrl`,
         { headers: getAuthHeaders() }
       );
 
@@ -132,7 +132,7 @@ export default function Profile() {
 
   const handleSaveClick = async (field: string) => {
     try {
-      await axios.post(`${BASE_URL}/serveProfile`, {
+      await axios.post(`${BACKEND_URL}/serveProfile`, {
         [field]: updatedValue,
       }, {
         headers: getAuthHeaders(),
@@ -154,7 +154,7 @@ export default function Profile() {
     setProfileData(prev => prev ? { ...prev, [type]: newValue } : null);
 
     try {
-      const { data } = await axios.post(`${BASE_URL}/serveProfile/updateNotificationPreferences`, {
+      const { data } = await axios.post(`${BACKEND_URL}/serveProfile/updateNotificationPreferences`, {
         [type]: newValue,
       }, {
         headers: getAuthHeaders(),

@@ -1,13 +1,13 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000';
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export const fileApi = {
   getUploadUrl: async (doctorId: number, patientId: number, fileName: string, fileType: string) => {
     const token = localStorage.getItem('jwt');
     
     const response = await axios.post(
-      `${API_URL}/files/upload`,
+      `${BACKEND_URL}/files/upload`,
       {
         doctorId,
         patientId,
@@ -28,7 +28,7 @@ export const fileApi = {
     const token = localStorage.getItem('jwt');
     
     const response = await axios.post(
-      `${API_URL}/files/confirm`,
+      `${BACKEND_URL}/files/confirm`,
       {
         doctorId,
         patientId,
@@ -46,7 +46,7 @@ export const fileApi = {
   },
   
   uploadFile: async (file: File, doctorId: number, patientId: number) => {
-    const token = localStorage.getItem('jwt');
+    // const token = localStorage.getItem('jwt');
     
     try {
       // Step 1: Get a presigned URL
@@ -75,7 +75,7 @@ export const fileApi = {
     const token = localStorage.getItem('jwt');
     
     const response = await axios.get(
-      `${API_URL}/files?doctorId=${doctorId}&patientId=${patientId}`,
+      `${BACKEND_URL}/files?doctorId=${doctorId}&patientId=${patientId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -90,7 +90,7 @@ export const fileApi = {
     const token = localStorage.getItem('jwt');
     
     const response = await axios.delete(
-      `${API_URL}/files/${fileId}`,
+      `${BACKEND_URL}/files/${fileId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`

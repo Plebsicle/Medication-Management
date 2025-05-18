@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { MessageSquare, Users } from "lucide-react";
 import { AppLayout } from '@/components/layout/AppLayout';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 interface Patient {
   id: number;
   name: string;
@@ -40,7 +42,7 @@ export default function DoctorDashboard() {
   async function verifyJwtToken(jwt: string) {
     try {
       const response = await axios.post(
-        "http://localhost:8000/verifyToken",
+        `${BACKEND_URL}/verifyToken`,
         {},
         {
           headers: {
@@ -69,7 +71,7 @@ export default function DoctorDashboard() {
     try {
       setLoading(true);
       // Get all chats and extract patients
-      const response = await axios.get("http://localhost:8000/chats/user-chats", {
+      const response = await axios.get(`${BACKEND_URL}/chats/user-chats`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },

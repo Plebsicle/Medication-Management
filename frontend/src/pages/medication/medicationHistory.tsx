@@ -7,6 +7,8 @@ import { Clock, Calendar, Pill, Info } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/layout/AppLayout";
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 type FormDataType = {
     name: string;
     type: string;
@@ -59,7 +61,7 @@ export default function MedicationHistory() {
                     return;
                 }
 
-                const response = await axios.get('http://localhost:8000/medicationHistory', {
+                const response = await axios.get(`${BACKEND_URL}/medicationHistory`, {
                     headers: {
                         Authorization: `Bearer ${jwt}`
                     }

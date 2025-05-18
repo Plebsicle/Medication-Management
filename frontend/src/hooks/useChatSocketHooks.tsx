@@ -3,6 +3,8 @@ import { io, Socket } from 'socket.io-client';
 import axios from 'axios';
 import { useAuth } from './useAuth';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 export interface Message {
   id?: number;
   content: string;
@@ -38,7 +40,7 @@ export function useChatSocket(): UseChatSocketReturn {
     // Refresh user data to ensure we have the latest
     refreshUserData();
 
-    const socketInstance = io('http://localhost:8000', {
+    const socketInstance = io(BACKEND_URL, {
       reconnectionAttempts: 3,
       timeout: 10000,
       auth: {
@@ -80,7 +82,7 @@ export function useChatSocket(): UseChatSocketReturn {
 
     const fetchChatHistory = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/chatbot/history', {
+        const response = await axios.get(`${BACKEND_URL}/chatbot/history`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

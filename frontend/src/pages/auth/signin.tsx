@@ -11,6 +11,8 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 export default function Signin() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -19,7 +21,7 @@ export default function Signin() {
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       const googleToken = credentialResponse.credential;
-      const response = await axios.post('http://localhost:8000/signin', {
+      const response = await axios.post(`${BACKEND_URL}/signin`, {
         googleId: googleToken,
       });
   
@@ -54,7 +56,7 @@ export default function Signin() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8000/signin', {
+      const response = await axios.post(`${BACKEND_URL}/signin`, {
         email,
         password
       });

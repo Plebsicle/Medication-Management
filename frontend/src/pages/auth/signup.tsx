@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { PhoneVerification } from '@/components/PhoneVerification';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 type Role = 'patient' | 'caregiver' | 'doctor';
 
 interface GoogleData {
@@ -34,7 +36,7 @@ export default function Signup() {
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     try {
       const googleToken = credentialResponse.credential;
-      const response = await axios.post('http://localhost:8000/signup', {
+      const response = await axios.post(`${BACKEND_URL}/signup`, {
         googleId: googleToken,
         role,
       });
@@ -71,7 +73,7 @@ export default function Signup() {
 
   async function manualSignuphandler() {
     try {
-      const response = await axios.post('http://localhost:8000/signup', {
+      const response = await axios.post(`${BACKEND_URL}/signup`, {
         name,
         email,
         password,
@@ -86,7 +88,7 @@ export default function Signup() {
         navigate('/redirect-verify');
         const interval = setInterval(async () => {
           try {
-            const verifiedResponse = await axios.post('http://localhost:8000/isverified', {
+            const verifiedResponse = await axios.post(`${BACKEND_URL}/isverified`, {
               email,
             });
             if (verifiedResponse.data.verified) {

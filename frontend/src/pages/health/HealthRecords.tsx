@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PlusCircle, Activity, Heart, Thermometer, Scale, FileText } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 type healthrecord = {
     record_id: number;
     record_date: Date;
@@ -30,7 +32,7 @@ export default function HealthRecords() {
                     return;
                 }
 
-                const response = await axios.get("http://localhost:8000/healthRecords", {
+                const response = await axios.get(`${BACKEND_URL}/healthRecords`, {
                     headers: { Authorization: `Bearer ${jwt}` },
                 });
 

@@ -8,6 +8,8 @@ import { MapPin, ExternalLink, Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 // import { MainLayout } from "@/components/layout/MainLayout";
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+
 type Hospital = {
     id: number;
     name: string | null;
@@ -29,7 +31,7 @@ export default function HospitalLocation() {
                 navigator.geolocation.getCurrentPosition(resolve, reject)
             );
 
-            const response = await axios.post("http://localhost:8000/hospitalLocation", {
+            const response = await axios.post(`${BACKEND_URL}/hospitalLocation`, {
                 latitude: coords.latitude,
                 longitude: coords.longitude,
                 radius: 5000,
