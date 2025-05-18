@@ -4,6 +4,8 @@ import ChatWindow from '../../components/chat/ChatWindow';
 import { chatApi } from '../../lib/api/chat';
 import { useAuth } from '../../hooks/useAuth';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { ArrowLeft, Stethoscope } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface Chat {
   chat_id: number;
@@ -18,10 +20,12 @@ const DoctorChat: React.FC = () => {
   const { chatId } = useParams<{ chatId: string }>();
   const [chat, setChat] = useState<Chat | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
   const { loading: authLoading } = useAuth();
 
   useEffect(() => {
+    setIsVisible(true);
     const loadChat = async () => {
       if (!chatId) return;
       
@@ -51,9 +55,11 @@ const DoctorChat: React.FC = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+      <AppLayout>
+        <div className="flex items-center justify-center h-screen bg-gradient-to-b from-blue-50 to-white">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </AppLayout>
     );
   }
 
@@ -63,20 +69,20 @@ const DoctorChat: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="flex flex-col h-[calc(100vh-2rem)]">
-        <header className="bg-white shadow rounded-lg mb-4">
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center">
-              <button
+      <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-12">
+        {/* Header Section */}
+        <section className={`relative pt-8 pb-6 px-4 md:px-6 lg:px-8 transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center mb-6">
+              <Button 
+                variant="ghost" 
+                className="mr-4 rounded-full hover:bg-blue-100 text-blue-600"
                 onClick={() => navigate('/doctor/chats')}
-                className="mr-4 text-gray-500 hover:text-gray-700"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
               <div className="flex items-center">
-                <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200 mr-3">
+                <div className="h-14 w-14 rounded-full overflow-hidden bg-blue-100 shadow-md mr-4">
                   <img
                     src={chat.patient.profile_photo_path || 'https://cdn-icons-png.flaticon.com/512/147/147142.png'}
                     alt={chat.patient.name}
@@ -84,20 +90,30 @@ const DoctorChat: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <h1 className="text-lg font-medium">{chat.patient.name}</h1>
-                  <p className="text-xs text-gray-500">Patient</p>
+                  <h1 className="text-xl font-bold text-gray-900">{chat.patient.name}</h1>
+                  <div className="flex items-center text-gray-600">
+                    <span className="flex items-center text-sm bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                      <Stethoscope className="h-3 w-3 mr-1" />
+                      Patient
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </header>
+        </section>
 
-        <div className="flex-1 overflow-hidden bg-white rounded-lg">
-          <ChatWindow />
+        {/* Chat Section */}
+        <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+            <div className="flex-1 h-[calc(75vh)]">
+              <ChatWindow />
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
     </AppLayout>
   );
 };
 
-export default DoctorChat; 
+export default DoctorChat;

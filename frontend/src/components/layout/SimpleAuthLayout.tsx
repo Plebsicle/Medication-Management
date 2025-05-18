@@ -6,8 +6,8 @@ import { Toaster } from "sonner";
 
 interface AuthLayoutProps {
   children: ReactNode;
-  title: string;
-  description: string;
+  title: ReactNode;
+  description: ReactNode;
   footerText?: string;
   footerLink?: {
     text: string;

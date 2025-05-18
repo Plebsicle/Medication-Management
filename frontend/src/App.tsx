@@ -1,6 +1,6 @@
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './App.css';
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Signup from './pages/auth/signup';
 import Signin from './pages/auth/signin';
 import Dashboard from './pages/dashboard/dashboard';
@@ -24,6 +24,7 @@ import PatientChatList from './pages/chats/PatientChatList';
 import DoctorChatList from './pages/chats/DoctorChatList';
 import PatientChat from './pages/chats/PatientChat';
 import DoctorChat from './pages/chats/DoctorChat';
+import Home from './pages/home/HomePage';
 import { AuthProvider } from './hooks/useAuth';
 import { SocketProvider } from './lib/socketContext';
 
@@ -36,7 +37,7 @@ function App() {
         <SocketProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path='/' element={<Home/>}/>
               <Route path="/signup" element={<Signup />} />
               <Route path="/signin/*" element={<Signin />} />
               <Route path="/forgetpassword" element={<ForgetPassword />} />
@@ -60,8 +61,6 @@ function App() {
                       <Route path="medications/:medication_id" element={<MedicationDetails />} />
                       <Route path="chatbot" element={<Chatbot />} />
                       <Route path="medical-documents" element={<MedicalDocuments />} />
-                      
-                      {/* Doctor-Patient Chat Routes */}
                       <Route path="patient/chats" element={<PatientChatList />} />
                       <Route path="patient/chat/:chatId" element={<PatientChat />} />
                       <Route path="doctor/chats" element={<DoctorChatList />} />

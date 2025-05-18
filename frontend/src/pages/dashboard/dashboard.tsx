@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, Bell, Trash2, Clock, MessageSquare, Stethoscope } from "lucide-react";
+import { PlusCircle, Bell, Trash2, Clock, MessageSquare, Stethoscope, ArrowRight } from "lucide-react";
 import { AppLayout } from '@/components/layout/AppLayout';
 import formatIntakeTime from "@/lib/formatIntakeTime";
 
@@ -42,8 +42,10 @@ export default function Dashboard() {
   const [userRole, setUserRole] = useState<string>('');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
-
+  const [isVisible, setIsVisible] = useState(false);
+  
   useEffect(() => {
+    setIsVisible(true);
     const checkAuth = async () => {
       const jwt = localStorage.getItem('jwt');
       if (!jwt) {
@@ -202,196 +204,250 @@ export default function Dashboard() {
     }
   };
 
-  // Helper to format intake time
-  
-
   return (
     <AppLayout>
-      <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>My Medications</CardTitle>
-              <CardDescription>Manage your medications and reminders</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Track your medications, set reminders, and manage your health routine.</p>
-            </CardContent>
-            <CardFooter>
-              <Button asChild>
+      <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-12">
+        {/* Hero Section */}
+        <section className={`relative pt-8 pb-10 px-4 md:px-6 lg:px-8 transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+          <div className="max-w-6xl mx-auto">
+            <div className="flex flex-col lg:flex-row items-center">
+              <div className="lg:w-1/2 space-y-4">
+                <div className="inline-block bg-blue-100 text-blue-700 rounded-full px-4 py-1 text-sm font-medium mb-2">
+                  Your Health Dashboard
+                </div>
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                  Welcome to your <span className="text-blue-600">MediTrack</span> Dashboard
+                </h1>
+                <p className="text-lg text-gray-600 max-w-xl">
+                  Track your medications, connect with doctors, and take control of your health journey.
+                </p>
+              </div>
+              <div className="lg:w-1/2 mt-6 lg:mt-0 flex justify-center">
+                <div className="relative w-full max-w-md aspect-square bg-blue-100/50 rounded-full flex items-center justify-center shadow-xl">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-100 to-indigo-50 opacity-50" />
+                  <div className="relative h-32 w-32 bg-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-5xl font-bold">M</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Access Cards */}
+        <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-2xl text-blue-600">My Medications</CardTitle>
+                <CardDescription>Manage your medications and reminders</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">Track your medications, set reminders, and manage your health routine.</p>
+              </CardContent>
+              <CardFooter>
+                <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl">
+                  <Link to="/addMedication" className="flex items-center gap-2">
+                    <PlusCircle className="h-4 w-4" />
+                    Add Medication
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-2xl text-blue-600">Doctor Consultations</CardTitle>
+                <CardDescription>Connect with doctors</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">Consult with doctors to get professional medical advice and guidance.</p>
+              </CardContent>
+              <CardFooter>
+                <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl">
+                  <Link to="/patient/chats" className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    Chat with Doctors
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+
+          {/* Available Doctors Section */}
+          {userRole !== 'doctor' && (
+            <div className={`mb-12 transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+              <div className="flex items-center mb-6">
+                <h2 className="text-2xl font-semibold text-gray-900">Available Doctors</h2>
+                <div className="ml-4 h-1 bg-blue-100 flex-grow rounded-full"></div>
+              </div>
+              
+              {loadingDoctors ? (
+                <div className="flex justify-center my-8">
+                  <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              ) : doctors.length === 0 ? (
+                <Card className="text-center p-8 mb-8 border-0 shadow-md bg-white">
+                  <CardContent>
+                    <p className="text-gray-500">No doctors available at the moment.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {doctors.slice(0, 3).map((doctor) => (
+                    <Card key={doctor.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center space-x-4">
+                          <div className="h-16 w-16 rounded-full overflow-hidden bg-blue-100 shadow-inner">
+                            <img
+                              src={doctor.profile_photo_path || 'https://cdn-icons-png.flaticon.com/512/147/147142.png'}
+                              alt={doctor.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <CardTitle className="text-xl text-blue-600">{doctor.name}</CardTitle>
+                            <CardDescription className="text-gray-600">{doctor.doctor?.speciality || 'Doctor'}</CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardFooter className="pt-4 flex justify-between">
+                        <Button 
+                          onClick={() => handleStartChat(doctor.id)} 
+                          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-2"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          Start Chat
+                        </Button>
+                        <Button variant="outline" asChild className="border-blue-300 text-blue-600 rounded-xl">
+                          <Link to="/patient/chats">
+                            <Stethoscope className="h-4 w-4 mr-2" />
+                            Profile
+                          </Link>
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+              )}
+              {doctors.length > 3 && (
+                <div className="flex justify-center mb-8">
+                  <Button variant="outline" asChild className="border-blue-300 text-blue-600 hover:bg-blue-50 rounded-xl">
+                    <Link to="/patient/chats" className="flex items-center gap-2">
+                      View All Doctors
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Medications Section */}
+          <div className={`transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center flex-grow">
+                <h2 className="text-2xl font-semibold text-gray-900">My Medications</h2>
+                <div className="ml-4 h-1 bg-blue-100 flex-grow rounded-full"></div>
+              </div>
+              <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl">
                 <Link to="/addMedication" className="flex items-center gap-2">
                   <PlusCircle className="h-4 w-4" />
                   Add Medication
                 </Link>
               </Button>
-            </CardFooter>
-          </Card>
+            </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Doctor Consultations</CardTitle>
-              <CardDescription>Connect with doctors</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Consult with doctors to get professional medical advice and guidance.</p>
-            </CardContent>
-            <CardFooter>
-              <Button asChild>
-                <Link to="/patient/chats" className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  Chat with Doctors
-                </Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
-
-        {/* Available Doctors Section */}
-        {userRole !== 'doctor' && (
-          <>
-            <h2 className="text-2xl font-semibold mb-4">Available Doctors</h2>
-            {loadingDoctors ? (
-              <div className="flex justify-center my-8">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-              </div>
-            ) : doctors.length === 0 ? (
-              <Card className="text-center p-8 mb-8">
-                <CardContent>
-                  <p className="text-gray-500">No doctors available at the moment.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                {doctors.slice(0, 3).map((doctor) => (
-                  <Card key={doctor.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center space-x-4">
-                        <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-200">
-                          <img
-                            src={doctor.profile_photo_path || 'https://cdn-icons-png.flaticon.com/512/147/147142.png'}
-                            alt={doctor.name}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
+            {isMedication ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {medications.map((medication, index) => (
+                  <Card key={index} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white overflow-hidden">
+                    <div className="h-2 bg-gradient-to-r from-blue-400 to-blue-600"></div>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-xl">{doctor.name}</CardTitle>
-                          <CardDescription>{doctor.doctor?.speciality || 'Doctor'}</CardDescription>
+                          <CardTitle className="text-xl text-blue-600">{medication.name}</CardTitle>
+                          <CardDescription>{medication.type}</CardDescription>
                         </div>
+                        <Badge variant={medication.notification_on ? "default" : "secondary"} className={medication.notification_on ? "bg-blue-500" : ""}>
+                          {medication.notification_on ? "Active" : "Inactive"}
+                        </Badge>
                       </div>
                     </CardHeader>
-                    <CardFooter className="pt-2 flex justify-between">
-                      <Button onClick={() => handleStartChat(doctor.id)} className="flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4" />
-                        Start Chat
-                      </Button>
-                      <Button variant="outline" asChild>
-                        <Link to="/patient/chats">
-                          <Stethoscope className="h-4 w-4 mr-2" />
-                          Profile
-                        </Link>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-blue-500" />
+                          <span className="text-sm text-gray-600">
+                            {medication.frequency} times per day
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-700">
+                          <strong>Dosage:</strong> {medication.dosage}
+                        </div>
+                        <div className="text-sm text-gray-700">
+                          <strong>Instructions:</strong> {medication.instructions}
+                        </div>
+                        <div className="text-sm text-gray-700">
+                          <strong>Intake Times:</strong>
+                          <ul className="list-disc list-inside">
+                            {medication.intake_times.map((time, i) => (
+                              <li key={i}>{formatIntakeTime(time)}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between bg-gray-50">
+                      <div className="flex items-center gap-2">
+                        <Bell className={`h-4 w-4 ${medication.notification_on ? "text-blue-500" : "text-gray-400"}`} />
+                        <Switch
+                          checked={medication.notification_on}
+                          onCheckedChange={() => toggleNotification(index)}
+                          className="data-[state=checked]:bg-blue-500"
+                        />
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => deleteMedication(index)}
+                        className="rounded-full h-8 w-8"
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </CardFooter>
                   </Card>
                 ))}
               </div>
-            )}
-            {doctors.length > 3 && (
-              <div className="flex justify-center mb-8">
-                <Button variant="outline" asChild>
-                  <Link to="/patient/chats">View All Doctors</Link>
-                </Button>
-              </div>
-            )}
-          </>
-        )}
-
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">My Medications</h1>
-          <Button asChild>
-            <Link to="/addMedication" className="flex items-center gap-2">
-              <PlusCircle className="h-4 w-4" />
-              Add Medication
-            </Link>
-          </Button>
-        </div>
-
-        {isMedication ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {medications.map((medication, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+            ) : (
+              <Card className="text-center p-8 border-0 shadow-md bg-white">
                 <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle>{medication.name}</CardTitle>
-                      <CardDescription>{medication.type}</CardDescription>
-                    </div>
-                    <Badge variant={medication.notification_on ? "default" : "secondary"}>
-                      {medication.notification_on ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
+                  <CardTitle className="text-2xl text-blue-600">No Medications Added</CardTitle>
+                  <CardDescription>
+                    Start by adding your first medication to track your health journey
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        {medication.frequency} times per day
-                      </span>
-                    </div>
-                    <div className="text-sm">
-                      <strong>Dosage:</strong> {medication.dosage}
-                    </div>
-                    <div className="text-sm">
-                      <strong>Instructions:</strong> {medication.instructions}
-                    </div>
-                    <div className="text-sm">
-                      <strong>Intake Times:</strong>
-                      <ul className="list-disc list-inside">
-                        {medication.intake_times.map((time, i) => (
-                          <li key={i}>{formatIntakeTime(time)}</li>
-                        ))}
-                      </ul>
+                <CardContent>
+                  <div className="flex justify-center my-6">
+                    <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center">
+                      <PlusCircle className="h-10 w-10 text-blue-500" />
                     </div>
                   </div>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <div className="flex items-center gap-2">
-                    <Bell className="h-4 w-4" />
-                    <Switch
-                      checked={medication.notification_on}
-                      onCheckedChange={() => toggleNotification(index)}
-                    />
-                  </div>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => deleteMedication(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
+                  <Button asChild className="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl">
+                    <Link to="/addMedication" className="flex items-center gap-2">
+                      <PlusCircle className="h-4 w-4" />
+                      Add Your First Medication
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
                   </Button>
-                </CardFooter>
+                </CardContent>
               </Card>
-            ))}
+            )}
           </div>
-        ) : (
-          <Card className="text-center p-8">
-            <CardHeader>
-              <CardTitle>No Medications Added</CardTitle>
-              <CardDescription>
-                Start by adding your first medication to track your health journey
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild className="mt-4">
-                <Link to="/addMedication" className="flex items-center gap-2">
-                  <PlusCircle className="h-4 w-4" />
-                  Add Your First Medication
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+        </div>
+      </main>
     </AppLayout>
   );
 }
