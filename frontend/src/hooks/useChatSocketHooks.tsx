@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import axios from 'axios';
+import { useAuth } from './useAuth';
 
 export interface Message {
   id?: number;
@@ -25,6 +26,7 @@ export function useChatSocket(): UseChatSocketReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [limitReached, setLimitReached] = useState(false);
   const socketRef = useRef<Socket | null>(null);
+  const { refreshUserData } = useAuth();
 
   useEffect(() => {
     const token = localStorage.getItem('jwt');
@@ -33,22 +35,22 @@ export function useChatSocket(): UseChatSocketReturn {
       return;
     }
 
+    // Refresh user data to ensure we have the latest
+    refreshUserData();
+
     const socketInstance = io('http://localhost:8000', {
       reconnectionAttempts: 3,
-      timeout: 10000
+      timeout: 10000,
+      auth: {
+        token
+      }
     });
 
     socketRef.current = socketInstance;
 
     socketInstance.on('connect', () => {
-      socketInstance.emit('authenticate', token);
-    });
-
-    socketInstance.on('authenticated', (data) => {
-      if (data.success) {
-        setIsConnected(true);
-        setConnectionError(null);
-      }
+      setIsConnected(true);
+      setConnectionError(null);
     });
 
     socketInstance.on('connect_error', () => {
@@ -78,7 +80,12 @@ export function useChatSocket(): UseChatSocketReturn {
 
     const fetchChatHistory = async () => {
       try {
-        const response = await axios.post('http://localhost:8000/chatbot/history', { token });
+        const response = await axios.get('http://localhost:8000/chatbot/history', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
         if (response.data.success) {
           setMessages(response.data.data);
         }
@@ -92,7 +99,7 @@ export function useChatSocket(): UseChatSocketReturn {
     return () => {
       socketInstance.disconnect();
     };
-  }, []);
+  }, [refreshUserData]);
 
   const sendMessage = (msg: string) => {
     if (!socketRef.current || !isConnected || limitReached) return;

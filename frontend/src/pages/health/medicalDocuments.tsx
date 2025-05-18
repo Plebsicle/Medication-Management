@@ -9,6 +9,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileUploader } from "@/components/file/FileUploader";
 import { FileIcon, FileTextIcon, ImageIcon, Trash2Icon, EyeIcon } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Document {
   id: string;
@@ -27,6 +37,8 @@ export default function HealthRecords() {
   const [documentType, setDocumentType] = useState("medical_report");
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
 
   const BASE_URL = "http://localhost:8000";
 
@@ -159,11 +171,14 @@ export default function HealthRecords() {
     }
   };
 
-  const handleDelete = async (document: Document) => {
-    if (!confirm(`Are you sure you want to delete "${document.name}"?`)) {
-      return;
-    }
-    console.log(document);
+  const handleDeleteClick = (document: Document) => {
+    setDocumentToDelete(document);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDelete = async () => {
+    if (!documentToDelete) return;
+    
     try {
       const token = localStorage.getItem("jwt");
       if (!token) {
@@ -172,12 +187,12 @@ export default function HealthRecords() {
       }
 
       // Send the document ID and filename to the backend for deletion
-      const response = await axios.delete(`${BASE_URL}/medicalDocuments/${document.id}`, {
+      const response = await axios.delete(`${BASE_URL}/medicalDocuments/${documentToDelete.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         data: {
-          filename: document.filename // Send the S3 filename for deletion
+          filename: documentToDelete.filename // Send the S3 filename for deletion
         }
       });
 
@@ -188,6 +203,9 @@ export default function HealthRecords() {
     } catch (error) {
       console.error("Error deleting document:", error);
       toast.error("Failed to delete document");
+    } finally {
+      setShowDeleteDialog(false);
+      setDocumentToDelete(null);
     }
   };
 
@@ -297,7 +315,7 @@ export default function HealthRecords() {
                             <Button
                               variant="destructive"
                               size="sm"
-                              onClick={() => handleDelete(doc)}
+                              onClick={() => handleDeleteClick(doc)}
                               className="flex items-center"
                             >
                               <Trash2Icon className="h-4 w-4 mr-1" />
@@ -385,6 +403,21 @@ export default function HealthRecords() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{documentToDelete?.name}"? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );

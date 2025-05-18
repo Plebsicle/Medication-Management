@@ -18,29 +18,41 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const { user } = useAuth();
 
   useEffect(() => {
-    // Only connect if user is authenticated
-    if (user) {
-      const socketInstance = io(import.meta.env.VITE_API_URL || 'http://localhost:8000', {
-        transports: ['websocket', 'polling'],
-      });
+    // Create socket connection
+    const socketInstance = io(import.meta.env.VITE_API_URL || 'http://localhost:8000', {
+      transports: ['websocket', 'polling'],
+      auth: {
+        token: localStorage.getItem('jwt') || ''
+      }
+    });
 
-      socketInstance.on('connect', () => {
-        console.log('Socket connected');
-        setIsConnected(true);
-      });
+    socketInstance.on('connect', () => {
+      console.log('Socket connected');
+      setIsConnected(true);
+    });
 
-      socketInstance.on('disconnect', () => {
-        console.log('Socket disconnected');
-        setIsConnected(false);
-      });
+    socketInstance.on('disconnect', () => {
+      console.log('Socket disconnected');
+      setIsConnected(false);
+    });
 
-      setSocket(socketInstance);
+    // Handle connection error
+    socketInstance.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      setIsConnected(false);
+    });
 
-      return () => {
-        socketInstance.disconnect();
-      };
-    }
-  }, [user]);
+    // Handle authentication error
+    socketInstance.on('error', (error) => {
+      console.error('Socket error:', error);
+    });
+
+    setSocket(socketInstance);
+
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, []);
 
   const joinChat = (chatId: number) => {
     if (socket && isConnected) {
@@ -55,11 +67,18 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const sendMessage = (chatId: number, content: string) => {
-    if (socket && isConnected && user) {
+    if (socket && isConnected) {
+      console.log('Sending message in chat:', chatId);
+      
+      // No need to send user ID, it will be extracted from JWT on the server
       socket.emit('message:send', {
         chatId,
-        senderId: user.id,
         content,
+      });
+    } else {
+      console.error('Cannot send message: socket not connected', { 
+        socket: !!socket, 
+        isConnected
       });
     }
   };

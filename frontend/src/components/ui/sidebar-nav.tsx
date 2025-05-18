@@ -1,13 +1,13 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
-import { 
-  LayoutDashboard, 
+import {
+  LayoutDashboard,
   Pill,
-  Files, 
-  Hospital, 
-  MessageSquare, 
-  LogOut, 
+  Files,
+  Hospital,
+  MessageSquare,
+  LogOut,
   User,
   Menu,
   FileText,
@@ -26,76 +26,80 @@ import {
 interface SidebarNavProps {
   className?: string;
 }
+interface roleItem {
+
+  title: string;
+  href: string;
+  icon: JSX.Element;
+}
 
 export function SidebarNav({ className }: SidebarNavProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
-  const [navItems, setNavItems] = useState([
-    {
-      title: "Profile",
-      href: "/profile",
-      icon: <User className="h-5 w-5" />,
-    },
-    {
-      title: "Dashboard",
-      href: "/dashboard",
-      icon: <LayoutDashboard className="h-5 w-5" />,
-    },
-    {
-      title: "Medication History",
-      href: "/medicationHistory",
-      icon: <Pill className="h-5 w-5" />,
-    },
-    {
-      title: "Health Records",
-      href: "/health-records",
-      icon: <Files className="h-5 w-5" />,
-    },
-    {
-      title: "Medical Documents",
-      href: "/medical-documents",
-      icon: <FileText className="h-5 w-5" />,
-    },
-    {
-      title: "Nearby Hospitals",
-      href: "/hospital-location",
-      icon: <Hospital className="h-5 w-5" />,
-    },
-    {
-      title: "Medical Assistant",
-      href: "/chatbot",
-      icon: <MessageSquare className="h-5 w-5" />,
-    }
-  ]);
+
+  const [navItems, setNavItems] = useState<roleItem[]>([]);
 
   useEffect(() => {
     if (user) {
-      if (user.role === 'doctor') {
-        setNavItems(prevItems => [
-          ...prevItems,
-          {
-            title: "Patient Chats",
-            href: "/doctor/chats",
-            icon: <Stethoscope className="h-5 w-5" />,
-          }
-        ]);
-      } else {
-        setNavItems(prevItems => [
-          ...prevItems,
-          {
-            title: "Doctor Consultations",
-            href: "/patient/chats",
-            icon: <Stethoscope className="h-5 w-5" />,
-          }
-        ]);
-      }
+      const baseItems = [
+        {
+          title: "Profile",
+          href: "/profile",
+          icon: <User className="h-5 w-5" />,
+        },
+        {
+          title: "Dashboard",
+          href: "/dashboard",
+          icon: <LayoutDashboard className="h-5 w-5" />,
+        },
+        {
+          title: "Medication History",
+          href: "/medicationHistory",
+          icon: <Pill className="h-5 w-5" />,
+        },
+        {
+          title: "Health Records",
+          href: "/health-records",
+          icon: <Files className="h-5 w-5" />,
+        },
+        {
+          title: "Medical Documents",
+          href: "/medical-documents",
+          icon: <FileText className="h-5 w-5" />,
+        },
+        {
+          title: "Nearby Hospitals",
+          href: "/hospital-location",
+          icon: <Hospital className="h-5 w-5" />,
+        },
+        {
+          title: "Medical Assistant",
+          href: "/chatbot",
+          icon: <MessageSquare className="h-5 w-5" />,
+        },
+      ];
+
+      const roleItem =
+        user.role === "doctor"
+          ? {
+              title: "Patient Chats",
+              href: "/doctor/chats",
+              icon: <Stethoscope className="h-5 w-5" />,
+            }
+          : {
+              title: "Doctor Consultations",
+              href: "/patient/chats",
+              icon: <Stethoscope className="h-5 w-5" />,
+            };
+
+      setNavItems([...baseItems, roleItem]);
     }
   }, [user]);
 
   const handleLogout = () => {
     localStorage.clear();
-    toast.success('Logged Out Successfully!');
+    toast.success("Logged Out Successfully!");
   };
 
   return (
@@ -107,9 +111,9 @@ export function SidebarNav({ className }: SidebarNavProps) {
       )}
     >
       <div className="flex h-14 items-center border-b px-3">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="h-9 w-9"
         >
@@ -139,11 +143,7 @@ export function SidebarNav({ className }: SidebarNavProps) {
                     </Button>
                   </Link>
                 </TooltipTrigger>
-                {isCollapsed && (
-                  <TooltipContent side="right">
-                    {item.title}
-                  </TooltipContent>
-                )}
+                {isCollapsed && <TooltipContent side="right">{item.title}</TooltipContent>}
               </Tooltip>
             </TooltipProvider>
           ))}
@@ -166,14 +166,10 @@ export function SidebarNav({ className }: SidebarNavProps) {
                 </Button>
               </Link>
             </TooltipTrigger>
-            {isCollapsed && (
-              <TooltipContent side="right">
-                Logout
-              </TooltipContent>
-            )}
+            {isCollapsed && <TooltipContent side="right">Logout</TooltipContent>}
           </Tooltip>
         </TooltipProvider>
       </div>
     </div>
   );
-} 
+}

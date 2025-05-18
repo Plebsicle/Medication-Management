@@ -24,15 +24,16 @@ interface Message {
 const ChatWindow: React.FC = () => {
   const { chatId } = useParams<{ chatId: string }>();
   const { user } = useAuth();
-  const { socket, joinChat, sendMessage } = useSocket();
+  const { socket, isConnected, joinChat, sendMessage } = useSocket();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load initial messages
   useEffect(() => {
-    const loadMessages = async () => {
+    const loadChat = async () => {
       if (chatId) {
         try {
           setLoading(true);
@@ -46,27 +47,35 @@ const ChatWindow: React.FC = () => {
       }
     };
 
-    loadMessages();
+    loadChat();
   }, [chatId]);
 
   // Join chat room when chat ID changes
   useEffect(() => {
-    if (chatId) {
+    if (chatId && isConnected) {
       joinChat(Number(chatId));
     }
-  }, [chatId, joinChat]);
+  }, [chatId, joinChat, isConnected]);
 
   // Listen for new messages
   useEffect(() => {
     if (socket) {
       const handleNewMessage = (message: Message) => {
         setMessages((prevMessages) => [...prevMessages, message]);
+        setIsSending(false);
+      };
+
+      const handleMessageError = (error: { error: string }) => {
+        console.error('Message error:', error);
+        setIsSending(false);
       };
 
       socket.on('message:receive', handleNewMessage);
+      socket.on('message:error', handleMessageError);
 
       return () => {
         socket.off('message:receive', handleNewMessage);
+        socket.off('message:error', handleMessageError);
       };
     }
   }, [socket]);
@@ -79,7 +88,8 @@ const ChatWindow: React.FC = () => {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (newMessage.trim() && chatId && user) {
+    if (newMessage.trim() && chatId) {
+      setIsSending(true);
       sendMessage(Number(chatId), newMessage.trim());
       setNewMessage('');
     }
@@ -108,7 +118,7 @@ const ChatWindow: React.FC = () => {
               content={message.content}
               created_at={message.created_at}
               user={message.user}
-              isCurrentUser={message.user_id === user?.id}
+              isCurrentUser={!!user && message.user_id === user.id}
             />
           ))
         )}
@@ -126,10 +136,12 @@ const ChatWindow: React.FC = () => {
           />
           <button
             type="submit"
-            disabled={!newMessage.trim()}
-            className="bg-blue-500 text-white rounded-r-lg px-4 py-2 disabled:bg-blue-300"
+            disabled={!newMessage.trim() || isSending}
+            className={`text-white rounded-r-lg px-4 py-2 ${
+              isSending ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-600'
+            } disabled:bg-blue-300 transition`}
           >
-            Send
+            {isSending ? 'Sending...' : 'Send'}
           </button>
         </form>
       </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ChatWindow from '../../components/chat/ChatWindow';
 import { chatApi } from '../../lib/api/chat';
+import { useAuth } from '../../hooks/useAuth';
 
 interface Chat {
   chat_id: number;
@@ -17,6 +18,7 @@ const PatientChat: React.FC = () => {
   const [chat, setChat] = useState<Chat | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const loadChat = async () => {
@@ -41,10 +43,12 @@ const PatientChat: React.FC = () => {
       }
     };
 
-    loadChat();
-  }, [chatId, navigate]);
+    if (!authLoading) {
+      loadChat();
+    }
+  }, [chatId, navigate, authLoading]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
