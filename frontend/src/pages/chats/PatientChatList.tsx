@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { chatApi } from '../../lib/api/chat';
 import { format } from 'date-fns';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 interface Doctor {
   id: number;
@@ -147,32 +148,34 @@ const PatientChatList: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-6">Doctor Consultations</h1>
-      
-      <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
-        <div className="flex border-b">
-          <button
-            className={`flex-1 py-3 font-medium ${
-              activeTab === 'chats' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'
-            }`}
-            onClick={() => setActiveTab('chats')}
-          >
-            My Chats
-          </button>
-          <button
-            className={`flex-1 py-3 font-medium ${
-              activeTab === 'doctors' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'
-            }`}
-            onClick={() => setActiveTab('doctors')}
-          >
-            Find Doctors
-          </button>
-        </div>
+    <AppLayout>
+      <div className="container mx-auto p-4 max-w-3xl">
+        <h1 className="text-2xl font-bold mb-6">Doctor Consultations</h1>
         
-        {activeTab === 'doctors' ? renderDoctorsList() : renderChatsList()}
+        <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+          <div className="flex border-b">
+            <button
+              className={`flex-1 py-3 font-medium ${
+                activeTab === 'chats' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'
+              }`}
+              onClick={() => setActiveTab('chats')}
+            >
+              My Chats
+            </button>
+            <button
+              className={`flex-1 py-3 font-medium ${
+                activeTab === 'doctors' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'
+              }`}
+              onClick={() => setActiveTab('doctors')}
+            >
+              Find Doctors
+            </button>
+          </div>
+          
+          {activeTab === 'doctors' ? renderDoctorsList() : renderChatsList()}
+        </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

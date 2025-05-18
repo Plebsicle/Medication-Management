@@ -1,5 +1,5 @@
 import express from 'express';
-import { initiateChat, getChatMessages, getUserChats, getAvailableDoctors } from '../../controller/chat/doctorPatientChat';
+import { initiateChat, getChatMessages, getUserChats, getAvailableDoctors, getChatInfo } from '../../controller/chat/doctorPatientChat';
 import jwtVerification from '../../middlewares/jwtVerification';
 
 const router = express.Router();
@@ -17,5 +17,8 @@ router.get('/user-chats',jwtVerification, getUserChats);
 
 // Get all doctors for a patient to start a chat with
 router.get('/available-doctors',jwtVerification, getAvailableDoctors);
+
+// Get chat information
+router.get('/:chatId', jwtVerification, getChatInfo);
 
 export default router; 

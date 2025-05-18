@@ -36,6 +36,9 @@ model user {
   medicalDocuments         medicalDocument[]
   doctorChats              doctor_patient_chat[]    @relation("doctor_chats")
   patientChats             doctor_patient_chat[]    @relation("patient_chats")
+  doctorSharedFiles        SharedFile[]             @relation("doctor_shared_files")
+  patientSharedFiles       SharedFile[]             @relation("patient_shared_files")
+  uploadedFiles            SharedFile[]             @relation("uploader_shared_files")
 }
 
 model doctor {
@@ -238,4 +241,22 @@ model doctor_patient_chat {
   @@unique([doctor_id, patient_id])
   @@index([doctor_id])
   @@index([patient_id])
+}
+
+model SharedFile {
+  id          Int       @id @default(autoincrement())
+  doctorId    Int
+  patientId   Int
+  uploadedBy  Int       // FK to user.id (doctor or patient)
+  fileName    String
+  fileKey     String    // S3 object key
+  createdAt   DateTime  @default(now())
+
+  doctor      user      @relation("doctor_shared_files", fields: [doctorId], references: [id])
+  patient     user      @relation("patient_shared_files", fields: [patientId], references: [id])
+  uploader    user      @relation("uploader_shared_files", fields: [uploadedBy], references: [id])
+
+  @@index([doctorId])
+  @@index([patientId])
+  @@index([uploadedBy])
 }

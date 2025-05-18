@@ -18,12 +18,29 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const { user } = useAuth();
 
   useEffect(() => {
-    // Create socket connection
+    // Create socket connection once the user is authenticated
+    const token = localStorage.getItem('jwt');
+    
+    // Disconnect previous socket if exists
+    if (socket) {
+      socket.disconnect();
+      setSocket(null);
+      setIsConnected(false);
+    }
+    
+    if (!token || !user) {
+      console.log('No JWT token or user found, skipping socket connection');
+      return;
+    }
+
     const socketInstance = io(import.meta.env.VITE_API_URL || 'http://localhost:8000', {
       transports: ['websocket', 'polling'],
       auth: {
-        token: localStorage.getItem('jwt') || ''
-      }
+        token: token
+      },
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000
     });
 
     socketInstance.on('connect', () => {
@@ -50,9 +67,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setSocket(socketInstance);
 
     return () => {
-      socketInstance.disconnect();
+      if (socketInstance && socketInstance.connected) {
+        socketInstance.disconnect();
+      }
     };
-  }, []);
+  }, [user]);
 
   const joinChat = (chatId: number) => {
     if (socket && isConnected) {

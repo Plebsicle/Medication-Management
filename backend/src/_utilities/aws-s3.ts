@@ -40,4 +40,49 @@ async function deleteDocument(filename : string){
     await awsClient.send(command);
 }
 
-export {getDocument,uploadDocument,deleteDocument};
+// New functions for shared files
+
+/**
+ * Generate a presigned URL for uploading a shared file
+ */
+async function getSharedFileUploadUrl(fileKey: string, contentType: string, expiresIn: number = 900) {
+    const command = new PutObjectCommand({
+        Bucket: process.env.S3_BUCKET,
+        Key: fileKey,
+        ContentType: contentType
+    });
+    const url = await getSignedUrl(awsClient, command, { expiresIn });
+    return url;
+}
+
+/**
+ * Generate a presigned URL for viewing a shared file
+ */
+async function getSharedFileViewUrl(fileKey: string, expiresIn: number = 3600) {
+    const command = new GetObjectCommand({
+        Bucket: process.env.S3_BUCKET,
+        Key: fileKey,
+    });
+    const url = await getSignedUrl(awsClient, command, { expiresIn });
+    return url;
+}
+
+/**
+ * Delete a shared file
+ */
+async function deleteSharedFile(fileKey: string) {
+    const command = new DeleteObjectCommand({
+        Bucket: process.env.S3_BUCKET,
+        Key: fileKey,
+    });
+    await awsClient.send(command);
+}
+
+export {
+    getDocument,
+    uploadDocument,
+    deleteDocument,
+    getSharedFileUploadUrl,
+    getSharedFileViewUrl,
+    deleteSharedFile
+};

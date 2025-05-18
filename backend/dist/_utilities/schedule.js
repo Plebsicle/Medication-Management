@@ -12,25 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const client_1 = require("@prisma/client");
 const twilio_1 = require("./twilio");
 const mailer_1 = require("./mailer");
 const node_schedule_1 = __importDefault(require("node-schedule"));
-const prisma = new client_1.PrismaClient();
-// Helper to validate and fix FCM endpoints
-function validateAndFixEndpoint(endpoint) {
-    console.log('Raw endpoint:', endpoint);
-    if (endpoint.includes('fcm.googleapis.com/fcm/send/')) {
-        return endpoint.replace('fcm.googleapis.com/fcm/send/', 'fcm.googleapis.com/wp/');
-    }
-    if (endpoint.includes('fcm.googleapis.com/') && !endpoint.includes('/wp/')) {
-        const parts = endpoint.split('fcm.googleapis.com/');
-        const token = parts[1].split('/').pop();
-        if (token)
-            return `https://fcm.googleapis.com/wp/${token}`;
-    }
-    return endpoint;
-}
+const database_1 = __importDefault(require("../database"));
 // Main notification scheduler
 function sendNotifications() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -39,7 +24,7 @@ function sendNotifications() {
         console.log("Scheduler checking for notifications at:", currentTimeHHMM);
         try {
             // Get all medication times for the current time
-            const medicationTimes = yield prisma.medication_times.findMany({
+            const medicationTimes = yield database_1.default.medication_times.findMany({
                 where: {
                     intake_time: currentTimeHHMM,
                 },
@@ -114,14 +99,14 @@ function sendNotifications() {
 function logNotification(medication_id, message) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const notification = yield prisma.notification.create({
+            const notification = yield database_1.default.notification.create({
                 data: {
                     message,
                     medication_id,
                     notification_on: true,
                 },
             });
-            yield prisma.notification_logs.create({
+            yield database_1.default.notification_logs.create({
                 data: {
                     notification_id: notification.notification_id,
                     status: 'sent',

@@ -54,14 +54,7 @@ export default function DoctorDashboard() {
         return;
       }
 
-      // Store user data
-      const userData = {
-        id: response.data.userId,
-        name: response.data.userName,
-        email: response.data.userEmail,
-        role: response.data.userRole
-      };
-      localStorage.setItem('user', JSON.stringify(userData));
+      // Don't store user data in localStorage, we'll use the decoded JWT token via useAuth
 
     } catch (error) {
       console.error("Error Verifying JWT:", error);

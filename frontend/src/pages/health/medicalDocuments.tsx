@@ -19,6 +19,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { AnimatedButton, AnimatedCard } from "@/components/animated";
+import { motion, AnimatePresence } from "framer-motion";
+import { staggerContainer, fadeUp } from "@/components/animated/animations";
 
 interface Document {
   id: string;
@@ -264,68 +267,93 @@ export default function HealthRecords() {
   return (
     <AppLayout>
       <div>
-        <h1 className="text-3xl font-bold mb-6">Health Records</h1>
+        <motion.h1 
+          className="text-3xl font-bold mb-6 text-primary"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          Health Records
+        </motion.h1>
         
         <Tabs defaultValue="documents">
           <TabsList className="mb-6">
-            <TabsTrigger value="documents">My Documents</TabsTrigger>
-            <TabsTrigger value="upload">Upload Document</TabsTrigger>
+            <TabsTrigger value="documents" className="hover:bg-secondary/20 transition-colors">My Documents</TabsTrigger>
+            <TabsTrigger value="upload" className="hover:bg-secondary/20 transition-colors">Upload Document</TabsTrigger>
           </TabsList>
 
           <TabsContent value="documents">
             <Card>
               <CardHeader>
-                <CardTitle>My Health Documents</CardTitle>
+                <CardTitle className="text-skyBright">My Health Documents</CardTitle>
                 <CardDescription>View and manage your medical records and documents</CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
                   <div className="flex justify-center my-8">
-                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                    <motion.div 
+                      className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    />
                   </div>
                 ) : documents.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <motion.div 
+                    className="text-center py-8 text-gray-500"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
                     <p>You haven't uploaded any health documents yet.</p>
                     <p className="mt-2">Upload your first document to keep track of your medical records.</p>
-                  </div>
+                  </motion.div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {documents.map((doc) => (
-                      <Card key={doc.id} className="overflow-hidden">
-                        <CardContent className="p-4">
-                          <div className="flex items-center space-x-3 mb-3">
-                            {getFileIcon(doc.type)}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{doc.name}</p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(doc.uploadDate).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex justify-end space-x-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handlePreview(doc)}
-                              className="flex items-center"
-                            >
-                              <EyeIcon className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteClick(doc)}
-                              className="flex items-center"
-                            >
-                              <Trash2Icon className="h-4 w-4 mr-1" />
-                              Delete
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                  <motion.div 
+                    variants={staggerContainer}
+                    initial="initial"
+                    animate="animate"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                  >
+                    <AnimatePresence>
+                      {documents.map((doc) => (
+                        <motion.div key={doc.id} variants={fadeUp}>
+                          <Card className="overflow-hidden">
+                            <CardContent className="p-4">
+                              <div className="flex items-center space-x-3 mb-3">
+                                {getFileIcon(doc.type)}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium truncate">{doc.name}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {new Date(doc.uploadDate).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex justify-end space-x-2">
+                                <AnimatedButton
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handlePreview(doc)}
+                                  className="flex items-center"
+                                >
+                                  <EyeIcon className="h-4 w-4 mr-1" />
+                                  View
+                                </AnimatedButton>
+                                <AnimatedButton
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleDeleteClick(doc)}
+                                  className="flex items-center"
+                                >
+                                  <Trash2Icon className="h-4 w-4 mr-1" />
+                                  Delete
+                                </AnimatedButton>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </motion.div>
                 )}
               </CardContent>
             </Card>
@@ -334,29 +362,40 @@ export default function HealthRecords() {
           <TabsContent value="upload">
             <Card>
               <CardHeader>
-                <CardTitle>Upload Health Document</CardTitle>
+                <CardTitle className="text-accent">Upload Health Document</CardTitle>
                 <CardDescription>
                   Upload medical reports, prescriptions, lab results, and other health documents
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2">
+                <motion.div 
+                  className="space-y-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                >
                   <Label htmlFor="document-name">Document Name</Label>
                   <Input
                     id="document-name"
                     value={documentName}
                     onChange={(e) => setDocumentName(e.target.value)}
                     placeholder="Enter a name for this document"
+                    className="border-accent/30 focus:border-accent focus-visible:ring-accent"
                   />
-                </div>
+                </motion.div>
 
-                <div className="space-y-2">
+                <motion.div 
+                  className="space-y-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
                   <Label htmlFor="document-type">Document Type</Label>
                   <select
                     id="document-type"
                     value={documentType}
                     onChange={(e) => setDocumentType(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-md border border-accent/30 bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {documentTypes.map((type) => (
                       <option key={type.value} value={type.value}>
@@ -364,58 +403,82 @@ export default function HealthRecords() {
                       </option>
                     ))}
                   </select>
-                </div>
+                </motion.div>
 
-                <div className="space-y-2">
+                <motion.div 
+                  className="space-y-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                >
                   <Label>Upload File</Label>
-                  <div className="border rounded-md p-4">
+                  <div className="border rounded-md p-4 border-accent/30">
                     <FileUploader
                       onFileSelect={handleFileChange}
                       acceptedFileTypes=".pdf,.jpg,.jpeg,.png"
                       maxFileSizeMB={5}
                     />
                     {selectedFile && (
-                      <div className="mt-2 text-sm text-gray-500">
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="mt-2 text-sm text-gray-500"
+                      >
                         Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                      </div>
+                      </motion.div>
                     )}
                   </div>
                   <p className="text-xs text-gray-500">
                     Accepted formats: PDF, JPG, JPEG, PNG. Maximum file size: 5MB.
                   </p>
-                </div>
+                </motion.div>
 
-                <Button
+                <AnimatedButton
                   onClick={handleUpload}
                   disabled={!selectedFile || !documentName || isUploading}
-                  className="w-full"
+                  className="w-full bg-primary hover:bg-primary/90"
+                  whileHoverScale={isUploading || !selectedFile || !documentName ? 1 : 1.03}
                 >
                   {isUploading ? (
                     <>
-                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-white rounded-full border-t-transparent"></div>
+                      <motion.div 
+                        className="mr-2 h-4 w-4 border-2 border-white rounded-full border-t-transparent"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      />
                       Uploading...
                     </>
                   ) : (
                     "Upload Document"
                   )}
-                </Button>
+                </AnimatedButton>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
 
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete "{documentToDelete?.name}"? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-            </AlertDialogFooter>
+          <AlertDialogContent className="border-destructive/20">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-destructive">Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete "{documentToDelete?.name}"? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="hover:bg-muted/80">Cancel</AlertDialogCancel>
+                <AnimatedButton asChild>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+                    Delete
+                  </AlertDialogAction>
+                </AnimatedButton>
+              </AlertDialogFooter>
+            </motion.div>
           </AlertDialogContent>
         </AlertDialog>
       </div>

@@ -26,18 +26,38 @@ import forgetPassword from './routes/user/forgetPassword'
 import chatbot from './routes/chat/chatbot';
 import doctorPatientChat from './routes/chat/doctorPatientChat';
 import medicalDocuments from './routes/health/medicalDocuments';
+import fileRoutes from './routes/fileRoutes';
 import sendNotifications from './_utilities/schedule';
 import { configureSocket } from './AI-Socket';
 import { configureSocketHandlers } from './socket';
 
 const app = express();
 const server = http.createServer(app);
+
+const allowedOrigins = [
+  'https://plebsicle.me',      
+  'http://localhost:5173',         
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('CORS not allowed from this origin'));
+    }
+  },
+  credentials: true
+}));
+
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: ['https://plebsicle.me', 'http://localhost:5173'],
     methods: ["GET", "POST"]
   }
 });
+
 
 // Configure AI Socket
 configureSocket(io);
@@ -69,6 +89,7 @@ app.use('/forgetPassword',forgetPassword);
 app.use('/chatbot', chatbot);
 app.use('/chats', doctorPatientChat);
 app.use('/medicalDocuments', medicalDocuments);
+app.use('/files', fileRoutes);
 sendNotifications();
 
 

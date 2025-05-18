@@ -36,7 +36,7 @@ interface roleItem {
 export function SidebarNav({ className }: SidebarNavProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const [navItems, setNavItems] = useState<roleItem[]>([]);
 
@@ -98,7 +98,7 @@ export function SidebarNav({ className }: SidebarNavProps) {
   }, [user]);
 
   const handleLogout = () => {
-    localStorage.clear();
+    logout();
     toast.success("Logged Out Successfully!");
   };
 

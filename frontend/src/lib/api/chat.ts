@@ -45,4 +45,10 @@ export const chatApi = {
     const response = await api.get('/chats/available-doctors');
     return response.data.doctors;
   },
+  
+  // Get chat information (including doctor and patient IDs)
+  getChatInfo: async (chatId: number) => {
+    const response = await api.get(`/chats/${chatId}`);
+    return response.data.chat;
+  },
 }; 

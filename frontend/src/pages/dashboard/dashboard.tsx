@@ -75,13 +75,7 @@ export default function Dashboard() {
 
       if (response.data.userRole) {
         setUserRole(response.data.userRole);
-        const userData = {
-          id: response.data.userId,
-          name: response.data.userName,
-          email: response.data.userEmail,
-          role: response.data.userRole
-        };
-        localStorage.setItem('user', JSON.stringify(userData));
+        // Don't store user data in localStorage, we'll use the decoded JWT token via useAuth
         
         // If user is a patient, load available doctors
         if (response.data.userRole !== 'doctor') {

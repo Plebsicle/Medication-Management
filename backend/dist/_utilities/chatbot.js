@@ -15,8 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.processMedicalQuery = processMedicalQuery;
 exports.getChatHistory = getChatHistory;
 const openai_1 = __importDefault(require("openai"));
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const database_1 = __importDefault(require("../database"));
 // Define fallback responses for when OpenAI is not available
 const fallbackResponses = [
     "I understand you may have concerns about your symptoms. For personalized medical advice, please consult with a healthcare professional.",
@@ -80,14 +79,14 @@ function processMedicalQuery(userId, query) {
             }
             // Try to store the conversation in the database
             try {
-                yield prisma.chat_message.create({
+                yield database_1.default.chat_message.create({
                     data: {
                         user_id: userId,
                         content: query,
                         is_ai: false,
                     },
                 });
-                yield prisma.chat_message.create({
+                yield database_1.default.chat_message.create({
                     data: {
                         user_id: userId,
                         content: aiResponse,
@@ -110,7 +109,7 @@ function processMedicalQuery(userId, query) {
 function getChatHistory(userId) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            return yield prisma.chat_message.findMany({
+            return yield database_1.default.chat_message.findMany({
                 where: {
                     user_id: userId,
                 },
@@ -121,7 +120,6 @@ function getChatHistory(userId) {
         }
         catch (error) {
             console.error('Error fetching chat history:', error);
-            // Return empty array if database query fails
             return [];
         }
     });

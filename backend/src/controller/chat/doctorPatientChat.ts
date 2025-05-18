@@ -201,4 +201,55 @@ export const getAvailableDoctors = async (req: express.Request, res: express.Res
     res.status(500).json({ error: 'Internal server error' });
     return;
   }
+};
+
+// Get chat information
+export const getChatInfo = async (req: express.Request, res: express.Response) => {
+  try {
+    const { chatId } = req.params;
+    const userId = req.userId;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    // Verify that the user is part of this chat
+    const chat = await prisma.doctor_patient_chat.findUnique({
+      where: {
+        chat_id: Number(chatId),
+      },
+      include: {
+        doctor: {
+          select: {
+            id: true,
+            name: true,
+            profile_photo_path: true,
+          },
+        },
+        patient: {
+          select: {
+            id: true,
+            name: true,
+            profile_photo_path: true,
+          },
+        },
+      },
+    });
+
+    if (!chat) {
+      res.status(404).json({ error: 'Chat not found' });
+      return;
+    }
+
+    if (chat.doctor_id !== Number(userId) && chat.patient_id !== Number(userId)) {
+      res.status(403).json({ error: 'You are not authorized to view this chat' });
+      return;
+    }
+
+    res.status(200).json({ chat });
+  } catch (error) {
+    console.error('Error getting chat info:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 }; 
