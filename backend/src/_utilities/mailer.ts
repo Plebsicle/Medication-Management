@@ -61,7 +61,7 @@ export async function sendEmail(to: string, subject: string, htmlContent: string
 
 export async function sendVerificationEmail(email: string, token: string) {
   try {
-    const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
+    const verificationUrl = `https://plebsicle.me/verify-email?token=${token}`;
     
     const htmlContent = `
       <h2>Verify Your Email</h2>
