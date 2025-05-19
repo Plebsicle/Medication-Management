@@ -7,41 +7,29 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, Bell, Trash2, Clock, MessageSquare, Stethoscope, ArrowRight } from "lucide-react";
+import { PlusCircle, Bell, Trash2, Clock, MessageSquare, ArrowRight, Calendar } from "lucide-react";
 import { AppLayout } from '@/components/layout/AppLayout';
 import formatIntakeTime from "@/lib/formatIntakeTime";
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
-type FormDataType = {
+type MedicationType = {
   medication_id: number;
   name: string;
   type: string;
   dosage: string;
-  start_date: string;
-  end_date: string;
+  startDate: string;  // Changed from starDate to startDate to match backend
+  endDate: string;
   frequency: number;
-  intake_times: string[];
+  intakeTimes: string[];
   instructions: string;
-  notification_on: boolean;
+  notifications: boolean;
 };
-
-interface Doctor {
-  id: number;
-  name: string;
-  profile_photo_path: string | null;
-  doctor: {
-    speciality: string;
-  };
-}
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [medications, setMedications] = useState<FormDataType[]>([]);
+  const [medications, setMedications] = useState<MedicationType[]>([]);
   const [isMedication, setIsMedication] = useState(false);
-  const [userRole, setUserRole] = useState<string>('');
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [loadingDoctors, setLoadingDoctors] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   
   useEffect(() => {
@@ -77,16 +65,7 @@ export default function Dashboard() {
         return;
       }
 
-      if (response.data.userRole) {
-        setUserRole(response.data.userRole);
-        // Don't store user data in localStorage, we'll use the decoded JWT token via useAuth
-        
-        // If user is a patient, load available doctors
-        if (response.data.userRole !== 'doctor') {
-          loadAvailableDoctors(jwt);
-        }
-      }
-
+      // Use the response data structure from the backend
       const medicationResponse = await axios.get(`${BACKEND_URL}/addMedication`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -108,24 +87,16 @@ export default function Dashboard() {
     }
   }
 
-  async function loadAvailableDoctors(jwt: string) {
-    try {
-      setLoadingDoctors(true);
-      const response = await axios.get(`${BACKEND_URL}/chats/available-doctors`, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      });
-      
-      if (response.data && response.data.doctors) {
-        setDoctors(response.data.doctors);
-      }
-    } catch (error) {
-      console.error("Error loading doctors:", error);
-    } finally {
-      setLoadingDoctors(false);
-    }
-  }
+  // Format date for display - e.g., "May 19, 2025"
+  const formatDate = (dateString : any) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
 
   const toggleNotification = async (index: number) => {
     const jwt = localStorage.getItem("jwt");
@@ -133,10 +104,10 @@ export default function Dashboard() {
 
     const medication = medications[index];
     try {
-      const updatedNotification = !medication.notification_on;
+      const updatedNotification = !medication.notifications;
       await axios.put(
         `${BACKEND_URL}/toggleNotification`,
-        { notification_on: updatedNotification, medication },
+        { notifications: updatedNotification, medication },
         {
           headers: {
             Authorization: `Bearer ${jwt}`,
@@ -146,7 +117,7 @@ export default function Dashboard() {
 
       setMedications((prev) =>
         prev.map((med, i) =>
-          i === index ? { ...med, notification_on: updatedNotification } : med
+          i === index ? { ...med, notifications: updatedNotification } : med
         )
       );
       toast.success("Notification settings updated");
@@ -177,30 +148,6 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Error deleting medication:", error);
       toast.error("Failed to delete medication");
-    }
-  };
-
-  const handleStartChat = async (doctorId: number) => {
-    try {
-      const jwt = localStorage.getItem('jwt');
-      if (!jwt) return;
-      
-      const response = await axios.post(
-        `${BACKEND_URL}/chats/initiate`,
-        { doctorId },
-        {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          },
-        }
-      );
-      
-      if (response.data && response.data.chatId) {
-        navigate(`/patient/chat/${response.data.chatId}`);
-      }
-    } catch (error) {
-      console.error("Error starting chat:", error);
-      toast.error("Failed to start chat");
     }
   };
 
@@ -276,75 +223,6 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Available Doctors Section */}
-          {userRole !== 'doctor' && (
-            <div className={`mb-12 transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-              <div className="flex items-center mb-6">
-                <h2 className="text-2xl font-semibold text-gray-900">Available Doctors</h2>
-                <div className="ml-4 h-1 bg-blue-100 flex-grow rounded-full"></div>
-              </div>
-              
-              {loadingDoctors ? (
-                <div className="flex justify-center my-8">
-                  <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-                </div>
-              ) : doctors.length === 0 ? (
-                <Card className="text-center p-8 mb-8 border-0 shadow-md bg-white">
-                  <CardContent>
-                    <p className="text-gray-500">No doctors available at the moment.</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {doctors.slice(0, 3).map((doctor) => (
-                    <Card key={doctor.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white">
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center space-x-4">
-                          <div className="h-16 w-16 rounded-full overflow-hidden bg-blue-100 shadow-inner">
-                            <img
-                              src={doctor.profile_photo_path || 'https://cdn-icons-png.flaticon.com/512/147/147142.png'}
-                              alt={doctor.name}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                          <div>
-                            <CardTitle className="text-xl text-blue-600">{doctor.name}</CardTitle>
-                            <CardDescription className="text-gray-600">{doctor.doctor?.speciality || 'Doctor'}</CardDescription>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardFooter className="pt-4 flex justify-between">
-                        <Button 
-                          onClick={() => handleStartChat(doctor.id)} 
-                          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-2"
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                          Start Chat
-                        </Button>
-                        <Button variant="outline" asChild className="border-blue-300 text-blue-600 rounded-xl">
-                          <Link to="/patient/chats">
-                            <Stethoscope className="h-4 w-4 mr-2" />
-                            Profile
-                          </Link>
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
-                </div>
-              )}
-              {doctors.length > 3 && (
-                <div className="flex justify-center mb-8">
-                  <Button variant="outline" asChild className="border-blue-300 text-blue-600 hover:bg-blue-50 rounded-xl">
-                    <Link to="/patient/chats" className="flex items-center gap-2">
-                      View All Doctors
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Medications Section */}
           <div className={`transition-all duration-1000 delay-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
             <div className="flex items-center justify-between mb-6">
@@ -365,14 +243,14 @@ export default function Dashboard() {
                 {medications.map((medication, index) => (
                   <Card key={index} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white overflow-hidden">
                     <div className="h-2 bg-gradient-to-r from-blue-400 to-blue-600"></div>
-                    <CardHeader>
+                    <CardHeader onClick={() => {navigate(`/medicationDetails/${medication.medication_id}`)}}>
                       <div className="flex justify-between items-start">
                         <div>
                           <CardTitle className="text-xl text-blue-600">{medication.name}</CardTitle>
                           <CardDescription>{medication.type}</CardDescription>
                         </div>
-                        <Badge variant={medication.notification_on ? "default" : "secondary"} className={medication.notification_on ? "bg-blue-500" : ""}>
-                          {medication.notification_on ? "Active" : "Inactive"}
+                        <Badge variant={medication.notifications ? "default" : "secondary"} className={medication.notifications ? "bg-blue-500" : ""}>
+                          {medication.notifications ? "Active" : "Inactive"}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -387,13 +265,19 @@ export default function Dashboard() {
                         <div className="text-sm text-gray-700">
                           <strong>Dosage:</strong> {medication.dosage}
                         </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                          <Calendar className="h-4 w-4 text-blue-500" />
+                          <span>
+                            <strong>Duration:</strong> {formatDate(medication.startDate)} - {formatDate(medication.endDate)}
+                          </span>
+                        </div>
                         <div className="text-sm text-gray-700">
                           <strong>Instructions:</strong> {medication.instructions}
                         </div>
                         <div className="text-sm text-gray-700">
                           <strong>Intake Times:</strong>
                           <ul className="list-disc list-inside">
-                            {medication.intake_times.map((time, i) => (
+                            {medication.intakeTimes.map((time, i) => (
                               <li key={i}>{formatIntakeTime(time)}</li>
                             ))}
                           </ul>
@@ -402,9 +286,9 @@ export default function Dashboard() {
                     </CardContent>
                     <CardFooter className="flex justify-between bg-gray-50">
                       <div className="flex items-center gap-2">
-                        <Bell className={`h-4 w-4 ${medication.notification_on ? "text-blue-500" : "text-gray-400"}`} />
+                        <Bell className={`h-4 w-4 ${medication.notifications ? "text-blue-500" : "text-gray-400"}`} />
                         <Switch
-                          checked={medication.notification_on}
+                          checked={medication.notifications}
                           onCheckedChange={() => toggleNotification(index)}
                           className="data-[state=checked]:bg-blue-500"
                         />

@@ -65,6 +65,7 @@ function App() {
                       <Route path="patient/chat/:chatId" element={<PatientChat />} />
                       <Route path="doctor/chats" element={<DoctorChatList />} />
                       <Route path="doctor/chat/:chatId" element={<DoctorChat />} />
+                      <Route path='medicationDetails/:medication_id' element={<MedicationDetails/>}></Route>
                     </Routes>
                 }
               />

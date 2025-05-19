@@ -3,14 +3,14 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, Activity, Heart, Thermometer, Scale, FileText, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle,CardFooter } from "@/components/ui/card";
+import { PlusCircle, Activity, Heart, Thermometer, Scale, FileText, ArrowRight,Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
 type healthrecord = {
-    record_id: number;
+    health_records_id: number;
     record_date: Date;
     blood_pressure: string | null;
     heart_rate: number | null;
@@ -18,6 +18,8 @@ type healthrecord = {
     temperature: number | null;
     notes: string | null;
 };
+
+
 
 export default function HealthRecords() {
     const [records, setRecords] = useState<healthrecord[]>([]);
@@ -38,7 +40,7 @@ export default function HealthRecords() {
                 const response = await axios.get(`${BACKEND_URL}/healthRecords`, {
                     headers: { Authorization: `Bearer ${jwt}` },
                 });
-
+                console.log(response.data); 
                 if (response.data) {
                     setRecords(response.data);
                 }
@@ -52,6 +54,28 @@ export default function HealthRecords() {
 
         fetchRecords();
     }, []);
+
+    const deleteMedication = async (record_id : number,index : number) =>{
+    const token = localStorage.getItem('jwt');
+    console.log(record_id);
+    if (!token) {
+        toast.error("Please sign in to view health records");
+        return;
+    }
+    console.log(token);
+    const res = await axios.post(`${BACKEND_URL}/healthRecords/delete`,{record_id},{
+        headers : {
+            Authorization : `Bearer ${token}`
+        }
+    });
+    setRecords(records.filter((_,arrIndex)=>{return index!=arrIndex}));
+    if(res.status !== 204){
+        toast.error("Deletion Of Health Record Failed");
+    }
+    else{
+        toast.success("Record Deleted Succesfully");
+    }
+    }
 
     return (
         <AppLayout>
@@ -159,6 +183,16 @@ export default function HealthRecords() {
                                                 </div>
                                             </div>
                                         )}
+                                         <CardFooter className="flex justify-between bg-gray-50">
+                                            <Button
+                                                variant="destructive"
+                                                size="icon"
+                                                onClick={() => deleteMedication(record.health_records_id,index)}
+                                                className="rounded-full h-8 w-8"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </CardFooter>
                                     </CardContent>
                                 </Card>
                             ))}

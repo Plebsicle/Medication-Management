@@ -41,81 +41,131 @@ const passwordSchema = zod_1.default.string()
     .regex(/[\W_]/, { message: "Password must contain at least one special character" });
 function verifyUserDetails(name, email, role, password, phone_number) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
         try {
             const validationResult = userSchema.safeParse({ name, email, role, phone_number });
             const passwordResult = passwordSchema.safeParse(password);
-            if (validationResult.success && passwordResult.success) {
-                return true;
+            // Collect all validation errors
+            const errors = [];
+            if (!validationResult.success) {
+                validationResult.error.errors.forEach(err => {
+                    errors.push({
+                        field: err.path.join('.'),
+                        message: err.message
+                    });
+                });
             }
-            else {
-                console.log("User validation failed:", (_a = validationResult.error) === null || _a === void 0 ? void 0 : _a.errors, (_b = passwordResult.error) === null || _b === void 0 ? void 0 : _b.errors);
-                return false;
+            if (!passwordResult.success) {
+                passwordResult.error.errors.forEach(err => {
+                    errors.push({
+                        field: 'password',
+                        message: err.message
+                    });
+                });
             }
+            if (errors.length > 0) {
+                return { success: false, errors };
+            }
+            return { success: true };
         }
         catch (error) {
             console.log("Error in Zod Verification:", error);
-            return false;
+            return {
+                success: false,
+                errors: [{ field: "general", message: "Validation failed due to an unexpected error" }]
+            };
         }
     });
 }
 function verifySigninManualDetails(email, password) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
         try {
             const validationResultEmail = userSigninSchema.safeParse({ email });
             const passwordResult = passwordSchema.safeParse(password);
-            if (validationResultEmail.success && passwordResult.success) {
-                return true;
+            const errors = [];
+            if (!validationResultEmail.success) {
+                validationResultEmail.error.errors.forEach(err => {
+                    errors.push({
+                        field: err.path.join('.'),
+                        message: err.message
+                    });
+                });
             }
-            else {
-                console.log("Signin validation failed:", (_a = validationResultEmail.error) === null || _a === void 0 ? void 0 : _a.errors, (_b = passwordResult.error) === null || _b === void 0 ? void 0 : _b.errors);
-                return false;
+            if (!passwordResult.success) {
+                passwordResult.error.errors.forEach(err => {
+                    errors.push({
+                        field: 'password',
+                        message: err.message
+                    });
+                });
             }
+            if (errors.length > 0) {
+                return { success: false, errors };
+            }
+            return { success: true };
         }
         catch (error) {
             console.log("Error in Zod Verification Signin Manual", error);
-            return false;
+            return {
+                success: false,
+                errors: [{ field: "general", message: "Validation failed due to an unexpected error" }]
+            };
         }
     });
 }
 function verifyEmailAlone(email) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
         try {
             const validationResultEmail = userSigninSchema.safeParse({ email });
-            if (validationResultEmail.success) {
-                return true;
+            if (!validationResultEmail.success) {
+                const errors = validationResultEmail.error.errors.map(err => ({
+                    field: err.path.join('.'),
+                    message: err.message
+                }));
+                return { success: false, errors };
             }
-            else {
-                console.log("Signin validation failed:", (_a = validationResultEmail.error) === null || _a === void 0 ? void 0 : _a.errors);
-                return false;
-            }
+            return { success: true };
         }
         catch (e) {
-            console.log("Error in Alone EMail", e);
+            console.log("Error in Alone Email", e);
+            return {
+                success: false,
+                errors: [{ field: "email", message: "Email validation failed" }]
+            };
         }
     });
 }
 function verifyGoogleDetails(name, email, role, phone_number) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
         try {
             const validationResult = userSchema.safeParse({ name, email, role, phone_number });
-            if (validationResult.success) {
-                return true;
+            if (!validationResult.success) {
+                const errors = validationResult.error.errors.map(err => ({
+                    field: err.path.join('.'),
+                    message: err.message
+                }));
+                return { success: false, errors };
             }
-            else {
-                console.log("Google validation failed:", (_a = validationResult.error) === null || _a === void 0 ? void 0 : _a.errors);
-                return false;
-            }
+            return { success: true };
         }
         catch (error) {
             console.log("Error in Google Zod Verification", error);
-            return false;
+            return {
+                success: false,
+                errors: [{ field: "general", message: "Validation failed due to an unexpected error" }]
+            };
         }
     });
 }
 function validatePhoneNumber(phone_number) {
-    return userSchema.shape.phone_number.safeParse(phone_number);
+    const result = userSchema.shape.phone_number.safeParse(phone_number);
+    if (!result.success) {
+        return {
+            success: false,
+            errors: result.error.errors.map(err => ({
+                field: 'phone_number',
+                message: err.message
+            }))
+        };
+    }
+    return { success: true };
 }

@@ -68,3 +68,24 @@ export const postHealthRecords = async (req : express.Request, res : express.Res
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+
+export const deleteHealthRecords = async (req : express.Request, res : express.Response) => {
+
+    const userId = req.userId;
+    try{
+        const {record_id} = req.body;
+        await prisma.health_records.delete({
+            where : {
+                health_records_id : record_id,
+                user_id : userId
+            }
+        });
+        res.status(204).json("Data Deleted Succesfully");
+    }
+    catch(e){
+        console.error(e);
+        res.status(500).json("Internal Server Error");
+    }
+}
+

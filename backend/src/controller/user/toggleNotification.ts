@@ -5,14 +5,14 @@ export const toggleNotification = async (req : express.Request, res : express.Re
    
 
     try {
-        const { medication, notification_on } = req.body;
+        const { medication, notifications } = req.body;
         if (!medication) {
             res.status(404).json({ error: "Medication not found" });
             return;
         }
-        const { name, type, dosage, start_date, end_date } = medication;
-        const startDate = new Date(start_date);
-        const endDate = new Date(end_date);
+        let { name, type, dosage, startDate, endDate } = medication;
+        startDate = new Date(startDate);
+        endDate = new Date(endDate);
 
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
             res.status(400).json({ error: "Invalid date format for start_date or end_date" });
@@ -33,14 +33,14 @@ export const toggleNotification = async (req : express.Request, res : express.Re
             return;
         }
 
-        if (typeof notification_on !== 'boolean') {
+        if (typeof notifications !== 'boolean') {
             res.status(400).json({ error: "Invalid notification status" });
             return;
         }
         const medication_id = medicationRecord.medication_id;
         await prisma.notification.updateMany({
             where: { medication_id },
-            data: { notification_on },
+            data: { notification_on : notifications },
         });
 
         res.status(200).json({ message: "Notification status updated successfully" });

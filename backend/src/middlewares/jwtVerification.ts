@@ -15,7 +15,7 @@ export default function jwtVerification(req : express.Request,res : express.Resp
     }
 
     let email;
-
+    console.log(token);
     try {
         const decoded : any = jwt.verify(token, process.env.JWT_SECRET as string) 
         email = decoded.email;

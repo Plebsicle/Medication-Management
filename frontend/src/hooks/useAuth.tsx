@@ -42,6 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getUserData = useCallback(() => {
     try {
       const token = localStorage.getItem('jwt');
+      console.log(token);
       if (!token) {
         setLoading(false);
         return;

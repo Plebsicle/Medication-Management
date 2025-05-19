@@ -10,15 +10,16 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { ArrowRight, LogIn, Mail, Key, LockKeyhole } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000" 
 
 export default function Signin() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
-
+  const {refreshUserData} = useAuth();
   // Add animation effect on component mount
   useState(() => {
     setIsVisible(true);
@@ -38,13 +39,14 @@ export default function Signin() {
   
       if (response.data.jwt) {
         localStorage.setItem('jwt', response.data.jwt);
-        
+          await refreshUserData();
         if(response.data.role === "doctor"){
           toast.success("Sign In Successful!");
           navigate('/doctorDashboard');
         }
         else{
           toast.success("Sign In Successful!");
+          await refreshUserData();
           navigate('/dashboard');
         }
       }
@@ -65,10 +67,20 @@ export default function Signin() {
         email,
         password
       });
-
-      if (response.data.token) {
-        localStorage.setItem('jwt', response.data.token);
-        
+      // console.log(response);
+      if('zodPass' in response.data && !response.data.zodPass){
+        toast.error("Invalid email or password");
+      }
+      if('userFound' in response.data && !response.data.userFound){
+        toast.error("User not found ,signup first ");
+      }
+      if('isPasswordSet' in response.data && !response.data.isPasswordSet){
+        toast.error("Use forget password to set a password");
+      }
+      if (response.data.jwt) {
+        // console.log("HI from JWT");
+        localStorage.setItem('jwt', response.data.jwt);
+          await refreshUserData();
         if(response.data.role === "doctor"){
           toast.success("Signed in successfully");
           navigate('/doctorDashboard');

@@ -9,7 +9,6 @@ import { Server } from 'socket.io';
 import Signup from './routes/auth/signup';
 import Signin from './routes/auth/signin'
 import emailVerification from './routes/email/email'
-import isverified from './routes/user/manualEmail'
 import manualEmail from './routes/user/manualEmail'
 import addMedication from './routes/medication/postMedication'
 import verifyToken from './routes/user/verifyToken'
@@ -72,7 +71,6 @@ app.use(express.json());
 app.use('/signup', Signup);
 app.use('/signin',Signin);
 app.use('/verifyEmail' , emailVerification);
-app.use('/isverified', isverified);
 app.use('/manualEmail',manualEmail);
 app.use('/addMedication',addMedication);
 app.use('/verifyToken',verifyToken);

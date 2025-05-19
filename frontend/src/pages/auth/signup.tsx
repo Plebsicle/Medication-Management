@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
@@ -11,7 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { PhoneVerification } from '@/components/PhoneVerification';
-import { UserPlus, Mail, User, Phone, Key, UserCog, ArrowRight } from 'lucide-react';
+import { UserPlus, Mail, User, Phone, Key, UserCog, ArrowRight, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
@@ -24,6 +26,11 @@ interface GoogleData {
   role: string;
 }
 
+interface ValidationError {
+  field: string;
+  message: string;
+}
+
 export default function Signup() {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
@@ -33,23 +40,37 @@ export default function Signup() {
   const [showPhoneVerification, setShowPhoneVerification] = useState(false);
   const [googleData, setGoogleData] = useState<GoogleData | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const navigate = useNavigate();
+  const { refreshUserData } = useAuth();
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
+  // Helper function to get error message for a specific field
+  const getErrorMessage = (field: string): string => {
+    const error = validationErrors.find(err => err.field === field);
+    return error ? error.message : '';
+  };
+
+  // Helper function to check if a field has an error
+  const hasError = (field: string): boolean => {
+    return validationErrors.some(err => err.field === field);
+  };
+
   const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
     try {
+      setValidationErrors([]);
       const googleToken = credentialResponse.credential;
       const response = await axios.post(`${BACKEND_URL}/signup`, {
         googleId: googleToken,
         role,
       });
 
-      if (response.data.jwt) {
+      if ('jwt' in response.data && response.data.jwt) {
         localStorage.setItem('jwt', response.data.jwt);
-        
+        await refreshUserData();
         if(response.data.role === "doctor"){
           toast.success("Sign Up Successful!");
           navigate('/doctorDashboard');
@@ -58,17 +79,26 @@ export default function Signup() {
           toast.success("Sign Up Successful!");
           navigate('/dashboard');
         }
-      } else if (response.data.requirePhoneNumber) {
+      } if ('requirePhoneNumber' in response.data &&   response.data.requirePhoneNumber) {
         // Show phone verification popup
         setGoogleData(response.data.googleData);
         setShowPhoneVerification(true);
-      } else if (response.data.EmailinUse) {
+      }  if ('EmailinUse' in response.data &&  response.data.EmailinUse) {
         toast.error("Email is already in use!");
-      } else if (!response.data.validDetails) {
+      }  if ('validationErrors' in response.data &&  response.data.validationErrors) {
+        // Handle validation errors
+        setValidationErrors(response.data.validationErrors);
+        toast.error("Please fix the validation errors");
+      } if ('validDetails' in response.data && !response.data.validDetails) { 
         toast.error("Invalid Google Credentials!");
       }
-    } catch (error) {
-      toast.error("Error during Google signup!");
+    } catch (error: any) {
+      if (error.response?.data?.validationErrors) {
+        setValidationErrors(error.response.data.validationErrors);
+        toast.error("Please fix the validation errors");
+      } else {
+        toast.error("Error during Google signup!");
+      }
     }
   };
 
@@ -78,6 +108,9 @@ export default function Signup() {
 
   async function manualSignuphandler() {
     try {
+      // Clear previous validation errors
+      setValidationErrors([]);
+      
       const response = await axios.post(`${BACKEND_URL}/signup`, {
         name,
         email,
@@ -85,19 +118,33 @@ export default function Signup() {
         role,
         phone_number: phoneNumber,
       });
-
-      if (response.data.EmailinUse) {
+      // console.log(response.status === 202);
+      if ('EmailinUse' in response.data && response.data.EmailinUse) {
         toast.error("Email is already in use!");
-      } else if (!response.data.isEmailVerified) {
+      } 
+      if ('validationErrors' in response.data &&  response.data.validationErrors) {
+        setValidationErrors(response.data.validationErrors);
+        toast.error("Please fix the highlighted errors");
+      }
+      if ('zodPass' in response.data && !response.data.zodPass) {
+        if (response.data.validationErrors) {
+          setValidationErrors(response.data.validationErrors);
+          toast.error("Please fix the validation errors");
+        } else {
+          toast.error("Entered details do not match the criteria");
+        }
+      }
+      if ('isEmailVerified' in response.data && !response.data.isEmailVerified) {
         toast.info("Verification email sent. Please check your inbox.");
         navigate('/redirect-verify');
         const interval = setInterval(async () => {
           try {
-            const verifiedResponse = await axios.post(`${BACKEND_URL}/isverified`, {
+            const verifiedResponse = await axios.post(`${BACKEND_URL}/manualEmail`, {
               email,
             });
             if (verifiedResponse.data.verified) {
               clearInterval(interval);
+              await refreshUserData();
               if(verifiedResponse.data.role === "doctor"){
                 toast.success("Email Verified! Redirecting to Dashboard...");
                 navigate('/doctorDashboard');
@@ -111,13 +158,16 @@ export default function Signup() {
             console.error('Error checking verification status', error);
           }
         }, 3000);
-      } else if (!response.data.zodPass) {
-        toast.error("Entered Details Do Not Match the Criteria!");
       } else if (response.data.serverError) {
         toast.error("Server Error! Please try again later.");
       } 
-    } catch (error) {
-      toast.error("Error during manual signup!");
+    } catch (error: any) {
+      if (error.response?.data?.validationErrors) {
+        setValidationErrors(error.response.data.validationErrors);
+        toast.error("Please fix the validation errors");
+      } else {
+        toast.error("Error during manual signup!");
+      }
     }
   }
 
@@ -169,8 +219,8 @@ export default function Signup() {
               className="space-y-4"
             >
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-gray-700 flex items-center gap-2">
-                  <User className="h-4 w-4 text-blue-500" />
+                <Label htmlFor="name" className={`text-gray-700 flex items-center gap-2 ${hasError('name') ? 'text-red-500' : ''}`}>
+                  <User className={`h-4 w-4 ${hasError('name') ? 'text-red-500' : 'text-blue-500'}`} />
                   Name
                 </Label>
                 <Input
@@ -180,13 +230,19 @@ export default function Signup() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-lg"
+                  className={`border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-lg ${hasError('name') ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : ''}`}
                 />
+                {hasError('name') && (
+                  <div className="text-red-500 text-xs flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {getErrorMessage('name')}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700 flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-blue-500" />
+                <Label htmlFor="email" className={`text-gray-700 flex items-center gap-2 ${hasError('email') ? 'text-red-500' : ''}`}>
+                  <Mail className={`h-4 w-4 ${hasError('email') ? 'text-red-500' : 'text-blue-500'}`} />
                   Email
                 </Label>
                 <Input
@@ -196,13 +252,19 @@ export default function Signup() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-lg"
+                  className={`border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-lg ${hasError('email') ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : ''}`}
                 />
+                {hasError('email') && (
+                  <div className="text-red-500 text-xs flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {getErrorMessage('email')}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-700 flex items-center gap-2">
-                  <Key className="h-4 w-4 text-blue-500" />
+                <Label htmlFor="password" className={`text-gray-700 flex items-center gap-2 ${hasError('password') ? 'text-red-500' : ''}`}>
+                  <Key className={`h-4 w-4 ${hasError('password') ? 'text-red-500' : 'text-blue-500'}`} />
                   Password
                 </Label>
                 <Input
@@ -212,13 +274,24 @@ export default function Signup() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-lg"
+                  className={`border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-lg ${hasError('password') ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : ''}`}
                 />
+                {hasError('password') && (
+                  <div className="text-red-500 text-xs flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {getErrorMessage('password')}
+                  </div>
+                )}
+                {!hasError('password') && (
+                  <p className="text-xs text-gray-500 pl-6">
+                    Password must be at least 8 characters with uppercase, lowercase, number, and special character
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phoneNumber" className="text-gray-700 flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-blue-500" />
+                <Label htmlFor="phoneNumber" className={`text-gray-700 flex items-center gap-2 ${hasError('phone_number') ? 'text-red-500' : ''}`}>
+                  <Phone className={`h-4 w-4 ${hasError('phone_number') ? 'text-red-500' : 'text-blue-500'}`} />
                   Phone Number
                 </Label>
                 <Input
@@ -228,23 +301,30 @@ export default function Signup() {
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   required
-                  className="border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-lg"
+                  className={`border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-lg ${hasError('phone_number') ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : ''}`}
                 />
-                <p className="text-xs text-gray-500 pl-6">
-                  Please include your country code (e.g., +1 for US)
-                </p>
+                {hasError('phone_number') ? (
+                  <div className="text-red-500 text-xs flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {getErrorMessage('phone_number')}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500 pl-6">
+                    Please enter this way +CountryCode Number
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="role" className="text-gray-700 flex items-center gap-2">
-                  <UserCog className="h-4 w-4 text-blue-500" />
+                <Label htmlFor="role" className={`text-gray-700 flex items-center gap-2 ${hasError('role') ? 'text-red-500' : ''}`}>
+                  <UserCog className={`h-4 w-4 ${hasError('role') ? 'text-red-500' : 'text-blue-500'}`} />
                   Role
                 </Label>
                 <Select
                   value={role}
                   onValueChange={(value) => setRole(value as Role)}
                 >
-                  <SelectTrigger id="role" className="border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-lg">
+                  <SelectTrigger id="role" className={`border-blue-100 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-lg ${hasError('role') ? 'border-red-300 focus:border-red-500 focus:ring-red-200' : ''}`}>
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -253,7 +333,22 @@ export default function Signup() {
                     <SelectItem value="doctor">Doctor</SelectItem>
                   </SelectContent>
                 </Select>
+                {hasError('role') && (
+                  <div className="text-red-500 text-xs flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {getErrorMessage('role')}
+                  </div>
+                )}
               </div>
+
+              {validationErrors.length > 0 && validationErrors.some(err => err.field === 'general') && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-red-500 text-sm flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {getErrorMessage('general')}
+                  </p>
+                </div>
+              )}
 
               <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center justify-center gap-2">
                 Create Account

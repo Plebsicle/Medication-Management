@@ -8,31 +8,23 @@ export const getMedicationHistory = async (req : express.Request,res  : express.
                 where : {
                     email
                 }
-            })
+            });
+             const currentDate = new Date();
             if(!response){res.status(400).json({message : "Invalid Email , Cannot find User"}); return;}
             const medicationData = await prisma.medication.findMany({
                 where :{
-                    user_id : response.id
+                    user_id : response.id,
+                    end_date : {lte : currentDate}
+                },
+                include : {
+                    medication_times : true,
+                    notification : true
                 }
-            })
+            });
+            
             if(!medicationData){res.status(400).json({message : "No Medication Data Exists"});return;}
-            
-            // Format the dates in a human-readable format
-            const formattedMedicationData = medicationData.map(medication => ({
-                ...medication,
-                start_date: new Date(medication.start_date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                }),
-                end_date: new Date(medication.end_date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                })
-            }));
-            
-            res.status(200).json(formattedMedicationData);
+
+            res.status(200).json(medicationData);
         }   
         catch(e){
             console.log("Error in Fetching Medication History",e);

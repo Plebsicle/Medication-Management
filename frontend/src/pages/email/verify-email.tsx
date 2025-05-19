@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 
+const BACKEND_URL = import.meta.env.API_URL || `http://localhost:8000`
+
 const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ const VerifyEmail: React.FC = () => {
 
       try {
         const response = await axios.post(
-          `http://localhost:8000/verifyEmail?token=${token}`
+          `${BACKEND_URL}/verifyEmail?token=${token}`
         ,{
           Name : "Pravaz"
         });

@@ -9,7 +9,7 @@ import { Camera, User, Mail, Shield, Bell} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { AppLayout } from "@/components/layout/AppLayout";
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/"
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
 export default function Profile() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
