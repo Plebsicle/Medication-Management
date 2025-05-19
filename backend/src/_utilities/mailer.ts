@@ -6,6 +6,8 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET as string;
 const REDIRECT_URL = process.env.REDIRECT_URL as string;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN as string;
 
+const FRONTEND_URL = process.env.FRONTEND_URL || `http://localhost:5173`
+
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
 oauth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
@@ -61,7 +63,7 @@ export async function sendEmail(to: string, subject: string, htmlContent: string
 
 export async function sendVerificationEmail(email: string, token: string) {
   try {
-    const verificationUrl = `https://plebsicle.me/verify-email?token=${token}`;
+    const verificationUrl = `${FRONTEND_URL}/verify-email?token=${token}`;
     
     const htmlContent = `
       <h2>Verify Your Email</h2>
@@ -82,7 +84,7 @@ export async function sendVerificationEmail(email: string, token: string) {
 
 export async function sendResetPassword(email: string) {
   try {
-    const verificationUrl = `https://plebsicle.me/resetPassword/${email}`;
+    const verificationUrl = `${FRONTEND_URL}/resetPassword/${email}`;
     
     const htmlContent = `
       <h2>Reset Your Password</h2>
