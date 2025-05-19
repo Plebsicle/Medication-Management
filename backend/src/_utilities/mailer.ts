@@ -82,7 +82,7 @@ export async function sendVerificationEmail(email: string, token: string) {
 
 export async function sendResetPassword(email: string) {
   try {
-    const verificationUrl = `http://localhost:5173/resetPassword/${email}`;
+    const verificationUrl = `https://plebsicle.me/resetPassword/${email}`;
     
     const htmlContent = `
       <h2>Reset Your Password</h2>
