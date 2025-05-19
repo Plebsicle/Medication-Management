@@ -21,6 +21,7 @@ const CLIENT_ID = process.env.MAILER_CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URL = process.env.REDIRECT_URL;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+const FRONTEND_URL = process.env.FRONTEND_URL || `http://localhost:5173`;
 const oauth2Client = new googleapis_1.google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
 oauth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 /**
@@ -76,7 +77,7 @@ function sendEmail(to, subject, htmlContent, textContent) {
 function sendVerificationEmail(email, token) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
+            const verificationUrl = `${FRONTEND_URL}/verify-email?token=${token}`;
             const htmlContent = `
       <h2>Verify Your Email</h2>
       <p>Please verify your email by clicking <a href="${verificationUrl}">this link</a>.</p>
@@ -92,7 +93,7 @@ function sendVerificationEmail(email, token) {
 function sendResetPassword(email) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const verificationUrl = `http://localhost:5173/resetPassword/${email}`;
+            const verificationUrl = `${FRONTEND_URL}/resetPassword/${email}`;
             const htmlContent = `
       <h2>Reset Your Password</h2>
       <p>Please reset your password by clicking <a href="${verificationUrl}">this link</a>.</p>
