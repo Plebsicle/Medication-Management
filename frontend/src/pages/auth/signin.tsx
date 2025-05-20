@@ -72,10 +72,13 @@ export default function Signin() {
         toast.error("Invalid email or password");
       }
       if('userFound' in response.data && !response.data.userFound){
-        toast.error("User not found ,signup first ");
+        toast.error("User not found Signup first ");
       }
       if('isPasswordSet' in response.data && !response.data.isPasswordSet){
         toast.error("Use forget password to set a password");
+      }
+      if('isPasswordCorrect' in response.data && !response.data.isPasswordCorrect){
+        toast.error("Enter password is incorrect");
       }
       if (response.data.jwt) {
         // console.log("HI from JWT");

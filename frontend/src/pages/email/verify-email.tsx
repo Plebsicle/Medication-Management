@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 
-const BACKEND_URL = import.meta.env.API_URL || `http://localhost:8000`
+const BACKEND_URL = import.meta.env.VITE_API_URL || `http://localhost:8000`
 
 const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -26,10 +26,7 @@ const VerifyEmail: React.FC = () => {
 
       try {
         const response = await axios.post(
-          `${BACKEND_URL}/verifyEmail?token=${token}`
-        ,{
-          Name : "Pravaz"
-        });
+          `${BACKEND_URL}/verifyEmail?token=${token}`);
         const jwtToken : any = response.data.jwt;
         localStorage.setItem("jwt", jwtToken);
         setStatusMessage("Email verified successfully! This tab will close automatically in a few seconds...");
