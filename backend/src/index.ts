@@ -52,7 +52,13 @@ app.use(cors({
 
 // Add Cross-Origin-Opener-Policy header after cors middleware
 app.use((req, res, next) => {
+  console.log(`Request: ${req.method} ${req.path}`);
   res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
+  const originalSend = res.send;
+  res.send = function(...args) {
+    console.log('Response headers:', res.getHeaders());
+    return originalSend.apply(this, args);
+  };
   next();
 });
 
