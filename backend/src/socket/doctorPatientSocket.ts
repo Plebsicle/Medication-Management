@@ -19,6 +19,7 @@ interface JwtPayload {
  * Configure Socket.IO for doctor-patient chat
  * @param io - Socket.IO server instance
  */
+
 export const configureDoctorPatientSocket = (io: Server): void => {
   // JWT Authentication middleware
   io.use(async (socket, next) => {

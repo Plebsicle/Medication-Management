@@ -50,13 +50,19 @@ app.use(cors({
   credentials: true
 }));
 
-const io = new Server(server, {
-  cors: {
-    origin: ['https://plebsicle.me', 'http://localhost:5173'],
-    methods: ["GET", "POST"]
-  }
+// Add Cross-Origin-Opener-Policy header after cors middleware
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
 });
 
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
 
 // Configure AI Socket
 configureSocket(io);
@@ -64,9 +70,8 @@ configureSocket(io);
 // Configure doctor-patient chat socket
 configureSocketHandlers(io);
 
-app.use(cors());
-app.use(express.json());
 
+app.use(express.json());
 
 app.use('/signup', Signup);
 app.use('/signin',Signin);
