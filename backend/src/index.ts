@@ -33,6 +33,20 @@ import { configureSocketHandlers } from './socket';
 const app = express();
 const server = http.createServer(app);
 
+app.use((req, res, next) => {
+  // Explicitly disable Cross-Origin-Opener-Policy
+  res.removeHeader('Cross-Origin-Opener-Policy');
+  res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
+  const originalSetHeader = res.setHeader;
+  res.setHeader = function(name, value) {
+    if (name.toLowerCase() === 'cross-origin-opener-policy') {
+      return originalSetHeader.call(this, name, 'unsafe-none');
+    }
+    return originalSetHeader.call(this, name, value);
+  };
+  next();
+});
+
 const allowedOrigins = [
   'https://plebsicle.me',      
   'http://localhost:5173',         
@@ -51,16 +65,7 @@ app.use(cors({
 }));
 
 // Add Cross-Origin-Opener-Policy header after cors middleware
-app.use((req, res, next) => {
-  console.log(`Request: ${req.method} ${req.path}`);
-  res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
-  const originalSend = res.send;
-  res.send = function(...args) {
-    console.log('Response headers:', res.getHeaders());
-    return originalSend.apply(this, args);
-  };
-  next();
-});
+
 
 const io = new Server(server, {
   cors: {
