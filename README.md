@@ -1,6 +1,6 @@
 # Medication Management System
 
-A full-featured, application for managing medications, electronic health records,communication between patients and doctors.
+A full-featured, application for managing medications, electronic health records, communication between patients and doctors.
 
 ## Live Website
 
@@ -45,7 +45,7 @@ https://plebsicle.me — Fully hosted on this domain.
 /frontend       # React frontend
 /backend        # Express backend with REST APIs
 /backend/src/database               #PostgreSQL Schema and Prisma
-/_utilities         # Redis, AWS, and OpenAI helpers
+/backend/src/_utilities         # Redis, AWS, and OpenAI helpers
 ```
 
 ## Security Highlights
