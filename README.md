@@ -68,4 +68,4 @@ npm install
 npm run dev for both backend and frontend
 ```
 
-Set up environment variables as needed for AWS S3, Redis, PostgreSQL, OPENAI , Twilio and Google Oauth
+Set up environment variables as mentioned in .env.sample for AWS S3, Redis, PostgreSQL, OPENAI , Twilio and Google Oauth
