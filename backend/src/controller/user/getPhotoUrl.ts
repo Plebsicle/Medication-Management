@@ -32,7 +32,7 @@ export const getPhotoUrl =  async (req: express.Request, res: express.Response) 
       }
 
       // Get a signed URL for the image
-      const url = await getDocument(filename, contentType as any);
+      const url = await getDocument(filename);
       
       res.status(200).json({ url });
     } catch (error) {

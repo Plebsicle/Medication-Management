@@ -23,12 +23,12 @@ async function uploadDocument(filename : string , filetype : filetype) {
     return url;
 }
 
-async function getDocument(filename : string , filetype : filetype){
+async function getDocument(filename : string){
     const command = new GetObjectCommand({
         Bucket : process.env.S3_BUCKET,
         Key : `${process.env.S3_PATH}/${filename}`,
     });
-    const url = await getSignedUrl(awsClient,command,{expiresIn : 20 });
+    const url = await getSignedUrl(awsClient,command,{expiresIn : 3600 });
     return url
 }
 

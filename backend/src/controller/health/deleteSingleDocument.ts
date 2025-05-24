@@ -22,17 +22,15 @@ export const deleteSingleDocument =  async (req: express.Request, res: express.R
     }
 
     // Delete from database
-    await prisma.medicalDocument.delete({
+    const deletionResponse = await prisma.medicalDocument.delete({
       where: {
         id: documentId
       }
     });
 
-    await deleteDocument(filename);
-    // Note: We're not deleting from S3 as files might be referenced elsewhere
-    // In a production app, you might want to implement S3 object deletion as well
+    const fileName = deletionResponse.filePath.split('/').pop()!;
 
-
+    await deleteDocument(fileName);
     res.status(200).json({
       success: true,
       message: "Document deleted successfully"

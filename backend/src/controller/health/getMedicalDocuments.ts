@@ -27,7 +27,7 @@ export const getMedicalDocuments = async (req: express.Request, res: express.Res
         contentType = doc.fileType;
       }
       
-      const url = await getDocument(filename, contentType as any);
+      const url = await getDocument(filename);
       
       return {
         id: doc.id,

@@ -23,7 +23,7 @@ export const getViewDocument = async (req: express.Request, res: express.Respons
 
     // Generate signed URL for viewing
     const filename = document.filePath.split('/').pop() as string;
-    const url = await getDocument(filename, document.fileType as any);
+    const url = await getDocument(filename);
 
     res.status(200).json({ url });
   } catch (error) {

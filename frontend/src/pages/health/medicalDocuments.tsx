@@ -161,6 +161,12 @@ export default function HealthRecords() {
 
       if (!uploadedResponse.ok) {
         toast.error("Failed to upload document to storage");
+        await axios.delete(`${BACKEND_URL}/medicalDocuments/${documentId}`, {
+          data: { filename: documentName },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
         return;
       }
 
