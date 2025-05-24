@@ -150,23 +150,28 @@ export default function HealthRecords() {
       // Step 2: Upload the file directly to S3 using the presigned URL
       const uploadUrl = presignedUrlResponse.data.uploadUrl;
       const documentId = presignedUrlResponse.data.documentId;
-      
-      const uploadedResponse = await fetch(uploadUrl, {
+      let uploadedResponse;
+      try{
+        uploadedResponse = await fetch(uploadUrl, {
         method: 'PUT',
         body: selectedFile,
         headers: {
           'Content-Type': selectedFile.type,
         }
       });
-
-      if (!uploadedResponse.ok) {
-        toast.error("Failed to upload document to storage");
-        await axios.delete(`${BACKEND_URL}/medicalDocuments/${documentId}`, {
+      }
+      catch(e){
+        console.error(e);
+         await axios.delete(`${BACKEND_URL}/medicalDocuments/${documentId}`, {
           data: { filename: documentName },
           headers: {
             Authorization: `Bearer ${token}`,
           }
         });
+      }
+
+      if (!uploadedResponse?.ok) {
+        toast.error("Failed to upload document to storage");
         return;
       }
 
