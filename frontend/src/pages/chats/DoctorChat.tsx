@@ -69,32 +69,33 @@ const DoctorChat: React.FC = () => {
 
   return (
     <AppLayout>
-      <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-12">
+      <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-4 sm:pb-12">
         {/* Header Section */}
-        <section className={`relative pt-8 pb-6 px-4 md:px-6 lg:px-8 transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+        <section className={`relative pt-4 sm:pt-8 pb-4 sm:pb-6 px-3 sm:px-4 md:px-6 lg:px-8 transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
           <div className="max-w-6xl mx-auto">
-            <div className="flex items-center mb-6">
+            <div className="flex items-center mb-4 sm:mb-6">
               <Button 
                 variant="ghost" 
-                className="mr-4 rounded-full hover:bg-blue-100 text-blue-600"
+                size="sm"
+                className="mr-2 sm:mr-4 rounded-full hover:bg-blue-100 text-blue-600 p-2"
                 onClick={() => navigate('/doctor/chats')}
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
-              <div className="flex items-center">
-                <div className="h-14 w-14 rounded-full overflow-hidden bg-blue-100 shadow-md mr-4">
+              <div className="flex items-center min-w-0 flex-1">
+                <div className="h-10 w-10 sm:h-14 sm:w-14 rounded-full overflow-hidden bg-blue-100 shadow-md mr-3 sm:mr-4 flex-shrink-0">
                   <img
                     src={chat.patient.profile_photo_path || 'https://cdn-icons-png.flaticon.com/512/147/147142.png'}
                     alt={chat.patient.name}
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">{chat.patient.name}</h1>
-                  <div className="flex items-center text-gray-600">
-                    <span className="flex items-center text-sm bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                      <Stethoscope className="h-3 w-3 mr-1" />
-                      Patient
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{chat.patient.name}</h1>
+                  <div className="flex items-center text-gray-600 mt-1">
+                    <span className="flex items-center text-xs sm:text-sm bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                      <Stethoscope className="h-3 w-3 mr-1 flex-shrink-0" />
+                      <span className="whitespace-nowrap">Patient</span>
                     </span>
                   </div>
                 </div>
@@ -104,9 +105,9 @@ const DoctorChat: React.FC = () => {
         </section>
 
         {/* Chat Section */}
-        <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-            <div className="flex-1 h-[calc(75vh)]">
+        <div className={`px-3 sm:px-4 md:container md:mx-auto transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+            <div className="flex-1 h-[calc(100vh-140px)] sm:h-[calc(75vh)] min-h-[400px]">
               <ChatWindow />
             </div>
           </div>

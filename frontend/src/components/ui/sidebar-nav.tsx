@@ -33,18 +33,37 @@ interface roleItem {
 }
 
 export function SidebarNav({ className }: SidebarNavProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Check if screen is mobile on initial load
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768; // Collapsed by default on mobile (md breakpoint)
+    }
+    return false;
+  });
+  
   const location = useLocation();
   const { user, logout } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
-
   const [navItems, setNavItems] = useState<roleItem[]>([]);
+
+  // Handle window resize to auto-collapse on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsCollapsed(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     // Add animation effect similar to dashboard
     setIsVisible(true);
-    
+  
     if (user) {
+      const dashboardPage : string = user.role === 'doctor' ? "/doctorDashboard" : "/dashboard"
       const baseItems = [
         {
           title: "Profile",
@@ -53,7 +72,7 @@ export function SidebarNav({ className }: SidebarNavProps) {
         },
         {
           title: "Dashboard",
-          href: "/dashboard",
+          href: `${dashboardPage}`,
           icon: <LayoutDashboard className="h-5 w-5" />,
         },
         {
@@ -105,6 +124,10 @@ export function SidebarNav({ className }: SidebarNavProps) {
     toast.success("Logged Out Successfully!");
   };
 
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
     <div
       className={cn(
@@ -122,7 +145,7 @@ export function SidebarNav({ className }: SidebarNavProps) {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={toggleSidebar}
           className="h-9 w-9 text-blue-600 hover:bg-blue-50 rounded-xl"
         >
           <Menu className="h-5 w-5" />

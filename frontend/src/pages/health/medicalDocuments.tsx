@@ -268,11 +268,11 @@ export default function HealthRecords() {
 
   const getFileIcon = (type: string) => {
     if (type.includes('pdf')) {
-      return <FileTextIcon className="h-8 w-8 text-red-500" />;
+      return <FileTextIcon className="h-6 w-6 sm:h-8 sm:w-8 text-red-500" />;
     } else if (type.includes('image')) {
-      return <ImageIcon className="h-8 w-8 text-blue-500" />;
+      return <ImageIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />;
     } else {
-      return <FileIcon className="h-8 w-8 text-gray-500" />;
+      return <FileIcon className="h-6 w-6 sm:h-8 sm:w-8 text-gray-500" />;
     }
   };
 
@@ -290,25 +290,25 @@ export default function HealthRecords() {
     <AppLayout>
       <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-12">
         {/* Hero Section */}
-        <section className={`relative pt-8 pb-10 px-4 md:px-6 lg:px-8 transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+        <section className={`relative pt-4 sm:pt-8 pb-6 sm:pb-10 px-4 md:px-6 lg:px-8 transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col lg:flex-row items-center">
-              <div className="lg:w-1/2 space-y-4">
-                <div className="inline-block bg-blue-100 text-blue-700 rounded-full px-4 py-1 text-sm font-medium mb-2">
+              <div className="lg:w-1/2 space-y-3 sm:space-y-4 text-center lg:text-left">
+                <div className="inline-block bg-blue-100 text-blue-700 rounded-full px-3 sm:px-4 py-1 text-xs sm:text-sm font-medium mb-2">
                   Your Medical History
                 </div>
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
                   Manage your <span className="text-blue-600">Health Records</span>
                 </h1>
-                <p className="text-lg text-gray-600 max-w-xl">
+                <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto lg:mx-0">
                   Securely store, organize, and access your medical documents whenever you need them.
                 </p>
               </div>
               <div className="lg:w-1/2 mt-6 lg:mt-0 flex justify-center">
-                <div className="relative w-full max-w-md aspect-square bg-blue-100/50 rounded-full flex items-center justify-center shadow-xl">
+                <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-full lg:max-w-md lg:aspect-square bg-blue-100/50 rounded-full flex items-center justify-center shadow-xl">
                   <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-100 to-indigo-50 opacity-50" />
-                  <div className="relative h-32 w-32 bg-blue-500 rounded-full flex items-center justify-center">
-                    <FileTextIcon className="h-16 w-16 text-white" />
+                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32 bg-blue-500 rounded-full flex items-center justify-center">
+                    <FileTextIcon className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 text-white" />
                   </div>
                 </div>
               </div>
@@ -317,49 +317,49 @@ export default function HealthRecords() {
         </section>
 
         {/* Main Content */}
-        <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          <Tabs defaultValue="documents" className="mb-12">
-            <TabsList className="bg-white shadow-sm rounded-xl p-1 mb-6">
-              <TabsTrigger value="documents" className="rounded-lg data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 transition-colors">
+        <div className={`container mx-auto px-3 sm:px-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+          <Tabs defaultValue="documents" className="mb-8 sm:mb-12">
+            <TabsList className="bg-white shadow-sm rounded-xl p-1 mb-4 sm:mb-6 w-full sm:w-auto grid grid-cols-2 sm:flex">
+              <TabsTrigger value="documents" className="rounded-lg data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 transition-colors text-sm sm:text-base">
                 My Documents
               </TabsTrigger>
-              <TabsTrigger value="upload" className="rounded-lg data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 transition-colors">
+              <TabsTrigger value="upload" className="rounded-lg data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 transition-colors text-sm sm:text-base">
                 Upload Document
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="documents" className="mt-0">
-              <div className="flex items-center mb-6">
-                <h2 className="text-2xl font-semibold text-gray-900">My Health Documents</h2>
-                <div className="ml-4 h-1 bg-blue-100 flex-grow rounded-full"></div>
+              <div className="flex flex-col sm:flex-row sm:items-center mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-0">My Health Documents</h2>
+                <div className="ml-0 sm:ml-4 h-1 bg-blue-100 flex-grow rounded-full"></div>
               </div>
 
-              <Card className="border-0 shadow-lg bg-white mb-8">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xl text-blue-600">Your Medical Records</CardTitle>
-                  <CardDescription>View and manage your medical records and documents</CardDescription>
+              <Card className="border-0 shadow-lg bg-white mb-6 sm:mb-8">
+                <CardHeader className="pb-2 px-4 sm:px-6">
+                  <CardTitle className="text-lg sm:text-xl text-blue-600">Your Medical Records</CardTitle>
+                  <CardDescription className="text-sm sm:text-base">View and manage your medical records and documents</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 sm:px-6">
                   {isLoading ? (
                     <div className="flex justify-center my-8">
                       <motion.div 
-                        className="h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full"
+                        className="h-8 w-8 sm:h-10 sm:w-10 border-4 border-blue-500 border-t-transparent rounded-full"
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                       />
                     </div>
                   ) : documents.length === 0 ? (
-                    <div className="text-center py-12">
-                      <div className="flex justify-center my-6">
-                        <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center">
-                          <FileTextIcon className="h-10 w-10 text-blue-500" />
+                    <div className="text-center py-8 sm:py-12">
+                      <div className="flex justify-center my-4 sm:my-6">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-blue-100 rounded-full flex items-center justify-center">
+                          <FileTextIcon className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500" />
                         </div>
                       </div>
-                      <p className="text-lg text-gray-600 mb-2">You haven't uploaded any health documents yet.</p>
-                      <p className="text-sm text-gray-500 mb-6">Upload your first document to keep track of your medical records.</p>
+                      <p className="text-base sm:text-lg text-gray-600 mb-2 px-4">You haven't uploaded any health documents yet.</p>
+                      <p className="text-sm text-gray-500 mb-4 sm:mb-6 px-4">Upload your first document to keep track of your medical records.</p>
                       <Button 
                         onClick={() => (document.querySelector('[data-state="inactive"][value="upload"]') as HTMLElement)?.click()}
-                        className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-2 mx-auto"
+                        className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-2 mx-auto text-sm sm:text-base px-4 sm:px-6"
                       >
                         <PlusCircle className="h-4 w-4" />
                         Upload Your First Document
@@ -370,40 +370,40 @@ export default function HealthRecords() {
                       variants={staggerContainer}
                       initial="initial"
                       animate="animate"
-                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
                     >
                       <AnimatePresence>
                         {documents.map((doc) => (
                           <motion.div key={doc.id} variants={fadeUp}>
                             <Card className="border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white overflow-hidden">
                               <div className="h-2 bg-gradient-to-r from-blue-400 to-blue-600"></div>
-                              <CardContent className="p-4">
-                                <div className="flex items-center space-x-3 mb-3">
+                              <CardContent className="p-3 sm:p-4">
+                                <div className="flex items-center space-x-2 sm:space-x-3 mb-3">
                                   {getFileIcon(doc.type)}
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate text-blue-600">{doc.name}</p>
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-sm font-medium truncate text-blue-600 leading-tight">{doc.name}</p>
+                                    <p className="text-xs text-gray-500 mt-1">
                                       {new Date(doc.uploadDate).toLocaleDateString()}
                                     </p>
                                   </div>
                                 </div>
-                                <div className="flex justify-end space-x-2 mt-4">
+                                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 mt-4">
                                   <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => handlePreview(doc)}
-                                    className="flex items-center rounded-lg border-blue-200 text-blue-600 hover:bg-blue-50"
+                                    className="flex items-center justify-center rounded-lg border-blue-200 text-blue-600 hover:bg-blue-50 text-xs sm:text-sm w-full sm:w-auto"
                                   >
-                                    <EyeIcon className="h-4 w-4 mr-1" />
+                                    <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                                     View
                                   </Button>
                                   <Button
                                     variant="destructive"
                                     size="sm"
                                     onClick={() => handleDeleteClick(doc)}
-                                    className="flex items-center rounded-lg"
+                                    className="flex items-center justify-center rounded-lg text-xs sm:text-sm w-full sm:w-auto"
                                   >
-                                    <Trash2Icon className="h-4 w-4 mr-1" />
+                                    <Trash2Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                                     Delete
                                   </Button>
                                 </div>
@@ -419,32 +419,32 @@ export default function HealthRecords() {
             </TabsContent>
 
             <TabsContent value="upload" className="mt-0">
-              <div className="flex items-center mb-6">
-                <h2 className="text-2xl font-semibold text-gray-900">Upload Health Document</h2>
-                <div className="ml-4 h-1 bg-blue-100 flex-grow rounded-full"></div>
+              <div className="flex flex-col sm:flex-row sm:items-center mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-0">Upload Health Document</h2>
+                <div className="ml-0 sm:ml-4 h-1 bg-blue-100 flex-grow rounded-full"></div>
               </div>
               
               <Card className="border-0 shadow-lg bg-white">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xl text-blue-600">Upload Health Document</CardTitle>
-                  <CardDescription>
+                <CardHeader className="pb-2 px-4 sm:px-6">
+                  <CardTitle className="text-lg sm:text-xl text-blue-600">Upload Health Document</CardTitle>
+                  <CardDescription className="text-sm sm:text-base">
                     Upload medical reports, prescriptions, lab results, and other health documents
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
                   <motion.div 
                     className="space-y-2"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: 0.1 }}
                   >
-                    <Label htmlFor="document-name">Document Name</Label>
+                    <Label htmlFor="document-name" className="text-sm sm:text-base">Document Name</Label>
                     <Input
                       id="document-name"
                       value={documentName}
                       onChange={(e) => setDocumentName(e.target.value)}
                       placeholder="Enter a name for this document"
-                      className="border-blue-200 focus:border-blue-500 focus-visible:ring-blue-500"
+                      className="border-blue-200 focus:border-blue-500 focus-visible:ring-blue-500 text-sm sm:text-base"
                     />
                   </motion.div>
 
@@ -454,12 +454,12 @@ export default function HealthRecords() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: 0.2 }}
                   >
-                    <Label htmlFor="document-type">Document Type</Label>
+                    <Label htmlFor="document-type" className="text-sm sm:text-base">Document Type</Label>
                     <select
                       id="document-type"
                       value={documentType}
                       onChange={(e) => setDocumentType(e.target.value)}
-                      className="flex h-10 w-full rounded-md border border-blue-200 bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-9 sm:h-10 w-full rounded-md border border-blue-200 bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {documentTypes.map((type) => (
                         <option key={type.value} value={type.value}>
@@ -475,8 +475,8 @@ export default function HealthRecords() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: 0.3 }}
                   >
-                    <Label>Upload File</Label>
-                    <div className="border rounded-md p-6 border-blue-200 bg-blue-50/50 hover:bg-blue-50 transition-colors">
+                    <Label className="text-sm sm:text-base">Upload File</Label>
+                    <div className="border rounded-md p-4 sm:p-6 border-blue-200 bg-blue-50/50 hover:bg-blue-50 transition-colors">
                       <FileUploader
                         onFileSelect={handleFileChange}
                         acceptedFileTypes=".pdf,.jpg,.jpeg,.png"
@@ -490,8 +490,8 @@ export default function HealthRecords() {
                         >
                           <div className="flex items-center">
                             {getFileIcon(selectedFile.type)}
-                            <div className="ml-3">
-                              <p className="font-medium">{selectedFile.name}</p>
+                            <div className="ml-3 min-w-0 flex-1">
+                              <p className="font-medium truncate text-sm">{selectedFile.name}</p>
                               <p className="text-xs text-gray-500">
                                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                               </p>
@@ -508,7 +508,7 @@ export default function HealthRecords() {
                   <Button
                     onClick={handleUpload}
                     disabled={!selectedFile || !documentName || isUploading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl"
+                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl text-sm sm:text-base py-2 sm:py-3"
                   >
                     {isUploading ? (
                       <>
@@ -527,12 +527,12 @@ export default function HealthRecords() {
                     )}
                   </Button>
                 </CardContent>
-                <CardFooter className="border-t bg-gray-50 py-4">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                      <Lock className="h-4 w-4 text-blue-600" />
+                <CardFooter className="border-t bg-gray-50 py-3 sm:py-4 px-4 sm:px-6">
+                  <div className="flex items-center text-xs sm:text-sm text-gray-500">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+                      <Lock className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                     </div>
-                    Your files are encrypted and stored securely
+                    <span className="leading-tight">Your files are encrypted and stored securely</span>
                   </div>
                 </CardFooter>
               </Card>
@@ -541,23 +541,25 @@ export default function HealthRecords() {
         </div>
 
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent className="border-red-100 bg-white">
+          <AlertDialogContent className="border-red-100 bg-white mx-4 sm:mx-0 max-w-md sm:max-w-lg">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
             >
               <AlertDialogHeader>
-                <AlertDialogTitle className="text-red-600">Delete Document</AlertDialogTitle>
-                <AlertDialogDescription>
+                <AlertDialogTitle className="text-red-600 text-lg sm:text-xl">Delete Document</AlertDialogTitle>
+                <AlertDialogDescription className="text-sm sm:text-base">
                   Are you sure you want to delete "{documentToDelete?.name}"? This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <AlertDialogFooter className="mt-4">
-                <AlertDialogCancel className="border-gray-200 hover:bg-gray-100 text-gray-700 rounded-lg">Cancel</AlertDialogCancel>
+              <AlertDialogFooter className="mt-4 flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                <AlertDialogCancel className="border-gray-200 hover:bg-gray-100 text-gray-700 rounded-lg w-full sm:w-auto text-sm sm:text-base">
+                  Cancel
+                </AlertDialogCancel>
                 <AlertDialogAction 
                   onClick={handleDelete} 
-                  className="bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                  className="bg-red-600 hover:bg-red-700 text-white rounded-lg w-full sm:w-auto text-sm sm:text-base"
                 >
                   Delete
                 </AlertDialogAction>

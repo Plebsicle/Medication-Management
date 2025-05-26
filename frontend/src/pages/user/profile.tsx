@@ -179,18 +179,18 @@ export default function Profile() {
   return (
     <AppLayout>
       <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-12">
-        {/* Header Section */}
-        <section className={`relative pt-8 pb-10 px-4 md:px-6 lg:px-8 transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+        {/* Header Section - Mobile Responsive */}
+        <section className={`relative pt-4 sm:pt-8 pb-6 sm:pb-10 px-3 sm:px-4 md:px-6 lg:px-8 transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
           <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col lg:flex-row items-center">
-              <div className="lg:w-full space-y-4">
-                <div className="inline-block bg-blue-100 text-blue-700 rounded-full px-4 py-1 text-sm font-medium mb-2">
+            <div className="flex flex-col lg:flex-row items-center text-center lg:text-left">
+              <div className="lg:w-full space-y-3 sm:space-y-4">
+                <div className="inline-block bg-blue-100 text-blue-700 rounded-full px-3 sm:px-4 py-1 text-xs sm:text-sm font-medium mb-2">
                   Your Profile
                 </div>
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
                   Manage Your <span className="text-blue-600">MediTrack</span> Profile
                 </h1>
-                <p className="text-lg text-gray-600 max-w-xl">
+                <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto lg:mx-0">
                   Update your personal information and notification preferences.
                 </p>
               </div>
@@ -198,17 +198,18 @@ export default function Profile() {
           </div>
         </section>
 
-        <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+        <div className={`container mx-auto px-3 sm:px-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
           <Card className="max-w-2xl mx-auto border-0 shadow-lg bg-white overflow-hidden">
             <div className="h-2 bg-gradient-to-r from-blue-400 to-blue-600"></div>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-2xl text-blue-600">Profile Settings</CardTitle>
-              <CardDescription>Manage your account settings and preferences</CardDescription>
+            <CardHeader className="pb-2 px-4 sm:px-6">
+              <CardTitle className="text-xl sm:text-2xl text-blue-600">Profile Settings</CardTitle>
+              <CardDescription className="text-sm sm:text-base">Manage your account settings and preferences</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex flex-col items-center space-y-4">
+            <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
+              {/* Profile Photo Section - Mobile Responsive */}
+              <div className="flex flex-col items-center space-y-3 sm:space-y-4">
                 <div
-                  className={`relative w-32 h-32 rounded-full overflow-hidden cursor-pointer group shadow-md transition-transform duration-300 ${isVisible ? 'scale-100' : 'scale-90'}`}
+                  className={`relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden cursor-pointer group shadow-md transition-transform duration-300 ${isVisible ? 'scale-100' : 'scale-90'}`}
                   onClick={handleUploadClick}
                   style={{ transitionDelay: '100ms' }}
                 >
@@ -220,14 +221,14 @@ export default function Profile() {
                     />
                   ) : (
                     <div className="w-full h-full bg-blue-100 flex items-center justify-center">
-                      <User className="h-12 w-12 text-blue-500" />
+                      <User className="h-8 w-8 sm:h-12 sm:w-12 text-blue-500" />
                     </div>
                   )}
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     {isUploading ? (
-                      <div className="animate-spin h-6 w-6 border-2 border-white rounded-full border-t-transparent"></div>
+                      <div className="animate-spin h-5 w-5 sm:h-6 sm:w-6 border-2 border-white rounded-full border-t-transparent"></div>
                     ) : (
-                      <Camera className="h-8 w-8 text-white" />
+                      <Camera className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                     )}
                   </div>
                   <input
@@ -238,36 +239,38 @@ export default function Profile() {
                     className="hidden"
                   />
                 </div>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs sm:text-sm text-gray-500 text-center">
                   {isUploading ? "Uploading..." : "Click to change profile photo"}
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <div className={`space-y-2 p-4 bg-white rounded-xl border border-gray-100 shadow-sm transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} style={{ transitionDelay: '200ms' }}>
-                  <Label className="capitalize text-blue-600">Name</Label>
+              {/* Profile Fields - Mobile Responsive */}
+              <div className="space-y-3 sm:space-y-4">
+                {/* Name Field */}
+                <div className={`space-y-2 p-3 sm:p-4 bg-white rounded-xl border border-gray-100 shadow-sm transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} style={{ transitionDelay: '200ms' }}>
+                  <Label className="capitalize text-blue-600 text-sm sm:text-base">Name</Label>
                   {editingField === "name" ? (
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex flex-col sm:flex-row gap-2 mt-2">
                       <Input
                         type="text"
                         value={updatedValue}
                         onChange={(e) => setUpdatedValue(e.target.value)}
-                        className="rounded-xl"
+                        className="rounded-xl flex-1"
                       />
                       <Button
                         onClick={() => handleSaveClick("name")}
-                        className="bg-blue-600 hover:bg-blue-700 rounded-xl"
+                        className="bg-blue-600 hover:bg-blue-700 rounded-xl w-full sm:w-auto"
                       >
                         Save
                       </Button>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-blue-100 p-2 rounded-full">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="bg-blue-100 p-2 rounded-full flex-shrink-0">
                           <User className="h-4 w-4 text-blue-500" />
                         </div>
-                        <p className="text-gray-800">
+                        <p className="text-gray-800 text-sm sm:text-base truncate">
                           {profileData
                             ? profileData.name
                             : "Loading..."}
@@ -277,7 +280,7 @@ export default function Profile() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEditClick("name")}
-                        className="text-blue-600 hover:bg-blue-50 rounded-xl"
+                        className="text-blue-600 hover:bg-blue-50 rounded-xl flex-shrink-0 text-xs sm:text-sm"
                       >
                         Edit
                       </Button>
@@ -285,57 +288,66 @@ export default function Profile() {
                   )}
                 </div>
 
-                <div className={`space-y-2 p-4 bg-white rounded-xl border border-gray-100 shadow-sm transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} style={{ transitionDelay: '300ms' }}>
-                  <Label className="text-blue-600">Role</Label>
+                {/* Role Field */}
+                <div className={`space-y-2 p-3 sm:p-4 bg-white rounded-xl border border-gray-100 shadow-sm transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} style={{ transitionDelay: '300ms' }}>
+                  <Label className="text-blue-600 text-sm sm:text-base">Role</Label>
                   <div className="flex items-center gap-2 mt-2">
-                    <div className="bg-blue-100 p-2 rounded-full">
+                    <div className="bg-blue-100 p-2 rounded-full flex-shrink-0">
                       <Shield className="h-4 w-4 text-blue-500" />
                     </div>
-                    <p className="text-gray-800">{profileData?.role || "Loading..."}</p>
+                    <p className="text-gray-800 text-sm sm:text-base truncate">{profileData?.role || "Loading..."}</p>
                   </div>
                 </div>
 
-                <div className={`space-y-2 p-4 bg-white rounded-xl border border-gray-100 shadow-sm transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} style={{ transitionDelay: '400ms' }}>
-                  <Label className="text-blue-600">Email</Label>
+                {/* Email Field */}
+                <div className={`space-y-2 p-3 sm:p-4 bg-white rounded-xl border border-gray-100 shadow-sm transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} style={{ transitionDelay: '400ms' }}>
+                  <Label className="text-blue-600 text-sm sm:text-base">Email</Label>
                   <div className="flex items-center gap-2 mt-2">
-                    <div className="bg-blue-100 p-2 rounded-full">
+                    <div className="bg-blue-100 p-2 rounded-full flex-shrink-0">
                       <Mail className="h-4 w-4 text-blue-500" />
                     </div>
-                    <p className="text-gray-800">{profileData?.email || "Loading..."}</p>
+                    <p className="text-gray-800 text-sm sm:text-base truncate">{profileData?.email || "Loading..."}</p>
                   </div>
                 </div>
                 
-                <div className={`pt-4 mt-6 border-t transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} style={{ transitionDelay: '500ms' }}>
-                  <h3 className="text-xl font-semibold text-blue-600 mb-4">Notification Preferences</h3>
+                {/* Notification Preferences - Mobile Responsive */}
+                <div className={`pt-3 sm:pt-4 mt-4 sm:mt-6 border-t transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} style={{ transitionDelay: '500ms' }}>
+                  <h3 className="text-lg sm:text-xl font-semibold text-blue-600 mb-3 sm:mb-4">Notification Preferences</h3>
                   
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-blue-100 p-2 rounded-full">
+                  <div className="space-y-3 sm:space-y-4">
+                    {/* Email Notifications */}
+                    <div className="flex items-center justify-between p-3 sm:p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="bg-blue-100 p-2 rounded-full flex-shrink-0">
                           <Bell className="h-4 w-4 text-blue-500" />
                         </div>
-                        <Label htmlFor="email-notifications" className="text-gray-800">Email Notifications</Label>
+                        <Label htmlFor="email-notifications" className="text-gray-800 text-sm sm:text-base cursor-pointer">
+                          Email Notifications
+                        </Label>
                       </div>
                       <Switch
                         id="email-notifications"
                         checked={profileData?.email_notifications || false}
                         onCheckedChange={() => handleNotificationToggle("email_notifications")}
-                        className="data-[state=checked]:bg-blue-500"
+                        className="data-[state=checked]:bg-blue-500 flex-shrink-0"
                       />
                     </div>
                     
-                    <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-blue-100 p-2 rounded-full">
+                    {/* SMS Notifications */}
+                    <div className="flex items-center justify-between p-3 sm:p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="bg-blue-100 p-2 rounded-full flex-shrink-0">
                           <Bell className="h-4 w-4 text-blue-500" />
                         </div>
-                        <Label htmlFor="sms-notifications" className="text-gray-800">SMS Notifications</Label>
+                        <Label htmlFor="sms-notifications" className="text-gray-800 text-sm sm:text-base cursor-pointer">
+                          SMS Notifications
+                        </Label>
                       </div>
                       <Switch
                         id="sms-notifications"
                         checked={profileData?.sms_notifications || false}
                         onCheckedChange={() => handleNotificationToggle("sms_notifications")}
-                        className="data-[state=checked]:bg-blue-500"
+                        className="data-[state=checked]:bg-blue-500 flex-shrink-0"
                       />
                     </div>
                   </div>

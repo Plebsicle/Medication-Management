@@ -173,29 +173,18 @@ export default function MedicationDetails() {
     if (!medication) return (
         <AppLayout>
             <div className="flex items-center justify-center h-screen bg-gradient-to-b from-blue-50 to-white">
-                <div className="p-8 rounded-lg bg-white shadow-md">
-                    <p className="text-lg text-gray-600">Loading medication details...</p>
+                <div className="p-4 sm:p-8 rounded-lg bg-white shadow-md mx-4">
+                    <p className="text-base sm:text-lg text-gray-600">Loading medication details...</p>
                 </div>
             </div>
         </AppLayout>
     );
 
-    // Format date for display
-    // const formatDate = (dateString: string) => {
-    //     if (!dateString) return "N/A";
-    //     const date = new Date(dateString);
-    //     return date.toLocaleDateString('en-US', { 
-    //         year: 'numeric', 
-    //         month: 'long', 
-    //         day: 'numeric' 
-    //     });
-    // };
-
     return (
         <AppLayout>
             <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-12">
-                {/* Hero Section */}
-                <section className={`relative pt-8 pb-10 px-4 md:px-6 lg:px-8 transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+                {/* Hero Section - Hidden on small screens for better mobile UX */}
+                <section className={`relative pt-4 sm:pt-8 pb-6 sm:pb-10 px-4 md:px-6 lg:px-8 transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'} hidden sm:block`}>
                     <div className="max-w-6xl mx-auto">
                         <div className="flex flex-col lg:flex-row items-center">
                             <div className="lg:w-1/2 space-y-4">
@@ -222,34 +211,34 @@ export default function MedicationDetails() {
                 </section>
 
                 {/* Form Section */}
-                <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-                    <div className="max-w-3xl mx-auto">
+                <div className={`container mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-0 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                    <div className="max-w-2xl sm:max-w-3xl mx-auto">
                         <Card className="border-0 shadow-lg bg-white overflow-hidden">
                             <div className="h-2 bg-gradient-to-r from-blue-400 to-blue-600"></div>
-                            <CardHeader>
-                                <CardTitle className="text-2xl text-blue-600">Edit Medication Details</CardTitle>
-                                <CardDescription>Update the details for {medication.name}</CardDescription>
+                            <CardHeader className="px-4 sm:px-6">
+                                <CardTitle className="text-xl sm:text-2xl text-blue-600">Edit Medication Details</CardTitle>
+                                <CardDescription className="text-sm sm:text-base">Update the details for {medication.name}</CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <form className="grid gap-4" onSubmit={handleSubmit}>
+                            <form onSubmit={handleSubmit}>
+                                <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
                                     <div className="space-y-2">
-                                        <Label htmlFor="name" className="text-gray-700">Name</Label>
+                                        <Label htmlFor="name" className="text-gray-700 text-sm sm:text-base">Name</Label>
                                         <Input
                                             id="name"
                                             name="name"
                                             value={medication.name}
                                             onChange={handleInputChange}
-                                            className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 h-11 sm:h-10 text-base sm:text-sm"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="type" className="text-gray-700">Type</Label>
+                                        <Label htmlFor="type" className="text-gray-700 text-sm sm:text-base">Type</Label>
                                         <select
                                             id="type"
                                             name="type"
                                             value={medication.type}
                                             onChange={handleInputChange}
-                                            className="w-full p-2 border rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="w-full p-3 sm:p-2 border rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500 h-11 sm:h-10 text-base sm:text-sm"
                                         >
                                             <option value="pills">Pills</option>
                                             <option value="syrup">Syrup</option>
@@ -257,19 +246,19 @@ export default function MedicationDetails() {
                                         </select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="dosage" className="text-gray-700">Dosage</Label>
+                                        <Label htmlFor="dosage" className="text-gray-700 text-sm sm:text-base">Dosage</Label>
                                         <Input
                                             id="dosage"
                                             name="dosage"
                                             value={medication.dosage}
                                             onChange={handleInputChange}
-                                            className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 h-11 sm:h-10 text-base sm:text-sm"
                                         />
                                     </div>
                                     
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="start_date" className="text-gray-700 flex items-center gap-2">
+                                            <Label htmlFor="start_date" className="text-gray-700 flex items-center gap-2 text-sm sm:text-base">
                                                 <Calendar className="h-4 w-4 text-blue-500" /> Start Date
                                             </Label>
                                             <Input
@@ -278,11 +267,11 @@ export default function MedicationDetails() {
                                                 type="date"
                                                 value={medication.start_date}
                                                 onChange={handleInputChange}
-                                                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 h-11 sm:h-10 text-base sm:text-sm"
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="end_date" className="text-gray-700 flex items-center gap-2">
+                                            <Label htmlFor="end_date" className="text-gray-700 flex items-center gap-2 text-sm sm:text-base">
                                                 <Calendar className="h-4 w-4 text-blue-500" /> End Date
                                             </Label>
                                             <Input
@@ -291,13 +280,13 @@ export default function MedicationDetails() {
                                                 type="date"
                                                 value={medication.end_date}
                                                 onChange={handleInputChange}
-                                                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 h-11 sm:h-10 text-base sm:text-sm"
                                             />
                                         </div>
                                     </div>
                                     
                                     <div className="space-y-2">
-                                        <Label htmlFor="frequency" className="text-gray-700 flex items-center gap-2">
+                                        <Label htmlFor="frequency" className="text-gray-700 flex items-center gap-2 text-sm sm:text-base">
                                             <Clock className="h-4 w-4 text-blue-500" /> Frequency (times per day)
                                         </Label>
                                         <Input
@@ -307,18 +296,18 @@ export default function MedicationDetails() {
                                             min="1"
                                             value={medication.frequency}
                                             onChange={handleFrequencyChange}
-                                            className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 h-11 sm:h-10 text-base sm:text-sm"
                                         />
                                     </div>
                                     
                                     <div className="space-y-3">
-                                        <Label className="text-gray-700 flex items-center gap-2">
+                                        <Label className="text-gray-700 flex items-center gap-2 text-sm sm:text-base">
                                             <Clock className="h-4 w-4 text-blue-500" /> Intake Times
                                         </Label>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             {medication.medication_times.map((value: medicationTimes, index: number) => (
                                                 <div key={index} className="space-y-1">
-                                                    <Label htmlFor={`time-${index}`} className="text-sm text-gray-600">
+                                                    <Label htmlFor={`time-${index}`} className="text-xs sm:text-sm text-gray-600">
                                                         Time {index + 1}
                                                     </Label>
                                                     <Input
@@ -326,7 +315,7 @@ export default function MedicationDetails() {
                                                         type="time"
                                                         value={value.intake_time}
                                                         onChange={(e) => handleTimeChange(index, e.target.value)}
-                                                        className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                                        className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 h-11 sm:h-10 text-base sm:text-sm"
                                                     />
                                                 </div>
                                             ))}
@@ -334,47 +323,47 @@ export default function MedicationDetails() {
                                     </div>
                                     
                                     <div className="space-y-2">
-                                        <Label htmlFor="instructions" className="text-gray-700">Instructions</Label>
+                                        <Label htmlFor="instructions" className="text-gray-700 text-sm sm:text-base">Instructions</Label>
                                         <Textarea
                                             id="instructions"
                                             name="instructions"
                                             value={medication.instructions}
                                             onChange={handleInputChange}
-                                            className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 min-h-[100px] text-base sm:text-sm"
+                                            rows={4}
                                         />
                                     </div>
                                     
-                                    <div className="flex items-center space-x-2 py-2">
+                                    <div className="flex items-center space-x-3 py-2">
                                         <Switch
                                             id="notification"
                                             checked={medication.notification_on}
                                             onCheckedChange={(checked) => setMedication(prev => prev && { ...prev, notification_on: checked })}
                                             className="data-[state=checked]:bg-blue-500"
                                         />
-                                        <Label htmlFor="notification" className="text-gray-700">Enable notifications</Label>
+                                        <Label htmlFor="notification" className="text-gray-700 text-sm sm:text-base cursor-pointer">Enable notifications</Label>
                                     </div>
-                                    
-                                    <CardFooter className="flex justify-between px-0 pt-4">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => navigate('/dashboard')}
-                                            className="flex items-center gap-2"
-                                        >
-                                            <ArrowLeft className="h-4 w-4" />
-                                            Back to Dashboard
-                                        </Button>
-                                        <Button
-                                            type="submit"
-                                            disabled={isSaving}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
-                                        >
-                                            <Save className="h-4 w-4" />
-                                            {isSaving ? "Saving..." : "Save Changes"}
-                                        </Button>
-                                    </CardFooter>
-                                </form>
-                            </CardContent>
+                                </CardContent>
+                                <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 bg-gray-50 px-4 sm:px-6 py-4">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => navigate('/dashboard')}
+                                        className="flex items-center justify-center gap-2 w-full sm:w-auto h-11 sm:h-10 order-2 sm:order-1"
+                                    >
+                                        <ArrowLeft className="h-4 w-4" />
+                                        Back to Dashboard
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={isSaving}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 w-full sm:w-auto h-11 sm:h-10 order-1 sm:order-2"
+                                    >
+                                        <Save className="h-4 w-4" />
+                                        {isSaving ? "Saving..." : "Save Changes"}
+                                    </Button>
+                                </CardFooter>
+                            </form>
                         </Card>
                     </div>
                 </div>

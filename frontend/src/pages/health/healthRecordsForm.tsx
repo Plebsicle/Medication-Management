@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -26,9 +26,9 @@ export default function HealthRecordsForm() {
     const navigate = useNavigate();
 
     // Set visibility after component mounts
-    useState(() => {
+    useEffect(() => {
         setIsVisible(true);
-    });
+    }, []);
 
     const handleChange = (e : any) => {
         const { name, value } = e.target;
@@ -72,29 +72,29 @@ export default function HealthRecordsForm() {
     return (
         <AppLayout>
             <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-12">
-
-
-                <div className={`container mx-auto px-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center flex-grow">
-                            <h2 className="text-2xl font-semibold text-gray-900">Health Records Form</h2>
-                            <div className="ml-4 h-1 bg-blue-100 flex-grow rounded-full"></div>
+                <div className={`container mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                    {/* Header Section - Mobile Responsive */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center flex-grow gap-4">
+                            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 whitespace-nowrap">Health Records Form</h2>
+                            <div className="hidden sm:block ml-4 h-1 bg-blue-100 flex-grow rounded-full"></div>
                         </div>
                     </div>
 
-                    <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white overflow-hidden max-w-3xl mx-auto">
+                    <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white overflow-hidden max-w-4xl mx-auto">
                         <div className="h-2 bg-gradient-to-r from-blue-400 to-blue-600"></div>
-                        <CardHeader>
-                            <CardTitle className="text-2xl text-blue-600">Health Records</CardTitle>
-                            <CardDescription>Please fill in your health information accurately</CardDescription>
+                        <CardHeader className="px-4 sm:px-6">
+                            <CardTitle className="text-xl sm:text-2xl text-blue-600">Health Records</CardTitle>
+                            <CardDescription className="text-sm sm:text-base">Please fill in your health information accurately</CardDescription>
                         </CardHeader>
                         <form onSubmit={handleSubmit}>
-                            <CardContent className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
+                                {/* Grid Layout - Responsive */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
-                                            <Calendar className="h-4 w-4 text-blue-500" />
-                                            <Label htmlFor="record_date">Record Date</Label>
+                                            <Calendar className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                                            <Label htmlFor="record_date" className="text-sm sm:text-base">Record Date</Label>
                                         </div>
                                         <Input
                                             id="record_date"
@@ -103,14 +103,14 @@ export default function HealthRecordsForm() {
                                             value={formData.record_date}
                                             onChange={handleChange}
                                             required
-                                            className="border-blue-200 focus:border-blue-500"
+                                            className="border-blue-200 focus:border-blue-500 h-10 sm:h-11"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
-                                            <Activity className="h-4 w-4 text-blue-500" />
-                                            <Label htmlFor="blood_pressure">Blood Pressure</Label>
+                                            <Activity className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                                            <Label htmlFor="blood_pressure" className="text-sm sm:text-base">Blood Pressure</Label>
                                         </div>
                                         <Input
                                             id="blood_pressure"
@@ -118,14 +118,14 @@ export default function HealthRecordsForm() {
                                             value={formData.blood_pressure}
                                             onChange={handleChange}
                                             placeholder="e.g., 120/80"
-                                            className="border-blue-200 focus:border-blue-500"
+                                            className="border-blue-200 focus:border-blue-500 h-10 sm:h-11"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
-                                            <Activity className="h-4 w-4 text-blue-500" />
-                                            <Label htmlFor="heart_rate">Heart Rate (bpm)</Label>
+                                            <Activity className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                                            <Label htmlFor="heart_rate" className="text-sm sm:text-base">Heart Rate (bpm)</Label>
                                         </div>
                                         <Input
                                             id="heart_rate"
@@ -134,14 +134,14 @@ export default function HealthRecordsForm() {
                                             value={formData.heart_rate}
                                             onChange={handleChange}
                                             placeholder="Enter heart rate"
-                                            className="border-blue-200 focus:border-blue-500"
+                                            className="border-blue-200 focus:border-blue-500 h-10 sm:h-11"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
-                                            <Weight className="h-4 w-4 text-blue-500" />
-                                            <Label htmlFor="weight">Weight (kg)</Label>
+                                            <Weight className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                                            <Label htmlFor="weight" className="text-sm sm:text-base">Weight (kg)</Label>
                                         </div>
                                         <Input
                                             id="weight"
@@ -151,14 +151,14 @@ export default function HealthRecordsForm() {
                                             value={formData.weight}
                                             onChange={handleChange}
                                             placeholder="Enter weight"
-                                            className="border-blue-200 focus:border-blue-500"
+                                            className="border-blue-200 focus:border-blue-500 h-10 sm:h-11"
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 sm:col-span-2 sm:max-w-md">
                                         <div className="flex items-center gap-2">
-                                            <Thermometer className="h-4 w-4 text-blue-500" />
-                                            <Label htmlFor="temperature">Body Temperature (°C)</Label>
+                                            <Thermometer className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                                            <Label htmlFor="temperature" className="text-sm sm:text-base">Body Temperature (°C)</Label>
                                         </div>
                                         <Input
                                             id="temperature"
@@ -168,15 +168,16 @@ export default function HealthRecordsForm() {
                                             value={formData.temperature}
                                             onChange={handleChange}
                                             placeholder="Enter temperature"
-                                            className="border-blue-200 focus:border-blue-500"
+                                            className="border-blue-200 focus:border-blue-500 h-10 sm:h-11"
                                         />
                                     </div>
                                 </div>
 
+                                {/* Notes Section - Full Width */}
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
-                                        <FileText className="h-4 w-4 text-blue-500" />
-                                        <Label htmlFor="notes">Notes</Label>
+                                        <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                                        <Label htmlFor="notes" className="text-sm sm:text-base">Notes</Label>
                                     </div>
                                     <Textarea
                                         id="notes"
@@ -184,22 +185,24 @@ export default function HealthRecordsForm() {
                                         value={formData.notes}
                                         onChange={handleChange}
                                         placeholder="Enter any additional notes or observations"
-                                        className="h-32 border-blue-200 focus:border-blue-500"
+                                        className="h-24 sm:h-32 border-blue-200 focus:border-blue-500 resize-none"
                                     />
                                 </div>
                             </CardContent>
-                            <CardFooter className="flex justify-between bg-gray-50 py-4">
+                            
+                            {/* Footer - Mobile Responsive */}
+                            <CardFooter className="flex flex-col sm:flex-row gap-3 sm:gap-0 sm:justify-between bg-gray-50 px-4 sm:px-6 py-4">
                                 <Button
                                     type="button"
                                     variant="outline"
                                     onClick={() => navigate('/health-records')}
-                                    className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                                    className="w-full sm:w-auto border-blue-200 text-blue-700 hover:bg-blue-50 h-10 sm:h-11"
                                 >
                                     Cancel
                                 </Button>
                                 <Button 
                                     type="submit"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-2"
+                                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center justify-center gap-2 h-10 sm:h-11"
                                 >
                                     Submit Record
                                     <ArrowRight className="h-4 w-4" />
