@@ -161,7 +161,7 @@ export default function DoctorDashboard() {
               </CardContent>
               <CardFooter>
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl">
-                  <Link to="/doctor/patients" className="flex items-center gap-2">
+                  <Link to="/doctor/chats" className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
                     View All Patients
                     <ArrowRight className="ml-1 h-4 w-4" />
