@@ -248,7 +248,7 @@ export default function DoctorDashboard() {
             {patients.length > 6 && (
               <div className="flex justify-center mt-8">
                 <Button variant="outline" asChild className="border-blue-300 text-blue-600 hover:bg-blue-50 rounded-xl">
-                  <Link to="/doctor/patients" className="flex items-center gap-2">
+                  <Link to="/doctor/chats" className="flex items-center gap-2">
                     View All Patients
                     <ArrowRight className="h-4 w-4" />
                   </Link>
