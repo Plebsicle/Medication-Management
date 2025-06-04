@@ -10,9 +10,9 @@ export const deleteMedication =  async (req : express.Request, res : express.Res
             return;
         }
 
-        const { medication_id , name, type, dosage, start_date, end_date } = medicationFull;
+        const { medication_id } = medicationFull;
 
-        if (!name || !type || !dosage || !start_date || !end_date || !medication_id) {
+        if ( !medication_id) {
             res.status(400).json({ error: "Incomplete medication details" });
             return;
         }
