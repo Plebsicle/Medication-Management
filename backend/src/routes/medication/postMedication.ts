@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/',jwtVerification, postMedication);
 router.get('/', jwtVerification,getMedication);
-router.post('/',jwtVerification, deleteMedication);
+router.post('/deleteMeds',jwtVerification, deleteMedication);
 
 
 export default router;

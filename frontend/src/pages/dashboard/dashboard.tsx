@@ -132,7 +132,7 @@ export default function Dashboard() {
     const medication = medications[index];
     try {
       await axios.post(
-        `${BACKEND_URL}/deleteMedication`,
+        `${BACKEND_URL}/deleteMedication/deleteMeds`,
         { medicationFull: medication },
         {
           headers: {
