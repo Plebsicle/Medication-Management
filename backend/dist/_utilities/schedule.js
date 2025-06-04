@@ -16,14 +16,18 @@ const twilio_1 = require("./twilio");
 const mailer_1 = require("./mailer");
 const node_schedule_1 = __importDefault(require("node-schedule"));
 const database_1 = __importDefault(require("../database"));
+const dayjs_1 = __importDefault(require("dayjs"));
+const utc_1 = __importDefault(require("dayjs/plugin/utc"));
+const timezone_1 = __importDefault(require("dayjs/plugin/timezone"));
+dayjs_1.default.extend(utc_1.default);
+dayjs_1.default.extend(timezone_1.default);
 // Main notification scheduler
 function sendNotifications() {
     return __awaiter(this, void 0, void 0, function* () {
-        const now = new Date();
-        const currentTimeHHMM = now.toTimeString().slice(0, 5); // "HH:mm"
-        console.log("Scheduler checking for notifications at:", currentTimeHHMM);
+        const nowIST = (0, dayjs_1.default)().tz("Asia/Kolkata");
+        const currentTimeHHMM = nowIST.format("HH:mm"); // IST-based "HH:mm"
+        console.log("Scheduler checking for notifications at (IST):", currentTimeHHMM);
         try {
-            // Get all medication times for the current time
             const medicationTimes = yield database_1.default.medication_times.findMany({
                 where: {
                     intake_time: currentTimeHHMM,
@@ -42,22 +46,19 @@ function sendNotifications() {
                 const { medication } = medTime;
                 if (!medication || !medication.user)
                     continue;
-                // Check if notification is enabled
                 const isNotifEnabled = medication.notification.some((n) => n.notification_on);
                 if (!isNotifEnabled) {
                     console.log(`Skipping ${medication.name}: notifications off`);
                     continue;
                 }
-                // Check medication is active (within start and end date)
-                const nowDate = new Date();
-                if (medication.start_date > nowDate || medication.end_date < nowDate) {
+                const nowDateIST = nowIST.toDate();
+                if (medication.start_date > nowDateIST || medication.end_date < nowDateIST) {
                     console.log(`Skipping ${medication.name}: outside active date range`);
                     continue;
                 }
                 const user = medication.user;
                 const messageText = `It's time to take your medication: ${medication.name}`;
                 yield logNotification(medication.medication_id, messageText);
-                // Send SMS notification via Twilio if user has SMS notifications enabled
                 if (user.phone_number && user.sms_notifications) {
                     try {
                         yield (0, twilio_1.sendSMS)(user.phone_number, `Medication Reminder: It's time to take ${medication.name}. ${medication.dosage} ${medication.instructions ? '- ' + medication.instructions : ''}`);
@@ -70,7 +71,6 @@ function sendNotifications() {
                 else if (user.phone_number) {
                     console.log(`Skipping SMS for user ${user.id}: SMS notifications disabled`);
                 }
-                // Send email notification if user has email notifications enabled
                 if (user.email && user.email_notifications) {
                     try {
                         yield (0, mailer_1.sendEmail)(user.email, 'Medication Reminder', `<h2>Medication Reminder</h2>
@@ -95,7 +95,6 @@ function sendNotifications() {
         }
     });
 }
-// Log the notification
 function logNotification(medication_id, message) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -119,9 +118,7 @@ function logNotification(medication_id, message) {
         }
     });
 }
-// Start the scheduler
 node_schedule_1.default.scheduleJob('* * * * *', sendNotifications);
 console.log("Notification scheduler initialized");
-// Run once at startup
 sendNotifications().catch(console.error);
 exports.default = sendNotifications;

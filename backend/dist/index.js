@@ -67,6 +67,19 @@ const AI_Socket_1 = require("./AI-Socket");
 const socket_1 = require("./socket");
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
+app.use((req, res, next) => {
+    // Explicitly disable Cross-Origin-Opener-Policy
+    res.removeHeader('Cross-Origin-Opener-Policy');
+    res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
+    const originalSetHeader = res.setHeader;
+    res.setHeader = function (name, value) {
+        if (name.toLowerCase() === 'cross-origin-opener-policy') {
+            return originalSetHeader.call(this, name, 'unsafe-none');
+        }
+        return originalSetHeader.call(this, name, value);
+    };
+    next();
+});
 const allowedOrigins = [
     'https://plebsicle.me',
     'http://localhost:5173',
@@ -84,17 +97,18 @@ app.use((0, cors_1.default)({
     },
     credentials: true
 }));
+// Add Cross-Origin-Opener-Policy header after cors middleware
 const io = new socket_io_1.Server(server, {
     cors: {
-        origin: ['https://plebsicle.me', 'http://localhost:5173'],
-        methods: ["GET", "POST"]
+        origin: allowedOrigins,
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 // Configure AI Socket
 (0, AI_Socket_1.configureSocket)(io);
 // Configure doctor-patient chat socket
 (0, socket_1.configureSocketHandlers)(io);
-app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use('/signup', signup_1.default);
 app.use('/signin', signin_1.default);
@@ -118,6 +132,6 @@ app.use('/medicalDocuments', medicalDocuments_1.default);
 app.use('/files', fileRoutes_1.default);
 (0, schedule_1.default)();
 const PORT = 8000;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });
