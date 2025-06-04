@@ -2,16 +2,20 @@ import { sendSMS } from './twilio';
 import { sendEmail } from './mailer';
 import schedule from 'node-schedule';
 import prisma from '../database';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Main notification scheduler
 async function sendNotifications() {
-  const now = new Date();
-  const currentTimeHHMM = now.toTimeString().slice(0, 5); // "HH:mm"
-  console.log("Scheduler checking for notifications at:", currentTimeHHMM);
+  const nowIST = dayjs().tz("Asia/Kolkata");
+  const currentTimeHHMM = nowIST.format("HH:mm"); // IST-based "HH:mm"
+  console.log("Scheduler checking for notifications at (IST):", currentTimeHHMM);
 
   try {
-    // Get all medication times for the current time
     const medicationTimes = await prisma.medication_times.findMany({
       where: {
         intake_time: currentTimeHHMM,
@@ -32,16 +36,14 @@ async function sendNotifications() {
       const { medication } = medTime as any;
       if (!medication || !medication.user) continue;
 
-      // Check if notification is enabled
       const isNotifEnabled = medication.notification.some((n: any) => n.notification_on);
       if (!isNotifEnabled) {
         console.log(`Skipping ${medication.name}: notifications off`);
         continue;
       }
 
-      // Check medication is active (within start and end date)
-      const nowDate = new Date();
-      if (medication.start_date > nowDate || medication.end_date < nowDate) {
+      const nowDateIST = nowIST.toDate();
+      if (medication.start_date > nowDateIST || medication.end_date < nowDateIST) {
         console.log(`Skipping ${medication.name}: outside active date range`);
         continue;
       }
@@ -50,11 +52,10 @@ async function sendNotifications() {
       const messageText = `It's time to take your medication: ${medication.name}`;
       await logNotification(medication.medication_id, messageText);
 
-      // Send SMS notification via Twilio if user has SMS notifications enabled
       if (user.phone_number && user.sms_notifications) {
         try {
           await sendSMS(
-            user.phone_number, 
+            user.phone_number,
             `Medication Reminder: It's time to take ${medication.name}. ${medication.dosage} ${medication.instructions ? '- ' + medication.instructions : ''}`
           );
           console.log(`SMS notification sent to ${user.phone_number}`);
@@ -65,7 +66,6 @@ async function sendNotifications() {
         console.log(`Skipping SMS for user ${user.id}: SMS notifications disabled`);
       }
 
-      // Send email notification if user has email notifications enabled
       if (user.email && user.email_notifications) {
         try {
           await sendEmail(
@@ -91,7 +91,6 @@ async function sendNotifications() {
   }
 }
 
-// Log the notification
 async function logNotification(medication_id: number, message: string) {
   try {
     const notification = await prisma.notification.create({
@@ -115,11 +114,9 @@ async function logNotification(medication_id: number, message: string) {
   }
 }
 
-// Start the scheduler
 schedule.scheduleJob('* * * * *', sendNotifications);
 console.log("Notification scheduler initialized");
 
-// Run once at startup
 sendNotifications().catch(console.error);
 
 export default sendNotifications;
