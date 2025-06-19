@@ -4,7 +4,7 @@ A full-featured, application for managing medications, electronic health records
 
 ## Live Website
 
-https://plebsicle.me — Fully hosted on this domain.
+https://plebsicle.me — Fully hosted on this domain
 
 ## Features
 
