@@ -89,6 +89,9 @@ async function sendNotifications() {
   } catch (err) {
     console.error("Scheduler error:", err);
   }
+  finally {
+    await prisma.$disconnect();
+  }
 }
 
 async function logNotification(medication_id: number, message: string) {
@@ -114,7 +117,7 @@ async function logNotification(medication_id: number, message: string) {
   }
 }
 
-schedule.scheduleJob('* * * * *', sendNotifications);
+schedule.scheduleJob('*/5 * * * *', sendNotifications);
 console.log("Notification scheduler initialized");
 
 sendNotifications().catch(console.error);
