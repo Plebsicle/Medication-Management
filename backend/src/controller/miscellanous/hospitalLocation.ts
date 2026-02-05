@@ -12,7 +12,7 @@ interface Hospital {
 
 
 
-const cache_expiration = 3600;
+const CACHE_EXPIRATION = 3600;
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 const redisClient = createClient({url : REDIS_URL});
 redisClient.on('error', (err : any) => console.error('Redis Client Error', err));
@@ -81,7 +81,9 @@ export const getHospitalLocation = async (req : Request, res : Response) => {
             return;
         }
 
-        await redisClient.set(cacheKey, cache_expiration, JSON.stringify(hospitals));
+        await redisClient.set(cacheKey, JSON.stringify(hospitals), {
+            EX: CACHE_EXPIRATION
+        });
         res.status(200).json({
             message: "Hospitals fetched successfully.",
             hospitals,
