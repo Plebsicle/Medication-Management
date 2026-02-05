@@ -81,7 +81,7 @@ export const getHospitalLocation = async (req : Request, res : Response) => {
             return;
         }
 
-        await redisClient.setEx(cacheKey, cache_expiration, JSON.stringify(hospitals));
+        await redisClient.set(cacheKey, cache_expiration, JSON.stringify(hospitals));
         res.status(200).json({
             message: "Hospitals fetched successfully.",
             hospitals,
