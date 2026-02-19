@@ -5,6 +5,8 @@ A full-featured, application for managing medications, electronic health records
 ## Live Website
 
 https://plebsicle.me — Fully hosted on this domain
+⚠️ Note: The previous domain plebsicle.me is expiring and has been replaced with medman.app.
+If the site doesn’t load immediately, it may be due to ongoing DNS propagation and should resolve shortly.
 
 ## Features
 
